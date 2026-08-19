@@ -1,0 +1,68 @@
+{
+  "Module": "Module 1 - HVAC Basics",
+  "Slides": [
+    {
+      "SlideNumber": 1,
+      "Title": "HVAC Basics",
+      "Subtitle": "Building Strong Foundations for Climate Control",
+      "VisualPrompt": "Side-by-side visual of a residential split AC and rooftop packaged unit; faded overlay of 'Module 0: Course Overview' with keywords like 'Certification', 'Standards', 'India'."
+    },
+    {
+      "SlideNumber": 2,
+      "Title": "What You Will Learn in This Module",
+      "BulletPoints": [
+        "Identify core components of an HVAC system",
+        "Understand the vapor-compression cycle",
+        "Interpret relevant ISHRAE and BIS standards"
+      ],
+      "VisualPrompt": "Checklist with HVAC toolset background"
+    },
+    {
+      "SlideNumber": 3,
+      "Title": "What We’ll Be Working With",
+      "ImageGrid": [
+        "AHU diagram with airflow arrows",
+        "Condenser unit mounted outdoors",
+        "Thermostat & refrigerant pressure gauges"
+      ],
+      "VisualPrompt": "Callout labels on each image explaining component function"
+    },
+    {
+      "SlideNumber": 4,
+      "Title": "The Basics of HVAC Function",
+      "Content": "Bullet list of components (Compressor, Evaporator, Condenser, Expansion Valve) with simplified process arrows",
+      "VisualPrompt": "Looping flow diagram showing refrigerant cycle with arrows + overlay of temperature gradients"
+    },
+    {
+      "SlideNumber": 5,
+      "Title": "A Faulty AC on a Hot Day",
+      "Scenario": "Home unit not cooling; evaporator coil frosted, low suction pressure",
+      "VisualPrompt": "Split-screen: left – customer complaint text; right – annotated HVAC schematic with red warning icons"
+    },
+    {
+      "SlideNumber": 6,
+      "Title": "How Do Standards Guide HVAC Practice?",
+      "CitedStandards": [
+        "IS 1391 (Performance/Safety)",
+        "ISHRAE Handbook 2020"
+      ],
+      "VisualPrompt": "BIS logo + ISHRAE logo above compliance checklist; animated highlighting of airflow and temperature parameters"
+    },
+    {
+      "SlideNumber": 7,
+      "Title": "Putting It All Together",
+      "VisualPrompt": "Central circular diagram summarizing the HVAC cycle, surrounded by icons for each module concept (Component, Cycle, Standard)"
+    },
+    {
+      "SlideNumber": 8,
+      "Title": "You’ve Mastered the Basics!",
+      "KeyTakeaways": [
+        "HVAC = Airflow + Temperature + Standards",
+        "Component failure affects system behavior",
+        "Compliance ensures performance & safety"
+      ],
+      "NextUp": "ISHRAE and BIS Guidelines Deep Dive",
+      "VisualPrompt": "Arrowed transition path to Module 2, overlaid on ISHRAE standard document cover"
+    }
+  ]
+}

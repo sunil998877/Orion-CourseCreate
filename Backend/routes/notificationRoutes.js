@@ -1,0 +1,20 @@
+import express from 'express';
+import authenticateJWT from '../middlewares/authMiddleware.js';
+
+import {
+    getNotifications,
+    markNotificationsRead,
+    markSingleNotificationRead,
+    deleteNotifications,
+    getActivityAnalytics
+} from '../controllers/notificationController.js';
+
+const router = express.Router();
+
+router.get('/notifications', authenticateJWT, getNotifications);
+router.put('/notifications/read', authenticateJWT, markNotificationsRead);
+router.put('/notifications/:id/read', authenticateJWT, markSingleNotificationRead);
+router.delete('/notifications', authenticateJWT, deleteNotifications);
+router.get('/analytics/activity', authenticateJWT, getActivityAnalytics);
+
+export default router;

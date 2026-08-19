@@ -1,0 +1,25 @@
+import express from 'express';
+import authenticateJWT from '../middlewares/authMiddleware.js';
+import {
+    generateAudio,
+    generatePodcast,
+    generateEbook,
+    downloadEbook,
+    generateModuleSlidesGamma,
+    generateAllSlidesGamma,
+    downloadPptx
+} from '../controllers/ebookController.js';
+
+const router = express.Router();
+
+
+router.post('/courses/:courseId/generate-audio', authenticateJWT, generateAudio);
+router.post('/courses/:courseId/generate-podcast', authenticateJWT, generatePodcast);
+router.post('/courses/:courseId/generate-ebook', authenticateJWT, generateEbook);
+router.get('/ebooks/:courseId/download', downloadEbook);
+router.post('/generate-module-slides-gamma', authenticateJWT, generateModuleSlidesGamma);
+router.post('/generate-all-slides-gamma', authenticateJWT, generateAllSlidesGamma);
+router.get('/courses/:courseId/modules/:moduleNumber/download-pptx', authenticateJWT, downloadPptx);
+
+
+export default router;
