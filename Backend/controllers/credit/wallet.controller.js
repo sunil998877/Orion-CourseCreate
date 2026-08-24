@@ -1,5 +1,6 @@
 import Wallet from "../../models/credits/wallet.js";
 import Plan from "../../models/credits/plain.js";
+import { DEFAULT_CREDIT_PLANS } from "../../config/creditPlans.js";
 
 function getFirstOfNextMonth() {
     const now = new Date();
@@ -25,7 +26,7 @@ export const getWallet = async (req, res) => {
             if (!freePlan) {
                 freePlan = await Plan.create({
                     name: "Free",
-                    monthlyCreditAllotment: 1450,
+                    monthlyCreditAllotment: DEFAULT_CREDIT_PLANS[0].monthlyCreditAllotment,
                     priceInINR: 0,
                     rolloverAllowed: false,
                 });
@@ -34,8 +35,7 @@ export const getWallet = async (req, res) => {
             wallet = await Wallet.create({
                 user: userId,
                 plan: freePlan._id,
-                balance: freePlan.monthlyCreditAllotment || 1450,
-                reserved: 0,
+                balance: freePlan.monthlyCreditAllotment || DEFAULT_CREDIT_PLANS[0].monthlyCreditAllotment,
                 lifetimeUsed: 0,
                 renewsOn: getFirstOfNextMonth(),
             });
@@ -47,6 +47,22 @@ export const getWallet = async (req, res) => {
         if (!wallet.renewsOn) {
             wallet.renewsOn = getFirstOfNextMonth();
             await wallet.save();
+        }
+
+        if (!wallet.plan) {
+            let freePlan = await Plan.findOne({ name: "Free" });
+            if (!freePlan) {
+                freePlan = await Plan.create({
+                    name: "Free",
+                    monthlyCreditAllotment: DEFAULT_CREDIT_PLANS[0].monthlyCreditAllotment,
+                    priceInINR: 0,
+                    rolloverAllowed: false,
+                });
+            }
+            wallet.plan = freePlan._id;
+            await wallet.save();
+            wallet = await Wallet.findById(wallet._id)
+                .populate("plan", "name monthlyCreditAllotment priceInINR rolloverAllowed");
         }
 
         const renewsOnFormatted = wallet.renewsOn
@@ -86,13 +102,7 @@ export const getPlans = async (req, res) => {
         let plans = await Plan.find({}).sort({ priceInINR: 1 });
 
         if (!plans || plans.length === 0) {
-            const defaultPlans = [
-                { name: "Free", monthlyCreditAllotment: 1000, priceInINR: 0, rolloverAllowed: false },
-                { name: "Pro", monthlyCreditAllotment: 5000, priceInINR: 499, rolloverAllowed: true },
-                { name: "Team", monthlyCreditAllotment: 15000, priceInINR: 1499, rolloverAllowed: true },
-            ];
-
-            plans = await Plan.insertMany(defaultPlans);
+            plans = await Plan.insertMany(DEFAULT_CREDIT_PLANS);
         }
 
         const formattedPlans = plans.map((p) => ({

@@ -13,6 +13,11 @@ export const login = async (req, res) => {
     if (!user)
       return res.status(404).json({ message: 'User not found' });
 
+    const adminEmail = String(process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+    if (adminEmail && String(email).trim().toLowerCase() === adminEmail) {
+      return res.status(403).json({ message: "Use the admin sign-in page at /admin/login" });
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid)
       return res.status(401).json({ message: 'Invalid password' });

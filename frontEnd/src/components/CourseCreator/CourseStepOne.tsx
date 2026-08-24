@@ -34,26 +34,6 @@ const CourseStepOne: React.FC = () => {
         INDUSTRIES
     } = useCourseCreator();
 
-    const [isStandardsOpen, setIsStandardsOpen] = React.useState(false);
-    const [isStyleOpen, setIsStyleOpen] = React.useState(false);
-    const [isCountryOpen, setIsCountryOpen] = React.useState(false);
-    const [isIndustryOpen, setIsIndustryOpen] = React.useState(false);
-
-    const STANDARDS_OPTIONS = [
-        { value: 'Global (ISO/IEC)', label: 'Global (ISO/IEC)' },
-        { value: 'Regional', label: 'Regional' },
-        { value: 'Industry Specific', label: 'Industry Specific' },
-    ];
-
-    const STYLE_OPTIONS = [
-        'Academic / Formal Style',
-        'Storytelling Style',
-        'Interactive Coaching Style',
-        'Humanized Teaching Style',
-        'Modern Edutainment Style',
-        'Scenario-Based Style',
-    ];
-
     return (
         <motion.div
             key="step1"
@@ -68,7 +48,7 @@ const CourseStepOne: React.FC = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="flex-1 xl:w-[65%] bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] max-md:rounded-2xl p-10 md:p-14 max-md:p-5 shadow-2xl relative overflow-hidden group/card shadow-[0_32px_100px_-20px_rgba(0,0,0,0.8)]"
+                className="flex-1 xl:w-[65%] bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 md:p-14 shadow-2xl relative overflow-hidden group/card shadow-[0_32px_100px_-20px_rgba(0,0,0,0.8)]"
             >
                 <div className="absolute inset-0 bg-gradient-to-br from-lime-500/[0.02] to-transparent pointer-events-none" />
                 <motion.div variants={itemVariants} className="mb-12 text-center relative z-10">
@@ -116,26 +96,22 @@ const CourseStepOne: React.FC = () => {
                         <div>
                             <label className="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">Target Audience</label>
                             <div className="relative">
+                                <Target className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
                                 {!courseData.level ? (
                                     <div className="relative group opacity-60">
                                         <input
                                             disabled
-                                            className="w-full bg-[#1a1f2e] border border-[#2a2f3e] rounded-xl py-3 pl-4 pr-4 text-gray-500 cursor-not-allowed transition-all"
+                                            className="w-full bg-gray-900/50 border border-gray-800 rounded-xl py-3 pl-11 pr-4 text-gray-500 cursor-not-allowed transition-all"
                                             placeholder="Please select an Experience Level first..."
                                             value=""
                                         />
                                     </div>
                                 ) : (
                                     <div className="relative">
-                                        {/* Trigger button */}
                                         <div
                                             onClick={() => setIsAudienceDropdownOpen(!isAudienceDropdownOpen)}
-                                            className={`w-full min-h-[50px] bg-[#181d2a] border rounded-xl py-2 pl-4 pr-10 flex flex-wrap items-center gap-2 cursor-pointer transition-all ${showValidation && !hasAudience(courseData.audience)
-                                                ? 'border-amber-500/50 ring-1 ring-amber-500/20'
-                                                : 'border-[#2a3045] hover:border-[#3a4060]'
-                                                }`}
+                                            className={`w-full min-h-[50px] bg-gray-800/50 border rounded-xl py-2 pl-11 pr-10 flex flex-wrap items-center gap-2 cursor-pointer transition-all ${showValidation && !hasAudience(courseData.audience) ? 'border-amber-500/50 ring-1 ring-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-gray-700'}`}
                                         >
-                                            <Target className="text-gray-500 w-4 h-4 flex-shrink-0" />
                                             {Array.isArray(courseData.audience) && courseData.audience.length > 0 ? (
                                                 courseData.audience.map((aud: any, idx: any) => (
                                                     <span key={idx} className="bg-lime-500/20 text-lime-400 text-xs px-2 py-1 rounded-md flex items-center gap-1 border border-lime-500/30">
@@ -153,7 +129,7 @@ const CourseStepOne: React.FC = () => {
                                                         </button>
                                                     </span>
                                                 ))
-                                            ) : typeof courseData.audience === 'string' && courseData.audience.trim() ? (
+                                            ) : (typeof courseData.audience === 'string' && courseData.audience.trim() ? (
                                                 <span className="bg-lime-500/20 text-lime-400 text-xs px-2 py-1 rounded-md flex items-center gap-1 border border-lime-500/30">
                                                     {courseData.audience}
                                                     <button
@@ -168,48 +144,27 @@ const CourseStepOne: React.FC = () => {
                                                     </button>
                                                 </span>
                                             ) : (
-                                                <span className="text-gray-500 select-none py-1 text-sm">Select Target Audiences...</span>
-                                            )}
+                                                <span className="text-gray-500 select-none py-1">Select Target Audiences...</span>
+                                            ))}
                                         </div>
-                                        <ChevronDown
-                                            className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none transition-transform duration-200 ${isAudienceDropdownOpen ? 'rotate-180' : ''
-                                                }`}
-                                        />
+                                        <ChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 pointer-events-none transition-transform ${isAudienceDropdownOpen ? 'rotate-180' : ''}`} />
 
-                                        {/* Dropdown panel */}
                                         <AnimatePresence>
                                             {isAudienceDropdownOpen && (
                                                 <motion.div
-                                                    initial={{ opacity: 0, scaleY: 0.92, y: -8, filter: 'blur(3px)' }}
-                                                    animate={{ opacity: 1, scaleY: 1, y: 0, filter: 'blur(0px)' }}
-                                                    exit={{ opacity: 0, scaleY: 0.92, y: -8, filter: 'blur(3px)' }}
-                                                    transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-                                                    style={{ transformOrigin: 'top', background: '#141824', border: '1px solid #252b3b' }}
-                                                    className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
+                                                    initial={{ opacity: 0, y: -10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -10 }}
+                                                    className="absolute z-50 w-full mt-2 bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden"
                                                 >
-                                                    {/* Scrollable list */}
-                                                    <div
-                                                        className="overflow-y-auto"
-                                                        style={{
-                                                            maxHeight: '220px',
-                                                            scrollbarWidth: 'thin',
-                                                            scrollbarColor: '#84cc16 #1e2430',
-                                                        }}
-                                                    >
-                                                        {/* Select All */}
+                                                    <div className="max-h-60 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                                                        {/* Select All Option */}
                                                         {(() => {
                                                             const allOptions = AUDIENCE_OPTIONS[courseData.level] || [];
-                                                            const currentAudience = Array.isArray(courseData.audience)
-                                                                ? courseData.audience
-                                                                : courseData.audience ? [courseData.audience] : [];
-                                                            const allSelected =
-                                                                allOptions.length > 0 &&
-                                                                allOptions.every((opt: any) => currentAudience.includes(opt));
+                                                            const currentAudience = Array.isArray(courseData.audience) ? courseData.audience : (courseData.audience ? [courseData.audience] : []);
+                                                            const allSelected = allOptions.length > 0 && allOptions.every((opt: any) => currentAudience.includes(opt));
                                                             return (
-                                                                <motion.div
-                                                                    initial={{ opacity: 0, x: -6 }}
-                                                                    animate={{ opacity: 1, x: 0 }}
-                                                                    transition={{ delay: 0.02, duration: 0.12 }}
+                                                                <div
                                                                     onClick={() => {
                                                                         if (allSelected) {
                                                                             updateCourseData({ audience: [] });
@@ -217,39 +172,22 @@ const CourseStepOne: React.FC = () => {
                                                                             updateCourseData({ audience: [...allOptions] });
                                                                         }
                                                                     }}
-                                                                    className="flex items-center justify-between px-5 py-3.5 cursor-pointer select-none border-b border-white/5"
-                                                                    style={{
-                                                                        color: allSelected ? '#84cc16' : '#e5e7eb',
-                                                                        background: allSelected ? 'rgba(132,204,22,0.07)' : 'transparent',
-                                                                    }}
+                                                                    className={`w-full text-left px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors flex items-center justify-between border-b border-white/5 mb-1 pb-2 ${allSelected ? 'bg-lime-500/10 text-lime-400' : 'text-gray-300 hover:bg-gray-700/50'}`}
                                                                 >
-                                                                    <span className="text-xs font-black uppercase tracking-[0.18em]">Select All</span>
-                                                                    <AnimatePresence>
-                                                                        {allSelected && (
-                                                                            <motion.span initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0, rotate: 90 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
-                                                                                <Check size={14} className="text-lime-400" />
-                                                                            </motion.span>
-                                                                        )}
-                                                                    </AnimatePresence>
-                                                                </motion.div>
+                                                                    <span className="font-bold uppercase tracking-wider text-xs">Select All</span>
+                                                                    {allSelected && <Check size={16} className="text-lime-500" />}
+                                                                </div>
                                                             );
                                                         })()}
-
-                                                        {/* Options */}
-                                                        {AUDIENCE_OPTIONS[courseData.level]?.map((opt: any, i: number) => {
+                                                        {AUDIENCE_OPTIONS[courseData.level]?.map((opt: any) => {
                                                             const isSelected = Array.isArray(courseData.audience)
                                                                 ? courseData.audience.includes(opt)
                                                                 : courseData.audience === opt;
                                                             return (
-                                                                <motion.div
+                                                                <div
                                                                     key={opt}
-                                                                    initial={{ opacity: 0, x: -8 }}
-                                                                    animate={{ opacity: 1, x: 0 }}
-                                                                    transition={{ delay: 0.02 + i * 0.018, duration: 0.12 }}
                                                                     onClick={() => {
-                                                                        let current = Array.isArray(courseData.audience)
-                                                                            ? [...courseData.audience]
-                                                                            : courseData.audience ? [courseData.audience] : [];
+                                                                        let current = Array.isArray(courseData.audience) ? [...courseData.audience] : (courseData.audience ? [courseData.audience] : []);
                                                                         if (isSelected) {
                                                                             current = current.filter(a => a !== opt);
                                                                         } else {
@@ -257,86 +195,57 @@ const CourseStepOne: React.FC = () => {
                                                                         }
                                                                         updateCourseData({ audience: current });
                                                                     }}
-                                                                    className="flex items-center justify-between px-5 py-3.5 cursor-pointer select-none"
-                                                                    style={{
-                                                                        color: isSelected ? '#84cc16' : '#d1d5db',
-                                                                        background: isSelected ? 'rgba(132,204,22,0.07)' : 'transparent',
-                                                                        transition: 'background 0.12s, color 0.12s',
-                                                                    }}
-                                                                    onMouseEnter={e => {
-                                                                        if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)';
-                                                                    }}
-                                                                    onMouseLeave={e => {
-                                                                        if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'transparent';
-                                                                    }}
+                                                                    className={`w-full text-left px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors flex items-center justify-between ${isSelected ? 'bg-lime-500/10 text-lime-400' : 'text-gray-300 hover:bg-gray-700/50'}`}
                                                                 >
-                                                                    <span className="text-sm">{opt}</span>
-                                                                    <AnimatePresence>
-                                                                        {isSelected && (
-                                                                            <motion.span initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0, rotate: 90 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
-                                                                                <Check size={14} className="text-lime-400 flex-shrink-0" />
-                                                                            </motion.span>
-                                                                        )}
-                                                                    </AnimatePresence>
-                                                                </motion.div>
+                                                                    {opt}
+                                                                    {isSelected && <Check size={16} className="text-lime-500" />}
+                                                                </div>
                                                             );
                                                         })}
                                                     </div>
-
-                                                    {/* Custom audience input */}
-                                                    <motion.div
-                                                        initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
-                                                        transition={{ delay: 0.06, duration: 0.14 }}
-                                                        className="flex items-center gap-2 px-3 py-2.5 border-t"
-                                                        style={{ borderColor: '#252b3b', background: '#10131c' }}
-                                                    >
-                                                        <input
-                                                            type="text"
-                                                            value={customAudienceInput}
-                                                            onChange={(e) => setCustomAudienceInput(e.target.value)}
-                                                            onKeyDown={(e) => {
-                                                                if (e.key === 'Enter') {
+                                                    <div className="p-2 border-t border-gray-700 bg-gray-900/50">
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                type="text"
+                                                                value={customAudienceInput}
+                                                                onChange={(e) => setCustomAudienceInput(e.target.value)}
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        e.preventDefault();
+                                                                        if (customAudienceInput.trim()) {
+                                                                            const capitalized = customAudienceInput.charAt(0).toUpperCase() + customAudienceInput.slice(1);
+                                                                            const current = Array.isArray(courseData.audience) ? [...courseData.audience] : (courseData.audience ? [courseData.audience] : []);
+                                                                            if (!current.includes(capitalized)) {
+                                                                                current.push(capitalized);
+                                                                                updateCourseData({ audience: current });
+                                                                            }
+                                                                            setCustomAudienceInput('');
+                                                                        }
+                                                                    }
+                                                                }}
+                                                                placeholder="Add custom audience..."
+                                                                className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-lime-500 outline-none"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
                                                                     e.preventDefault();
                                                                     if (customAudienceInput.trim()) {
                                                                         const capitalized = customAudienceInput.charAt(0).toUpperCase() + customAudienceInput.slice(1);
-                                                                        const current = Array.isArray(courseData.audience)
-                                                                            ? [...courseData.audience]
-                                                                            : courseData.audience ? [courseData.audience] : [];
+                                                                        const current = Array.isArray(courseData.audience) ? [...courseData.audience] : (courseData.audience ? [courseData.audience] : []);
                                                                         if (!current.includes(capitalized)) {
                                                                             current.push(capitalized);
                                                                             updateCourseData({ audience: current });
                                                                         }
                                                                         setCustomAudienceInput('');
                                                                     }
-                                                                }
-                                                            }}
-                                                            placeholder="Add custom audience..."
-                                                            className="flex-1 bg-transparent text-sm text-gray-300 placeholder-gray-600 outline-none py-1"
-                                                        />
-                                                        <motion.button
-                                                            whileHover={{ scale: 1.12, backgroundColor: 'rgba(132,204,22,0.25)' }}
-                                                            whileTap={{ scale: 0.9 }}
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                if (customAudienceInput.trim()) {
-                                                                    const capitalized = customAudienceInput.charAt(0).toUpperCase() + customAudienceInput.slice(1);
-                                                                    const current = Array.isArray(courseData.audience)
-                                                                        ? [...courseData.audience]
-                                                                        : courseData.audience ? [courseData.audience] : [];
-                                                                    if (!current.includes(capitalized)) {
-                                                                        current.push(capitalized);
-                                                                        updateCourseData({ audience: current });
-                                                                    }
-                                                                    setCustomAudienceInput('');
-                                                                }
-                                                            }}
-                                                            className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-lime-400 border border-lime-500/40 transition-colors"
-                                                        >
-                                                            <Plus size={14} />
-                                                        </motion.button>
-                                                    </motion.div>
+                                                                }}
+                                                                className="bg-lime-500/20 text-lime-400 p-2 rounded-lg hover:bg-lime-500/30 transition-colors"
+                                                            >
+                                                                <Plus size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </motion.div>
                                             )}
                                         </AnimatePresence>
@@ -350,292 +259,135 @@ const CourseStepOne: React.FC = () => {
                         <div>
                             <label className="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">International/Regional Industry Standard</label>
                             <div className="relative">
-                                {/* Custom Standards Dropdown Trigger */}
-                                <div
-                                    onClick={() => { setIsStandardsOpen(!isStandardsOpen); setIsStyleOpen(false); }}
-                                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl cursor-pointer transition-all select-none"
-                                    style={{ background: '#181d2a', border: '1px solid #252b3b' }}
+                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+                                <select
+                                    className="w-full bg-gray-800/50 border border-gray-700 rounded-xl py-3 pl-11 pr-4 focus:ring-2 focus:ring-lime-500 outline-none appearance-none cursor-pointer"
+                                    value={courseData.standards}
+                                    onChange={(e) => {
+                                        updateCourseData({ standards: e.target.value });
+                                        if (e.target.value !== 'Regional') {
+                                            updateCourseData({ country: '' });
+                                        }
+                                    }}
                                 >
-                                    <Globe className="text-gray-400 w-4 h-4 flex-shrink-0" />
-                                    <span className="flex-1 text-sm text-gray-200">{courseData.standards || 'Global (ISO/IEC)'}</span>
-                                    <ChevronDown
-                                        className={`text-gray-400 w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isStandardsOpen ? 'rotate-180' : ''
-                                            }`}
-                                    />
-                                </div>
-
-                                {/* Standards dropdown panel */}
-                                <AnimatePresence>
-                                    {isStandardsOpen && (
-                                        <motion.div
-                                            initial={{ opacity: 0, scaleY: 0.88, y: -10, filter: 'blur(4px)' }}
-                                            animate={{ opacity: 1, scaleY: 1, y: 0, filter: 'blur(0px)' }}
-                                            exit={{ opacity: 0, scaleY: 0.88, y: -10, filter: 'blur(4px)' }}
-                                            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                                            style={{ transformOrigin: 'top', background: '#141824', border: '1px solid #252b3b' }}
-                                            className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
-                                        >
-                                            {STANDARDS_OPTIONS.map((opt, i) => (
-                                                <motion.div
-                                                    key={opt.value}
-                                                    initial={{ opacity: 0, x: -8 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    transition={{ delay: 0.02 + i * 0.022, duration: 0.12 }}
-                                                    onClick={() => {
-                                                        updateCourseData({ standards: opt.value });
-                                                        if (opt.value !== 'Regional') updateCourseData({ country: '' });
-                                                        setIsStandardsOpen(false);
-                                                    }}
-                                                    className="flex items-center justify-between px-5 py-3.5 cursor-pointer select-none"
-                                                    style={{
-                                                        color: courseData.standards === opt.value ? '#84cc16' : '#d1d5db',
-                                                        background: courseData.standards === opt.value ? 'rgba(132,204,22,0.07)' : 'transparent',
-                                                        transition: 'background 0.12s, color 0.12s',
-                                                    }}
-                                                    onMouseEnter={e => {
-                                                        if (courseData.standards !== opt.value) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)';
-                                                    }}
-                                                    onMouseLeave={e => {
-                                                        if (courseData.standards !== opt.value) (e.currentTarget as HTMLElement).style.background = 'transparent';
-                                                    }}
-                                                >
-                                                    <span className="text-sm">{opt.label}</span>
-                                                    <AnimatePresence>
-                                                        {courseData.standards === opt.value && (
-                                                            <motion.span initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0, rotate: 90 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
-                                                                <Check size={14} className="text-lime-400" />
-                                                            </motion.span>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </motion.div>
-                                            ))}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                    <option>Global (ISO/IEC)</option>
+                                    <option>Regional</option>
+                                    <option>Industry Specific</option>
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 pointer-events-none" />
                             </div>
                             {courseData.standards === 'Regional' && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -6 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -6 }}
-                                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                                    className="mt-3 pl-4 border-l-2 border-lime-500/40"
-                                >
+                                <div className="mt-3 pl-4 border-l-2 border-lime-500/40 animate-in fade-in slide-in-from-top-2 duration-300">
                                     <label className="block text-[11px] font-semibold text-lime-400 mb-1.5 uppercase tracking-wider">Specific Region/Country</label>
                                     <div className="relative">
+                                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
                                         {!isCustomCountry ? (
-                                            <>
-                                                {/* Custom Country Dropdown Trigger */}
-                                                <div
-                                                    onClick={() => setIsCountryOpen(!isCountryOpen)}
-                                                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer select-none transition-all ${
-                                                        showValidation && !courseData.country
-                                                            ? 'ring-1 ring-amber-500/30'
-                                                            : ''
+                                            <select
+                                                className={`w-full bg-gray-800/30 border rounded-xl py-2.5 pl-9 pr-10 text-sm focus:ring-2 focus:ring-lime-500 outline-none appearance-none cursor-pointer transition-all ${showValidation && !courseData.country ? 'border-amber-500/50 ring-1 ring-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-gray-700/50 hover:border-gray-600'
                                                     }`}
-                                                    style={{ background: '#181d2a', border: `1px solid ${showValidation && !courseData.country ? 'rgba(245,158,11,0.5)' : '#252b3b'}` }}
-                                                >
-                                                    <Globe className="text-gray-500 w-4 h-4 flex-shrink-0" />
-                                                    <span className={`flex-1 text-sm ${courseData.country ? 'text-gray-200' : 'text-gray-500'}`}>
-                                                        {courseData.country || 'Select a region...'}
-                                                    </span>
-                                                    <ChevronDown className={`text-gray-400 w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isCountryOpen ? 'rotate-180' : ''}`} />
-                                                </div>
-
-                                                <AnimatePresence>
-                                                    {isCountryOpen && (
-                                                        <motion.div
-                                                            initial={{ opacity: 0, scaleY: 0.88, y: -8, filter: 'blur(3px)' }}
-                                                            animate={{ opacity: 1, scaleY: 1, y: 0, filter: 'blur(0px)' }}
-                                                            exit={{ opacity: 0, scaleY: 0.88, y: -8, filter: 'blur(3px)' }}
-                                                            transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-                                                            style={{ transformOrigin: 'top', background: '#141824', border: '1px solid #252b3b' }}
-                                                            className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
-                                                        >
-                                                            {['Australia', 'Canada', 'India', 'United States', 'London (UK)'].map((country, i) => (
-                                                                <motion.div
-                                                                    key={country}
-                                                                    initial={{ opacity: 0, x: -6 }}
-                                                                    animate={{ opacity: 1, x: 0 }}
-                                                                    transition={{ delay: 0.02 + i * 0.018, duration: 0.12 }}
-                                                                    onClick={() => {
-                                                                        updateCourseData({ country: country });
-                                                                        setIsCountryOpen(false);
-                                                                    }}
-                                                                    className="flex items-center justify-between px-4 py-3 cursor-pointer select-none"
-                                                                    style={{
-                                                                        color: courseData.country === country ? '#84cc16' : '#d1d5db',
-                                                                        background: courseData.country === country ? 'rgba(132,204,22,0.07)' : 'transparent',
-                                                                        transition: 'background 0.1s',
-                                                                    }}
-                                                                    onMouseEnter={e => { if (courseData.country !== country) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
-                                                                    onMouseLeave={e => { if (courseData.country !== country) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
-                                                                >
-                                                                    <span className="text-sm">{country}</span>
-                                                                    <AnimatePresence>
-                                                                        {courseData.country === country && (
-                                                                            <motion.span initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
-                                                                                <Check size={13} className="text-lime-400" />
-                                                                            </motion.span>
-                                                                        )}
-                                                                    </AnimatePresence>
-                                                                </motion.div>
-                                                            ))}
-                                                            {/* Other/Custom */}
-                                                            <motion.div
-                                                                initial={{ opacity: 0, x: -6 }}
-                                                                animate={{ opacity: 1, x: 0 }}
-                                                                transition={{ delay: 0.12, duration: 0.12 }}
-                                                                onClick={() => { setIsCustomCountry(true); updateCourseData({ country: '' }); setIsCountryOpen(false); }}
-                                                                className="flex items-center gap-2 px-4 py-3 cursor-pointer select-none border-t"
-                                                                style={{ borderColor: '#252b3b', color: '#9ca3af', transition: 'background 0.1s' }}
-                                                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
-                                                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
-                                                            >
-                                                                <Plus size={12} />
-                                                                <span className="text-sm">Other / Custom...</span>
-                                                            </motion.div>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                            </>
+                                                value={courseData.country}
+                                                onChange={(e) => {
+                                                    if (e.target.value === 'Other') {
+                                                        setIsCustomCountry(true);
+                                                        updateCourseData({ country: '' });
+                                                    } else {
+                                                        updateCourseData({ country: e.target.value });
+                                                    }
+                                                }}
+                                            >
+                                                <option value="">Select a region...</option>
+                                                <option>Australia</option>
+                                                <option>Canada</option>
+                                                <option>India</option>
+                                                <option>United States</option>
+                                                <option>London (UK)</option>
+                                                <option value="Other">Other / Custom...</option>
+                                            </select>
                                         ) : (
                                             <div className="relative">
-                                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
                                                 <input
                                                     type="text"
                                                     autoFocus
-                                                    className="w-full bg-[#181d2a] border border-lime-500/50 rounded-xl py-2.5 pl-9 pr-10 text-sm focus:ring-2 focus:ring-lime-500 outline-none"
+                                                    className="w-full bg-gray-800/30 border border-lime-500/50 rounded-xl py-2.5 pl-9 pr-10 text-sm focus:ring-2 focus:ring-lime-500 outline-none"
                                                     placeholder="Type custom region..."
                                                     value={courseData.country}
                                                     onChange={(e) => updateCourseData({ country: e.target.value })}
                                                 />
                                                 <button
-                                                    onClick={() => { setIsCustomCountry(false); updateCourseData({ country: '' }); }}
+                                                    onClick={() => {
+                                                        setIsCustomCountry(false);
+                                                        updateCourseData({ country: '' });
+                                                    }}
                                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
                                                 >
                                                     <X size={14} />
                                                 </button>
                                             </div>
                                         )}
-                                        {showValidation && !courseData.country && !isCustomCountry && (
-                                            <div className="absolute right-9 top-1/2 -translate-y-1/2 text-amber-500 animate-pulse">
-                                                <Zap size={16} fill="currentColor" />
+                                        {!isCustomCountry && <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 pointer-events-none" />}
+                                        {showValidation && !courseData.country && (
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500 animate-pulse">
+                                                <Zap size={18} fill="currentColor" />
                                             </div>
                                         )}
                                     </div>
-                                </motion.div>
+                                </div>
                             )}
 
                             {courseData.standards === 'Industry Specific' && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -6 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -6 }}
-                                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                                    className="mt-3 pl-4 border-l-2 border-lime-500/40"
-                                >
+                                <div className="mt-3 pl-4 border-l-2 border-lime-500/40 animate-in fade-in slide-in-from-top-2 duration-300">
                                     <label className="block text-[11px] font-semibold text-lime-400 mb-1.5 uppercase tracking-wider">Select Industry</label>
                                     <div className="relative">
+                                        <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
                                         {!isCustomIndustry ? (
-                                            <>
-                                                {/* Custom Industry Dropdown Trigger */}
-                                                <div
-                                                    onClick={() => setIsIndustryOpen(!isIndustryOpen)}
-                                                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer select-none transition-all ${
-                                                        showValidation && !courseData.industry ? 'ring-1 ring-amber-500/30' : ''
+                                            <select
+                                                className={`w-full bg-gray-800/30 border rounded-xl py-2.5 pl-9 pr-10 text-sm focus:ring-2 focus:ring-lime-500 outline-none appearance-none cursor-pointer transition-all ${showValidation && !courseData.industry ? 'border-amber-500/50 ring-1 ring-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-gray-700/50 hover:border-gray-600'
                                                     }`}
-                                                    style={{ background: '#181d2a', border: `1px solid ${showValidation && !courseData.industry ? 'rgba(245,158,11,0.5)' : '#252b3b'}` }}
-                                                >
-                                                    <Sparkles className="text-gray-500 w-4 h-4 flex-shrink-0" />
-                                                    <span className={`flex-1 text-sm ${courseData.industry ? 'text-gray-200' : 'text-gray-500'}`}>
-                                                        {courseData.industry || 'Select an industry...'}
-                                                    </span>
-                                                    <ChevronDown className={`text-gray-400 w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isIndustryOpen ? 'rotate-180' : ''}`} />
-                                                </div>
-
-                                                <AnimatePresence>
-                                                    {isIndustryOpen && (
-                                                        <motion.div
-                                                            initial={{ opacity: 0, scaleY: 0.88, y: -8, filter: 'blur(3px)' }}
-                                                            animate={{ opacity: 1, scaleY: 1, y: 0, filter: 'blur(0px)' }}
-                                                            exit={{ opacity: 0, scaleY: 0.88, y: -8, filter: 'blur(3px)' }}
-                                                            transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-                                                            style={{ transformOrigin: 'top', background: '#141824', border: '1px solid #252b3b' }}
-                                                            className="absolute z-50 w-full mt-1 rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden"
-                                                        >
-                                                            <div className="overflow-y-auto" style={{ maxHeight: '200px', scrollbarWidth: 'thin', scrollbarColor: '#84cc16 #1e2430' }}>
-                                                                {INDUSTRIES.map((ind: any, i: number) => (
-                                                                    <motion.div
-                                                                        key={ind}
-                                                                        initial={{ opacity: 0, x: -6 }}
-                                                                        animate={{ opacity: 1, x: 0 }}
-                                                                        transition={{ delay: 0.02 + i * 0.014, duration: 0.11 }}
-                                                                        onClick={() => { updateCourseData({ industry: ind }); setIsIndustryOpen(false); }}
-                                                                        className="flex items-center justify-between px-4 py-3 cursor-pointer select-none"
-                                                                        style={{
-                                                                            color: courseData.industry === ind ? '#84cc16' : '#d1d5db',
-                                                                            background: courseData.industry === ind ? 'rgba(132,204,22,0.07)' : 'transparent',
-                                                                            transition: 'background 0.1s',
-                                                                        }}
-                                                                        onMouseEnter={e => { if (courseData.industry !== ind) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
-                                                                        onMouseLeave={e => { if (courseData.industry !== ind) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
-                                                                    >
-                                                                        <span className="text-sm">{ind}</span>
-                                                                        <AnimatePresence>
-                                                                            {courseData.industry === ind && (
-                                                                                <motion.span initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
-                                                                                    <Check size={13} className="text-lime-400" />
-                                                                                </motion.span>
-                                                                            )}
-                                                                        </AnimatePresence>
-                                                                    </motion.div>
-                                                                ))}
-                                                            </div>
-                                                            {/* Other/Custom */}
-                                                            <motion.div
-                                                                initial={{ opacity: 0 }}
-                                                                animate={{ opacity: 1 }}
-                                                                transition={{ delay: 0.1, duration: 0.12 }}
-                                                                onClick={() => { setIsCustomIndustry(true); updateCourseData({ industry: '' }); setIsIndustryOpen(false); }}
-                                                                className="flex items-center gap-2 px-4 py-3 cursor-pointer select-none border-t"
-                                                                style={{ borderColor: '#252b3b', color: '#9ca3af', transition: 'background 0.1s' }}
-                                                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
-                                                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
-                                                            >
-                                                                <Plus size={12} />
-                                                                <span className="text-sm">Other / Custom...</span>
-                                                            </motion.div>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                            </>
+                                                value={courseData.industry}
+                                                onChange={(e) => {
+                                                    if (e.target.value === 'Other') {
+                                                        setIsCustomIndustry(true);
+                                                        updateCourseData({ industry: '' });
+                                                    } else {
+                                                        updateCourseData({ industry: e.target.value });
+                                                    }
+                                                }}
+                                            >
+                                                <option value="">Select an industry...</option>
+                                                {INDUSTRIES.map((ind: any) => (
+                                                    <option key={ind} value={ind}>{ind}</option>
+                                                ))}
+                                                <option value="Other">Other / Custom...</option>
+                                            </select>
                                         ) : (
                                             <div className="relative">
-                                                <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
                                                 <input
                                                     type="text"
                                                     autoFocus
-                                                    className="w-full bg-[#181d2a] border border-lime-500/50 rounded-xl py-2.5 pl-9 pr-10 text-sm focus:ring-2 focus:ring-lime-500 outline-none"
+                                                    className="w-full bg-gray-800/30 border border-lime-500/50 rounded-xl py-2.5 pl-9 pr-10 text-sm focus:ring-2 focus:ring-lime-500 outline-none"
                                                     placeholder="Type custom industry..."
                                                     value={courseData.industry}
                                                     onChange={(e) => updateCourseData({ industry: e.target.value })}
                                                 />
                                                 <button
-                                                    onClick={() => { setIsCustomIndustry(false); updateCourseData({ industry: '' }); }}
+                                                    onClick={() => {
+                                                        setIsCustomIndustry(false);
+                                                        updateCourseData({ industry: '' });
+                                                    }}
                                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
                                                 >
                                                     <X size={14} />
                                                 </button>
                                             </div>
                                         )}
-                                        {showValidation && !courseData.industry && !isCustomIndustry && (
-                                            <div className="absolute right-9 top-1/2 -translate-y-1/2 text-amber-500 animate-pulse">
-                                                <Zap size={16} fill="currentColor" />
+                                        {!isCustomIndustry && <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 pointer-events-none" />}
+                                        {showValidation && !courseData.industry && (
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500 animate-pulse">
+                                                <Zap size={18} fill="currentColor" />
                                             </div>
                                         )}
                                     </div>
-                                </motion.div>
+                                </div>
                             )}
                         </div>
 
@@ -665,67 +417,20 @@ const CourseStepOne: React.FC = () => {
                         <div>
                             <label className="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">Course Tone & Style</label>
                             <div className="relative">
-                                {/* Custom Style Dropdown Trigger */}
-                                <div
-                                    onClick={() => { setIsStyleOpen(!isStyleOpen); setIsStandardsOpen(false); }}
-                                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl cursor-pointer transition-all select-none"
-                                    style={{ background: '#181d2a', border: '1px solid #252b3b' }}
+                                <Palette className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+                                <select
+                                    className="w-full bg-gray-800/50 border border-gray-700 rounded-xl py-3 pl-11 pr-4 focus:ring-2 focus:ring-lime-500 outline-none appearance-none cursor-pointer"
+                                    value={courseData.courseStyle || 'Academic / Formal Style'}
+                                    onChange={(e) => updateCourseData({ courseStyle: e.target.value })}
                                 >
-                                    <Palette className="text-gray-400 w-4 h-4 flex-shrink-0" />
-                                    <span className="flex-1 text-sm text-gray-200">{courseData.courseStyle || 'Academic / Formal Style'}</span>
-                                    <ChevronDown
-                                        className={`text-gray-400 w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isStyleOpen ? 'rotate-180' : ''
-                                            }`}
-                                    />
-                                </div>
-
-                                {/* Style dropdown panel */}
-                                <AnimatePresence>
-                                    {isStyleOpen && (
-                                        <motion.div
-                                            initial={{ opacity: 0, scaleY: 0.88, y: -10, filter: 'blur(4px)' }}
-                                            animate={{ opacity: 1, scaleY: 1, y: 0, filter: 'blur(0px)' }}
-                                            exit={{ opacity: 0, scaleY: 0.88, y: -10, filter: 'blur(4px)' }}
-                                            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                                            style={{ transformOrigin: 'top', background: '#141824', border: '1px solid #252b3b' }}
-                                            className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
-                                        >
-                                            {STYLE_OPTIONS.map((opt, i) => (
-                                                <motion.div
-                                                    key={opt}
-                                                    initial={{ opacity: 0, x: -8 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    transition={{ delay: 0.02 + i * 0.02, duration: 0.12 }}
-                                                    onClick={() => {
-                                                        updateCourseData({ courseStyle: opt });
-                                                        setIsStyleOpen(false);
-                                                    }}
-                                                    className="flex items-center justify-between px-5 py-3.5 cursor-pointer select-none"
-                                                    style={{
-                                                        color: (courseData.courseStyle || 'Academic / Formal Style') === opt ? '#84cc16' : '#d1d5db',
-                                                        background: (courseData.courseStyle || 'Academic / Formal Style') === opt ? 'rgba(132,204,22,0.07)' : 'transparent',
-                                                        transition: 'background 0.12s, color 0.12s',
-                                                    }}
-                                                    onMouseEnter={e => {
-                                                        if ((courseData.courseStyle || 'Academic / Formal Style') !== opt) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)';
-                                                    }}
-                                                    onMouseLeave={e => {
-                                                        if ((courseData.courseStyle || 'Academic / Formal Style') !== opt) (e.currentTarget as HTMLElement).style.background = 'transparent';
-                                                    }}
-                                                >
-                                                    <span className="text-sm">{opt}</span>
-                                                    <AnimatePresence>
-                                                        {(courseData.courseStyle || 'Academic / Formal Style') === opt && (
-                                                            <motion.span initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0, rotate: 90 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
-                                                                <Check size={14} className="text-lime-400" />
-                                                            </motion.span>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </motion.div>
-                                            ))}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                    <option>Academic / Formal Style</option>
+                                    <option>Storytelling Style</option>
+                                    <option>Interactive Coaching Style</option>
+                                    <option>Humanized Teaching Style</option>
+                                    <option>Modern Edutainment Style</option>
+                                    <option>Scenario-Based Style</option>
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 pointer-events-none" />
                             </div>
                         </div>
                     </div>

@@ -15,6 +15,11 @@ export const register = async (req, res) => {
             return res.status(409).json({ message: 'User already exists in the Database' });
         }
 
+        const adminEmail = String(process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+        if (adminEmail && String(email).trim().toLowerCase() === adminEmail) {
+            return res.status(403).json({ message: "This email is reserved for admin access" });
+        }
+
         if (existingUser && !existingUser.isVerified) {
             const hashedPassword = await bcrypt.hash(password, 10);
             let avatar = existingUser.avatar;

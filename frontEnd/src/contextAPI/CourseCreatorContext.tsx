@@ -547,25 +547,25 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
             if (resp.ok) {
                 const { description } = await resp.json();
                 if (description) {
-                    // Auto-populate based on level (default: 1 hour, 5 modules)
-                    let autoModules = 5;
-                    let autoDuration = 1;
+                    // Auto-populate based on level
+                    let autoModules = 10;
+                    let autoDuration = 2;
 
                     if (courseData.level === 'Intermediate') {
-                        autoModules = 6;
-                        autoDuration = 2;
+                        autoModules = 24;
+                        autoDuration = 6;
                     } else if (courseData.level === 'Advanced') {
-                        autoModules = 8;
-                        autoDuration = 3;
+                        autoModules = 64;
+                        autoDuration = 16;
                     } else if (courseData.level === 'Professional') {
-                        autoModules = 10;
-                        autoDuration = 4;
+                        autoModules = 96;
+                        autoDuration = 24;
                     }
 
                     updateCourseData({
                         description,
                         module: autoModules,
-                        duration: { value: autoDuration, unit: 'Hours' },
+                        duration: { value: autoDuration, unit: 'hours' },
                     });
                     setStep(2);
                     window.scrollTo({ top: 0, behavior: 'smooth' });

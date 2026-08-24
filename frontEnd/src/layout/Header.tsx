@@ -71,7 +71,7 @@ export default function Header({
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-lg border-b border-white/10 h-16">
       <div className="h-16 px-3 md:px-6 flex items-center justify-between gap-2 md:gap-6">
-        {/* Mobile menu button and Logo (Logo hidden on mobile) */}
+       
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
           <button
             type="button"
@@ -86,7 +86,7 @@ export default function Header({
           </Link>
         </div>
 
-        {/* Search Bar (Visible in top bar on both mobile and desktop) */}
+      
         <div className="flex-1 max-w-2xl">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-white/40" />
@@ -107,9 +107,9 @@ export default function Header({
           </div>
         </div>
 
-        {/* Right side items: Notifications & User Avatar dropdowns */}
+        
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
-          {/* Notifications Dropdown */}
+         
           <div className="relative" ref={notifDropdownRef}>
             <button
               className={`p-2 rounded-full border transition-all relative ${notifOpen ? 'bg-white/15 border-white/20' : 'bg-white/5 border-white/10 hover:bg-white/10 '

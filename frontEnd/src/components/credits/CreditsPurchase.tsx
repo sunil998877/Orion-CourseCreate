@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { CheckCircle2, CreditCard, Loader2, ShieldCheck, Zap, X } from 'lucide-react';
+import { CheckCircle2, CreditCard, Loader2, ShieldCheck, X } from 'lucide-react';
 import type { CreditPackage } from '../../types/credits.types';
 import { useCredits } from '../../contextAPI/CreditsContext';
-import { createRechargeStripeSession } from '../../services/rechargeService';
+import {
+  createRazorpayOrder,
+  getRazorpayConfig,
+  loadRazorpayScript,
+  verifyRazorpayRecharge,
+} from '../../services/razorpayService';
 
 type CreditsPurchaseProps = {
   pkg: CreditPackage | null;
@@ -11,17 +16,13 @@ type CreditsPurchaseProps = {
 };
 
 type PaymentStage = 'summary' | 'processing' | 'verifying' | 'success' | 'error';
-type PaymentMethod = 'stripe' | 'direct';
 
 const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSuccess }) => {
-  const { addCredits } = useCredits();
+  const { refreshWallet } = useCredits();
   const [stage, setStage] = useState<PaymentStage>('summary');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!pkg) return null;
-
-  const orderId = `RECHARGE-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
   const handleConfirmPayment = async () => {
     try {
@@ -29,35 +30,62 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
       setStage('processing');
 
       const token = localStorage.getItem('token') || '';
+      const loaded = await loadRazorpayScript();
+      if (!loaded) throw new Error('Failed to load Razorpay checkout');
 
-      if (paymentMethod === 'stripe') {
-        const stripeSession = await createRechargeStripeSession(token, {
-          amount: pkg.credits,
-          package_id: pkg.id,
-          price: pkg.price,
+      const config = await getRazorpayConfig(token);
+      const order = await createRazorpayOrder(token, {
+        amount: pkg.price,
+        credits: pkg.credits,
+        package_id: pkg.id,
+        type: 'recharge',
+      });
+
+      const username = localStorage.getItem('username') || '';
+      const email = localStorage.getItem('email') || '';
+
+      await new Promise<void>((resolve, reject) => {
+        const razorpay = new (window as any).Razorpay({
+          key: config.keyId,
+          amount: order.amount,
+          currency: order.currency,
+          name: 'Course Creator',
+          description: `${pkg.label} · ${pkg.credits.toLocaleString()} credits`,
+          order_id: order.id,
+          prefill: { name: username, email },
+          theme: { color: '#84cc16' },
+          handler: async (response: {
+            razorpay_order_id: string;
+            razorpay_payment_id: string;
+            razorpay_signature: string;
+          }) => {
+            try {
+              setStage('verifying');
+              await verifyRazorpayRecharge(token, {
+                ...response,
+                credits: pkg.credits,
+                amount: pkg.credits,
+                package_id: pkg.id,
+              });
+              await refreshWallet();
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          },
+          modal: {
+            ondismiss: () => reject(new Error('Payment cancelled')),
+          },
         });
-
-        if (stripeSession.mode === 'live_stripe' && stripeSession.checkoutUrl) {
-          window.location.href = stripeSession.checkoutUrl;
-          return;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setStage('verifying');
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await addCredits(pkg.credits, orderId);
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        setStage('verifying');
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        await addCredits(pkg.credits, orderId);
-      }
+        razorpay.on('payment.failed', (resp: any) => {
+          reject(new Error(resp?.error?.description || 'Razorpay payment failed'));
+        });
+        razorpay.open();
+      });
 
       setStage('success');
       onSuccess?.(pkg.credits);
-      setTimeout(() => {
-        onClose();
-      }, 1800);
+      setTimeout(() => onClose(), 1800);
     } catch (err: any) {
       setStage('error');
       setErrorMessage(err?.message || 'Payment processing failed. Please try again.');
@@ -87,7 +115,7 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white">Recharge Credits</h3>
-                <p className="text-xs text-white/40">Credit Top-Up Checkout</p>
+                <p className="text-xs text-white/40">Pay securely with Razorpay</p>
               </div>
             </div>
 
@@ -106,10 +134,6 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
                 <span>Credits Added</span>
                 <span className="font-bold text-lime-400">+{pkg.credits.toLocaleString()} Credits</span>
               </div>
-              <div className="flex justify-between text-white/60">
-                <span>Reference</span>
-                <span className="font-mono text-white/50">{orderId}</span>
-              </div>
               <div className="my-2 h-px bg-white/10" />
               <div className="flex justify-between text-sm">
                 <span className="font-semibold text-white">Total Amount</span>
@@ -117,44 +141,13 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-white/60">Select Payment Method</label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('stripe')}
-                  className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border p-3 text-xs transition ${
-                    paymentMethod === 'stripe'
-                      ? 'border-lime-400 bg-lime-400/10 text-white font-bold shadow-[0_0_15px_rgba(132,204,22,0.15)]'
-                      : 'border-white/10 bg-white/[0.03] text-white/60 hover:border-white/20'
-                  }`}
-                >
-                  <CreditCard className={`h-5 w-5 ${paymentMethod === 'stripe' ? 'text-lime-400' : 'text-white/40'}`} />
-                  <span>Stripe Checkout</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('direct')}
-                  className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border p-3 text-xs transition ${
-                    paymentMethod === 'direct'
-                      ? 'border-lime-400 bg-lime-400/10 text-white font-bold shadow-[0_0_15px_rgba(132,204,22,0.15)]'
-                      : 'border-white/10 bg-white/[0.03] text-white/60 hover:border-white/20'
-                  }`}
-                >
-                  <Zap className={`h-5 w-5 ${paymentMethod === 'direct' ? 'text-lime-400' : 'text-white/40'}`} />
-                  <span>Direct Instant</span>
-                </button>
-              </div>
+            <div className="rounded-2xl border border-lime-400 bg-lime-400/10 p-3 text-center text-xs font-semibold text-white">
+              Razorpay Checkout
             </div>
 
             <div className="flex items-center gap-2 text-[11px] text-white/40">
               <ShieldCheck className="h-4 w-4 text-lime-400 shrink-0" />
-              <span>
-                {paymentMethod === 'stripe'
-                  ? 'Encrypted checkout session powered by Stripe.'
-                  : 'Direct instant wallet top-up.'}
-              </span>
+              <span>UPI, cards, netbanking and wallets via Razorpay.</span>
             </div>
 
             <div className="flex gap-3">
@@ -170,7 +163,7 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
                 onClick={handleConfirmPayment}
                 className="w-2/3 rounded-xl border border-lime-400 bg-lime-400 py-2.5 text-sm font-bold text-black hover:bg-lime-300 transition shadow-[0_0_20px_rgba(132,204,22,0.2)]"
               >
-                Pay ₹{pkg.price} Now
+                Pay ₹{pkg.price} with Razorpay
               </button>
             </div>
           </div>
@@ -183,15 +176,9 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
             </div>
             <div>
               <h4 className="text-lg font-bold text-white">
-                {stage === 'processing'
-                  ? paymentMethod === 'stripe'
-                    ? 'Connecting to Stripe Checkout...'
-                    : 'Processing Credit Top-Up...'
-                  : 'Verifying Payment & Updating Wallet...'}
+                {stage === 'processing' ? 'Opening Razorpay Checkout...' : 'Verifying Payment & Updating Wallet...'}
               </h4>
-              <p className="text-xs text-white/40 mt-1">
-                Please do not close or refresh this window.
-              </p>
+              <p className="text-xs text-white/40 mt-1">Please do not close or refresh this window.</p>
             </div>
           </div>
         )}
@@ -205,9 +192,6 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
               <h4 className="text-xl font-bold text-white">Top-Up Successful!</h4>
               <p className="text-sm text-lime-400 mt-1 font-semibold">
                 +{pkg.credits.toLocaleString()} credits added to your wallet
-              </p>
-              <p className="text-xs text-white/40 mt-2">
-                Order reference: {orderId}
               </p>
             </div>
           </div>

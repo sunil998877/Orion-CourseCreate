@@ -4,6 +4,14 @@ import { ORIGIN } from './api';
 const API_ORIGIN = ORIGIN || 'https://orion-back-developerevoke-6846s-projects.vercel.app/api';
 
 function handleAuthError() {
+  const onAdmin = window.location.pathname.startsWith('/admin');
+  if (onAdmin) {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminEmail');
+    localStorage.removeItem('adminUsername');
+    window.location.href = '/admin/login';
+    return;
+  }
   localStorage.removeItem('token');
   localStorage.removeItem('avatar');
   localStorage.removeItem('username');
@@ -28,10 +36,11 @@ export function setupAuthInterceptor() {
   window.fetch = async function (input: RequestInfo | URL, init?: RequestInit) {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     const isOurApi = url.includes(API_ORIGIN) || url.includes('/api/');
+    const isLoginRequest = url.includes('/api/login') || url.includes('/admin/login');
 
     const response = await originalFetch.call(window, input, init);
 
-    if (isOurApi && (response.status === 401 || response.status === 403)) {
+    if (isOurApi && !isLoginRequest && (response.status === 401 || response.status === 403)) {
       let isSingleSessionError = false;
       try {
         const clone = response.clone();

@@ -66,6 +66,8 @@ const courseSchema = new mongoose.Schema({
 });
 
 courseSchema.index({ userId: 1, courseId: 1 }, { unique: true });
+courseSchema.index({ createdAt: -1 });
+courseSchema.index({ userId: 1, createdAt: -1 });
 
 courseSchema.set('toJSON', { virtuals: true });
 courseSchema.virtual('module')

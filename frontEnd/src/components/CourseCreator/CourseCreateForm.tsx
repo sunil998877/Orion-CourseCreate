@@ -1,7 +1,8 @@
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { useCourseCreator, CourseCreatorProvider } from '../../contextAPI/CourseCreatorContext';
+import Loading from '../Loading';
 import CourseHeader from './CourseHeader';
 import StepProgress from './StepProgress';
 import CourseStepOne from './CourseStepOne';
@@ -12,24 +13,10 @@ import BatchGenerationOverlay from './BatchGenerationOverlay';
 import ModulePreview from './ModulePreview';
 import CourseDescriptionModal from './CourseDescriptionModal';
 
-const Loading = lazy(() => import('../Loading'));
-
-const LoadingFallback = () => (
-  <div className="flex min-h-screen items-center justify-center bg-black">
-    <div className="h-10 w-10 animate-spin rounded-full border-2 border-lime-400 border-t-transparent" />
-  </div>
-);
-
 const CourseCreatorContent: React.FC = () => {
   const { step, isGeneratingContent } = useCourseCreator();
 
-  if (isGeneratingContent) {
-    return (
-      <Suspense fallback={<LoadingFallback />}>
-        <Loading />
-      </Suspense>
-    );
-  }
+  if (isGeneratingContent) return <Loading />;
 
   return (
     <div className="min-h-screen bg-black text-gray-100 font-sans selection:bg-lime-500 selection:text-black">
@@ -40,7 +27,7 @@ const CourseCreatorContent: React.FC = () => {
 
       <CourseHeader />
 
-      <main className="relative z-10 transition-all duration-700 mx-auto py-12 px-6 max-md:py-6 max-md:px-3 max-w-[1600px]">
+      <main className="relative z-10 transition-all duration-700 mx-auto py-12 px-6 max-w-[1600px]">
         <StepProgress />
 
         <div className="mt-12 flex flex-col lg:flex-row gap-8 items-start">

@@ -3,27 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import Plan from "../models/credits/plain.js";
-
-const plans = [
-    {
-        name: "Free",
-        monthlyCreditAllotment: 1000,
-        priceInINR: 0,
-        rolloverAllowed: false,
-    },
-    {
-        name: "Pro",
-        monthlyCreditAllotment: 5000,
-        priceInINR: 499,
-        rolloverAllowed: true,
-    },
-    {
-        name: "Team",
-        monthlyCreditAllotment: 15000,
-        priceInINR: 1499,
-        rolloverAllowed: true,
-    },
-];
+import { DEFAULT_CREDIT_PLANS } from "../config/creditPlans.js";
 
 const seedPlans = async () => {
     try {
@@ -35,7 +15,7 @@ const seedPlans = async () => {
         await mongoose.connect(mongoUri);
         console.log("Connected to MongoDB");
 
-        for (const p of plans) {
+        for (const p of DEFAULT_CREDIT_PLANS) {
             await Plan.findOneAndUpdate(
                 { name: p.name },
                 { $set: p },

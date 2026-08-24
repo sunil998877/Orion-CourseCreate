@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { CheckCircle2, CreditCard, Loader2, ShieldCheck, Sparkles, Zap, X } from 'lucide-react';
+import { CheckCircle2, CreditCard, Loader2, ShieldCheck, Sparkles, X } from 'lucide-react';
 import type { PlanData } from '../../types/credits.types';
 import { useCredits } from '../../contextAPI/CreditsContext';
-import { createPlanStripeSession } from '../../services/planService';
+import {
+  createRazorpayOrder,
+  getRazorpayConfig,
+  loadRazorpayScript,
+  verifyRazorpayPlan,
+} from '../../services/razorpayService';
 
 type PlanPurchaseModalProps = {
   plan: PlanData | null;
@@ -11,17 +16,15 @@ type PlanPurchaseModalProps = {
 };
 
 type PaymentStage = 'summary' | 'processing' | 'verifying' | 'success' | 'error';
-type PaymentMethod = 'stripe' | 'direct';
 
 const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({ plan, onClose, onSuccess }) => {
-  const { subscribeToPlan } = useCredits();
+  const { subscribeToPlan, refreshWallet } = useCredits();
   const [stage, setStage] = useState<PaymentStage>('summary');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!plan) return null;
 
-  const orderId = `PLAN-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const isFree = plan.priceInr === 0;
 
   const handleConfirmPlan = async () => {
     try {
@@ -30,33 +33,70 @@ const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({ plan, onClose, on
 
       const token = localStorage.getItem('token') || '';
 
-      if (paymentMethod === 'stripe') {
-        const stripeSession = await createPlanStripeSession(token, {
-          plan_id: plan.id,
-          plan_name: plan.name,
-        });
-
-        if (stripeSession.mode === 'live_stripe' && stripeSession.checkoutUrl) {
-          window.location.href = stripeSession.checkoutUrl;
-          return;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (isFree) {
         setStage('verifying');
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await subscribeToPlan(plan.name, plan.id, orderId);
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        setStage('verifying');
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        await subscribeToPlan(plan.name, plan.id, orderId);
+        await subscribeToPlan(plan.name, plan.id);
+        setStage('success');
+        onSuccess?.(plan.name);
+        setTimeout(() => onClose(), 1800);
+        return;
       }
+
+      const loaded = await loadRazorpayScript();
+      if (!loaded) throw new Error('Failed to load Razorpay checkout');
+
+      const config = await getRazorpayConfig(token);
+      const order = await createRazorpayOrder(token, {
+        amount: plan.priceInr,
+        plan_id: plan.id,
+        plan_name: plan.name,
+        type: 'plan',
+      });
+
+      const username = localStorage.getItem('username') || '';
+      const email = localStorage.getItem('email') || '';
+
+      await new Promise<void>((resolve, reject) => {
+        const razorpay = new (window as any).Razorpay({
+          key: config.keyId,
+          amount: order.amount,
+          currency: order.currency,
+          name: 'Course Creator',
+          description: `${plan.name} plan subscription`,
+          order_id: order.id,
+          prefill: { name: username, email },
+          theme: { color: '#84cc16' },
+          handler: async (response: {
+            razorpay_order_id: string;
+            razorpay_payment_id: string;
+            razorpay_signature: string;
+          }) => {
+            try {
+              setStage('verifying');
+              await verifyRazorpayPlan(token, {
+                ...response,
+                plan_id: plan.id,
+                plan_name: plan.name,
+              });
+              await refreshWallet();
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          },
+          modal: {
+            ondismiss: () => reject(new Error('Payment cancelled')),
+          },
+        });
+        razorpay.on('payment.failed', (resp: any) => {
+          reject(new Error(resp?.error?.description || 'Razorpay payment failed'));
+        });
+        razorpay.open();
+      });
 
       setStage('success');
       onSuccess?.(plan.name);
-      setTimeout(() => {
-        onClose();
-      }, 1800);
+      setTimeout(() => onClose(), 1800);
     } catch (err: any) {
       setStage('error');
       setErrorMessage(err?.message || 'Plan subscription failed. Please try again.');
@@ -86,7 +126,9 @@ const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({ plan, onClose, on
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white">Subscribe to {plan.name}</h3>
-                <p className="text-xs text-white/40">Plan Subscription Checkout</p>
+                <p className="text-xs text-white/40">
+                  {isFree ? 'Activate free plan' : 'Pay securely with Razorpay'}
+                </p>
               </div>
             </div>
 
@@ -109,56 +151,28 @@ const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({ plan, onClose, on
                 <span>Credit Rollover</span>
                 <span className="font-semibold text-white">{plan.rolloverAllowed ? 'Enabled' : 'Disabled'}</span>
               </div>
-              <div className="flex justify-between text-white/60">
-                <span>Reference</span>
-                <span className="font-mono text-white/50">{orderId}</span>
-              </div>
               <div className="my-2 h-px bg-white/10" />
               <div className="flex justify-between text-sm">
                 <span className="font-semibold text-white">Monthly Subscription</span>
                 <span className="font-black text-lime-400">
-                  {plan.priceInr === 0 ? 'Free' : `₹${plan.priceInr.toLocaleString()} / mo`}
+                  {isFree ? 'Free' : `₹${plan.priceInr.toLocaleString()} / mo`}
                 </span>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-white/60">Select Payment Method</label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('stripe')}
-                  className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border p-3 text-xs transition ${
-                    paymentMethod === 'stripe'
-                      ? 'border-lime-400 bg-lime-400/10 text-white font-bold shadow-[0_0_15px_rgba(132,204,22,0.15)]'
-                      : 'border-white/10 bg-white/[0.03] text-white/60 hover:border-white/20'
-                  }`}
-                >
-                  <CreditCard className={`h-5 w-5 ${paymentMethod === 'stripe' ? 'text-lime-400' : 'text-white/40'}`} />
-                  <span>Stripe Checkout</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('direct')}
-                  className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border p-3 text-xs transition ${
-                    paymentMethod === 'direct'
-                      ? 'border-lime-400 bg-lime-400/10 text-white font-bold shadow-[0_0_15px_rgba(132,204,22,0.15)]'
-                      : 'border-white/10 bg-white/[0.03] text-white/60 hover:border-white/20'
-                  }`}
-                >
-                  <Zap className={`h-5 w-5 ${paymentMethod === 'direct' ? 'text-lime-400' : 'text-white/40'}`} />
-                  <span>Direct Instant</span>
-                </button>
+            {!isFree && (
+              <div className="flex items-center justify-center gap-2 rounded-2xl border border-lime-400 bg-lime-400/10 p-3 text-center text-xs font-semibold text-white">
+                <CreditCard className="h-4 w-4 text-lime-400" />
+                Razorpay Checkout
               </div>
-            </div>
+            )}
 
             <div className="flex items-center gap-2 text-[11px] text-white/40">
               <ShieldCheck className="h-4 w-4 text-lime-400 shrink-0" />
               <span>
-                {paymentMethod === 'stripe'
-                  ? 'Secure monthly subscription checkout powered by Stripe.'
-                  : 'Direct instant plan subscription activation.'}
+                {isFree
+                  ? 'No payment required for the Free plan.'
+                  : 'UPI, cards, netbanking and wallets via Razorpay.'}
               </span>
             </div>
 
@@ -175,7 +189,7 @@ const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({ plan, onClose, on
                 onClick={handleConfirmPlan}
                 className="w-2/3 rounded-xl border border-lime-400 bg-lime-400 py-2.5 text-sm font-bold text-black hover:bg-lime-300 transition shadow-[0_0_20px_rgba(132,204,22,0.2)]"
               >
-                {plan.priceInr === 0 ? 'Activate Free Plan' : `Subscribe for ₹${plan.priceInr}`}
+                {isFree ? 'Activate Free Plan' : `Pay ₹${plan.priceInr} with Razorpay`}
               </button>
             </div>
           </div>
@@ -189,14 +203,12 @@ const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({ plan, onClose, on
             <div>
               <h4 className="text-lg font-bold text-white">
                 {stage === 'processing'
-                  ? paymentMethod === 'stripe'
-                    ? 'Connecting to Stripe Checkout...'
-                    : 'Activating Subscription Plan...'
+                  ? isFree
+                    ? 'Activating Subscription Plan...'
+                    : 'Opening Razorpay Checkout...'
                   : 'Verifying Subscription & Updating Wallet...'}
               </h4>
-              <p className="text-xs text-white/40 mt-1">
-                Please do not close or refresh this window.
-              </p>
+              <p className="text-xs text-white/40 mt-1">Please do not close or refresh this window.</p>
             </div>
           </div>
         )}
@@ -210,9 +222,6 @@ const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({ plan, onClose, on
               <h4 className="text-xl font-bold text-white">Subscription Active!</h4>
               <p className="text-sm text-lime-400 mt-1 font-semibold">
                 You are now subscribed to the {plan.name} Plan
-              </p>
-              <p className="text-xs text-white/40 mt-2">
-                Order reference: {orderId}
               </p>
             </div>
           </div>

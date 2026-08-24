@@ -79,8 +79,8 @@ export const CREDIT_COSTS: Record<string, number | string> = {
 };
 
 export const CREDIT_PACKAGES: CreditPackage[] = [
-  { id: 'pkg-100', credits: 100, price: 9, label: '100 Credits' },
-  { id: 'pkg-500', credits: 500, price: 39, label: '500 Credits', popular: true },
-  { id: 'pkg-1000', credits: 1000, price: 69, label: '1,000 Credits' },
-  { id: 'pkg-5000', credits: 5000, price: 249, label: '5,000 Credits' },
+  { id: 'pkg-100', credits: 100, price: 19, label: '100 Credits' },
+  { id: 'pkg-500', credits: 500, price: 79, label: '500 Credits', popular: true },
+  { id: 'pkg-1000', credits: 1000, price: 149, label: '1,000 Credits' },
+  { id: 'pkg-5000', credits: 5000, price: 599, label: '5,000 Credits' },
 ];

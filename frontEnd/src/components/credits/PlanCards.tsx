@@ -11,20 +11,20 @@ type PlanCardsProps = {
 const DEFAULT_PLANS: PlanData[] = [
   {
     name: 'Free',
-    monthlyCreditAllotment: 1000,
+    monthlyCreditAllotment: 500,
     priceInr: 0,
     rolloverAllowed: false,
   },
   {
     name: 'Pro',
-    monthlyCreditAllotment: 5000,
-    priceInr: 499,
+    monthlyCreditAllotment: 3000,
+    priceInr: 999,
     rolloverAllowed: true,
   },
   {
     name: 'Team',
-    monthlyCreditAllotment: 15000,
-    priceInr: 1499,
+    monthlyCreditAllotment: 10000,
+    priceInr: 2499,
     rolloverAllowed: true,
   },
 ];

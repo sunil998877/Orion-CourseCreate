@@ -77,8 +77,16 @@ export const CreditsProvider: React.FC<{ children: React.ReactNode }> = ({ child
       });
 
       try {
-        const txData = await getTransactions(token, { limit: 50 });
-        setTransactions(txData.transactions ?? []);
+        const allTransactions = [];
+        let page = 1;
+        let hasNext = true;
+        while (hasNext) {
+          const txData = await getTransactions(token, { page, limit: 100 });
+          allTransactions.push(...(txData.transactions ?? []));
+          hasNext = Boolean(txData.pagination?.has_next);
+          page += 1;
+        }
+        setTransactions(allTransactions);
       } catch (txErr: any) {
         console.warn('[CreditsContext] Could not load transactions:', txErr?.message);
         setTransactions([]);
@@ -94,6 +102,8 @@ export const CreditsProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(() => {
     fetchWalletData();
+    window.addEventListener('auth-changed', fetchWalletData);
+    return () => window.removeEventListener('auth-changed', fetchWalletData);
   }, [fetchWalletData]);
 
   const isZeroBalance = useMemo(() => credits.remaining <= 0, [credits.remaining]);

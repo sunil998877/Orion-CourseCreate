@@ -66,7 +66,7 @@ const CourseStepFive: React.FC = () => {
             className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] h-full"
         >
             {/* Left Side: Form Content */}
-            <div className="flex-1 xl:w-[55%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] max-md:rounded-2xl p-8 md:p-12 max-md:p-5 shadow-2xl relative overflow-hidden group flex flex-col h-full">
+            <div className="flex-1 xl:w-[55%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group flex flex-col h-full">
                 <div className="grid lg:grid-cols-3 gap-8 mb-10 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar flex-1">
                     <div className="lg:col-span-1 space-y-6">
                         <div className="bg-gray-800/40 p-6 rounded-3xl border border-gray-800">

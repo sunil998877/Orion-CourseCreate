@@ -1,7 +1,0 @@
-1. GET  /api/wallet
-      ↓
-2. GET  /api/wallet/transactions
-      ↓
-3. POST /api/wallet/estimate
-      ↓
-4. POST /api/wallet/recharge

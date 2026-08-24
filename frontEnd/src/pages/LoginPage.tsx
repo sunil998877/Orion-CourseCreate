@@ -124,6 +124,7 @@ function App() {
         if (data.email) {
           localStorage.setItem('email', data.email);
         }
+        window.dispatchEvent(new Event('auth-changed'));
         await new Promise(resolve => setTimeout(resolve, 1500));
         toast.success('Login successful!...');
         navigate('/course-creator', { replace: true });
@@ -392,6 +393,7 @@ function App() {
                         Create a new account
                       </a>
                     </div>
+                  
                   </form>
                 </div>
 

@@ -39,7 +39,7 @@ const CourseStepFour: React.FC = () => {
             className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] h-full"
         >
             {/* Left Side: Form Content */}
-            <div className="flex-1 xl:w-[66%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] max-md:rounded-2xl p-8 md:p-12 max-md:p-5 shadow-2xl relative overflow-hidden group flex flex-col h-full">
+            <div className="flex-1 xl:w-[66%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group flex flex-col h-full">
                 {!hasBlueprint && !isBlueprinting ? (
                     <div className="flex-1 flex flex-col h-full">
                         <div className="flex-1 flex flex-col items-center justify-center text-center py-12">

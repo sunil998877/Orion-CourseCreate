@@ -9,12 +9,12 @@ const CourseHeader: React.FC = () => {
     const { handleExitArchitect } = useCourseCreator();
 
     return (
-        <nav className="relative z-[100] py-4 px-8 max-md:px-4 max-md:py-3 border-b border-white/10 backdrop-blur-xl bg-black/40">
+        <nav className="relative z-[100] py-4 px-8 border-b border-white/10 backdrop-blur-xl bg-black/40">
             <div className="w-full flex justify-between items-center transition-all duration-500">
                 {/* Left: Logo */}
                 <div className="flex-1 flex justify-start">
                     <div className="flex flex-col items-start gap-1">
-                        <img src={logo5} alt="ORION Logo" className="h-16 max-md:h-10 w-auto hover:rotate-3 transition-transform cursor-pointer" />
+                        <img src={logo5} alt="ORION Logo" className="h-16 w-auto hover:rotate-3 transition-transform cursor-pointer" />
                         <div className="flex items-center gap-2">
                             <span className="text-lime-400 text-[9px] font-black uppercase tracking-[0.2em] leading-none">EVOKE AI</span>
                         </div>
@@ -30,16 +30,7 @@ const CourseHeader: React.FC = () => {
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex-1 flex items-center justify-end gap-6 max-md:gap-2">
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleExitArchitect}
-                        className="md:hidden p-2 rounded-xl border border-white/10 bg-white/5 text-gray-400"
-                        aria-label="Exit Architect"
-                    >
-                        <ChevronLeft size={18} strokeWidth={2.5} className="text-lime-500" />
-                    </motion.button>
+                <div className="flex-1 flex items-center justify-end gap-6">
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}

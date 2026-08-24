@@ -69,8 +69,9 @@ const CreditTransactionSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Compound index for fast stale reservation queries
 CreditTransactionSchema.index({ type: 1, status: 1, createdAt: 1 });
+CreditTransactionSchema.index({ createdAt: -1 });
+CreditTransactionSchema.index({ wallet: 1, type: 1, status: 1 });
 
 const CreditTransaction = mongoose.model("CreditTransaction", CreditTransactionSchema);
 export default CreditTransaction;

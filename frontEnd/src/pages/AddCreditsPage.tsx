@@ -152,7 +152,7 @@ const AddCreditsPage: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <UsageHistory items={transactions} limit={8} />
+                <UsageHistory items={transactions} maxHeight="max-h-[420px]" />
               )}
             </section>
 

@@ -11,10 +11,9 @@ import ScrollToTop from "./ScrollToTop";
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
-  // Navigation & Drawer state
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // User Profile & Avatar state
+ 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => localStorage.getItem("avatar"));
   const [userInfo, setUserInfo] = useState<UserInfo | null>(() => {
     const username = localStorage.getItem("username");
@@ -22,14 +21,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return username && email ? { username, email } : null;
   });
 
-  // Modal states
+
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
 
-  // Notifications state
+
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
-  // Fetch Notifications
+  
   const fetchNotifications = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
@@ -74,14 +73,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Poll notifications
+ 
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  // Fetch user profile on mount
+  
   useEffect(() => {
     const fetchUserProfile = async () => {
       const token = localStorage.getItem("token");
@@ -106,7 +105,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     fetchUserProfile();
   }, []);
 
-  // Avatar upload handler
+  
   const handleAvatarCropped = async (file: File) => {
     const formData = new FormData();
     formData.append("avatar", file);
@@ -130,7 +129,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Logout handler
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("courseStatus");
@@ -142,7 +141,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0b1220] via-[#0a0f1a] to-black text-white">
-      {/* Top Header */}
+      
       <Header
         onOpenMobileMenu={() => setMobileOpen(true)}
         userInfo={userInfo}
@@ -156,32 +155,32 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         onFetchNotifications={fetchNotifications}
       />
 
-      {/* Main Content Area & Desktop Sidebar */}
+    
       <div className="flex pt-16">
         <Sidebar />
 
-        <main className="flex-1 p-4 sm:p-6 min-w-0 md:ml-64">
+        <main className="flex-1 min-w-0 p-4 sm:p-6 md:ml-[250px]">
           <div className="w-full space-y-8">{children}</div>
         </main>
       </div>
 
-      {/* Mobile Drawer Navigation */}
+      
       <MobileSidebar isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
-      {/* Avatar Cropping Modal */}
+    
       <AvatarCropModal
         open={avatarModalOpen}
         onClose={() => setAvatarModalOpen(false)}
         onCropped={handleAvatarCropped}
       />
 
-      {/* Change Password Modal */}
+      
       <ChangePasswordModal
         isOpen={changePasswordModalOpen}
         onClose={() => setChangePasswordModalOpen(false)}
       />
 
-      {/* Scroll To Top Button */}
+    
       <ScrollToTop />
     </div>
   );

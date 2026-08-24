@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Layout, Plus, Presentation, Headphones, BookOpen, Download, Music, Zap } from 'lucide-react';
+import { Sparkles, Plus, Presentation, Headphones, BookOpen, Download, Music, Zap } from 'lucide-react';
 import avatarImg from '../assests/avtar1.png';
 import PageTransition from '../components/PageTransition';
 import { motion } from 'framer-motion';
@@ -52,36 +52,36 @@ const HomePage: React.FC = () => {
     <PageTransition>
       <div className="space-y-8 animate-fade-in  ">
         {/* Hero Section */}
-        <section className="relative w-full rounded-[2.5rem] max-md:rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/5 shadow-2xl group isolate transition-all duration-700 hover:shadow-emerald-900/10">
+        <section className="relative w-full rounded-[2rem] max-md:rounded-2xl overflow-hidden bg-[#0b100f] border border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.28)] group isolate transition-all duration-700 hover:shadow-emerald-900/20">
           <div className="absolute inset-0 opacity-20 brightness-100 contrast-150 mix-blend-overlay bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E')]" />
           <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-lime-500/10 blur-[150px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3 opacity-50" />
           <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none translate-y-1/3 -translate-x-1/4 opacity-50" />
 
-          <div className="relative bottom-4 z-10 flex flex-col md:flex-row items-center md:items-end justify-between px-8 pt-12 pb-0 md:px-16 md:pt-16 gap-8 md:gap-12 min-h-[480px] max-md:px-4 max-md:pt-6 max-md:min-h-0">
-            <div className="relative flex-1 space-y-6 md:space-y-8 max-w-2xl text-center md:text-left pb-6 md:pb-20 self-center max-md:w-full">
+          <div className="relative z-10  bottom-6  flex flex-col md:flex-row items-center md:items-end justify-between px-8 pt-10 pb-0 md:px-14 md:pt-14 gap-6 md:gap-8 min-h-[450px] max-md:px-4 max-md:pt-6 max-md:min-h-0">
+            <div className="relative flex-1 space-y-5 md:space-y-6 max-w-[620px] text-center md:text-left pb-6 md:pb-16 self-center max-md:w-full">
               <div className="absolute -inset-10 bg-lime-500/5 blur-3xl rounded-full -z-10 pointer-events-none mix-blend-screen opacity-50" />
-
-              <div className="space-y-4 md:space-y-6 relative">
+                 
+              <div className="space-y-4 md:space-y-5 relative">
                 <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold tracking-wide text-lime-400 w-fit mx-auto md:mx-0 uppercase backdrop-blur-md shadow-lg shadow-lime-900/10">
                   <Sparkles className="w-3 h-3 mr-2" />
                   AI-Powered Learning
                 </div>
-                <h1 className="text-3xl sm:text-4xl md:text-8xl font-black text-white tracking-tighter leading-[1.05] md:leading-[0.9] mb-2 md:mb-4">
+                <h1 className="text-4xl sm:text-5xl md:text-[clamp(3.8rem,6vw,6.5rem)] font-black text-white tracking-[-0.04em] leading-[0.94] md:leading-[0.88] mb-2 md:mb-4">
                   Welcome back, <br className="hidden md:block" />
                   <span className="text-transparent bg-clip-text bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-lime-300 via-emerald-400 to-teal-500 animate-gradient-x px-1">
                     {username || 'Creator'}
                   </span>
                 </h1>
 
-                <div className="mt-6 space-y-6 text-left w-full max-w-xl mx-auto md:mx-0">
-                  <div className="relative p-6 rounded-3xl bg-white/[0.03] border border-white/10 backdrop-blur-xl shadow-2xl overflow-hidden group/guide">
+                <div className="mt-5 space-y-6 text-left w-full max-w-[560px] mx-auto md:mx-0">
+                  <div className="relative p-5 md:p-5 rounded-2xl bg-[#141d18]/90 border border-lime-300/15 backdrop-blur-xl shadow-2xl overflow-hidden group/guide">
                     <div className="absolute inset-0 bg-gradient-to-br from-lime-500/[0.05] via-transparent to-transparent opacity-0 group-hover/guide:opacity-100 transition-opacity duration-500" />
                     <div className="relative z-10 space-y-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-lime-500/20 flex items-center justify-center border border-lime-500/30">
-                          <Sparkles className="w-5 h-5 text-lime-400" />
+                        <div className="w-9 h-9 rounded-xl bg-lime-500/20 flex items-center justify-center border border-lime-500/30">
+                          <Sparkles className="w-4 h-4 text-lime-400" />
                         </div>
-                        <h3 className="text-xl font-bold text-white tracking-tight">First-Time User Guidance</h3>
+                        <h3 className="text-lg font-bold text-white tracking-tight">First-Time User Guidance</h3>
                       </div>
                       <div className="space-y-3">
                         <p className="text-gray-300 font-medium italic">New here? Let's get you started.</p>
@@ -111,7 +111,7 @@ const HomePage: React.FC = () => {
             </div>
 
             <div className="shrink-0 w-full md:w-auto flex justify-center md:justify-end">
-              <div className="relative w-[320px] md:w-[480px] h-[400px] md:h-[500px] flex items-end justify-center perspective-[1200px] group/scene">
+              <div className="relative w-[300px] md:w-[430px] h-[370px] md:h-[445px] flex items-end justify-center perspective-[1200px] group/scene">
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-full bg-gradient-to-t from-lime-500/10 via-emerald-500/5 to-transparent blur-3xl opacity-60 pointer-events-none mix-blend-screen" />
                 <div
                   className="absolute top-10 left-6 right-6 bottom-16 bg-gray-900/60 backdrop-blur-md border border-white/10 rounded-2xl -z-10 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.5)] flex flex-col gap-4 p-6 transition-all duration-700 ease-out transform-gpu group-hover/scene:rotate-y-[-5deg] group-hover/scene:rotate-x-[5deg] group-hover/scene:translate-x-2"
@@ -202,23 +202,23 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
-        {/* Premium CTA Section */}
+      
         <div className="relative overflow-hidden rounded-[2.5rem] max-md:rounded-2xl bg-[#0F0F0F] border border-white/10 p-12 max-md:p-6 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-10 group">
           <div className="absolute inset-0 bg-gradient-to-r from-lime-500/5 to-emerald-500/5 opacity-50" />
           <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2" />
-          <div className="relative z-10 max-w-2xl space-y-4">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
+          <div className="relative z-10 max-w-2xl space-y-3">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
               Ready to build your next <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-400">Masterpiece?</span>
             </h2>
-            <p className="text-gray-400 text-lg">
+            <p className="text-gray-400 text-base md:text-lg">
               Join thousands of creators sharing their knowledge. It only takes a few clicks to get started.
             </p>
           </div>
           <div className="relative z-10">
             <button
               onClick={handleCreateNew}
-              className="group/btn relative px-8 py-4 bg-gradient-to-r from-lime-400 to-emerald-500 rounded-2xl text-black font-bold text-lg hover:brightness-110 transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(132,204,22,0.3)] flex items-center gap-3"
+              className="group/btn relative px-7 py-3.5 bg-gradient-to-r from-lime-300 to-emerald-400 rounded-xl text-black font-bold text-base hover:brightness-110 transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(132,204,22,0.3)] flex items-center gap-3"
             >
               <Plus className="w-6 h-6" />
               <span>Start Creating</span>
@@ -227,21 +227,21 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Feature Section Header */}
-        <div className="flex flex-col items-center text-center space-y-3 pt-6 pb-2 animate-fade-in-up">
+        
+        <div className="flex flex-col items-center text-center space-y-3   animate-fade-in-up">
           <div className="inline-flex items-center px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
             Platform Capabilities
           </div>
         </div>
 
-        {/* Feature Cards Grid */}
+        
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-md:gap-4 pb-12"
         >
-          {/* Card 1: User Guidance */}
+      
           <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-fuchsia-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(217,70,239,0.1)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
@@ -255,7 +255,7 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Card 2: Slide Generation */}
+      
           <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-lime-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(132,204,22,0.1)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-lime-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
@@ -269,7 +269,7 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Card 3: PPTX Downloads */}
+          
           <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-rose-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(244,63,94,0.1)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
@@ -283,7 +283,7 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Card 4: Audiobooks */}
+        
           <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-indigo-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(99,102,241,0.1)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
@@ -297,7 +297,7 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Card 5: Voice Scripts */}
+          
           <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-cyan-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(6,182,212,0.1)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
@@ -311,7 +311,7 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Card 6: Ebooks */}
+      
           <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-amber-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(245,158,11,0.1)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">

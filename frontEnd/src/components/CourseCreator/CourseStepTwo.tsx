@@ -44,7 +44,7 @@ const CourseStepTwo: React.FC = () => {
                   exit="exit"
                   className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px]"
                 >
-                  <div className="flex-1 xl:w-[55%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] max-md:rounded-2xl p-8 md:p-12 max-md:p-5 shadow-2xl relative overflow-hidden group space-y-8">
+                  <div className="flex-1 xl:w-[55%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group space-y-8">
                     {/* Experience Level Removed from here */}
 
                     <div>
@@ -178,12 +178,13 @@ const CourseStepTwo: React.FC = () => {
                             min="0"
                             className={`w-full bg-gray-800/50 border rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-lime-500 outline-none transition-all ${showValidation && (!(courseData.duration?.value) || (courseData.duration?.value ?? 0) <= 0) ? 'border-amber-500/50 ring-1 ring-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-gray-700'
                               }`}
-                            placeholder="e.g. 1"
+                            placeholder="e.g. 10"
                             value={courseData.duration?.value === 0 ? '' : (courseData.duration?.value ?? '')}
                             onChange={(e) => {
                               const val = Math.max(0, Number(e.target.value || 0));
-                              // Recommended Modules: 5 modules for 1 hour, ~4-5 modules per hour
-                              let recommendedModules = val === 1 ? 5 : (val <= 2 ? val * 5 : val * 4);
+                              // Recommended Modules: ~4-5 modules per hour
+                              let recommendedModules = val * 4;
+                              if (val <= 2) recommendedModules = val * 5; // Beginner level density
 
                               updateCourseData({
                                 duration: { ...(courseData.duration || { value: 0, unit: 'Hours' }), value: val },
@@ -210,7 +211,7 @@ const CourseStepTwo: React.FC = () => {
                             min="0"
                             className={`w-full bg-gray-800/50 border rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-lime-500 outline-none transition-all ${showValidation && (courseData.module === undefined || courseData.module === null || courseData.module <= 0) ? 'border-amber-500/50 ring-1 ring-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-gray-700'
                               }`}
-                            placeholder="e.g. 5"
+                            placeholder="e.g. 4"
                             value={courseData.module === 0 ? '' : courseData.module}
                             onChange={(e) => {
                               const val = e.target.value === '' ? 0 : Math.max(0, Number(e.target.value));

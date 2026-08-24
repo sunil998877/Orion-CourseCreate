@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Wallet from "../../models/credits/wallet.js";
 import Plan from "../../models/credits/plain.js";
 import CreditTransaction from "../../models/credits/creditTransaction.js";
+import { DEFAULT_CREDIT_PLANS } from "../../config/creditPlans.js";
 
 function getFirstOfNextMonth() {
     const now = new Date();
@@ -12,12 +13,7 @@ export const getPlansList = async () => {
     let plans = await Plan.find({}).sort({ priceInINR: 1 });
 
     if (!plans || plans.length === 0) {
-        const defaultPlans = [
-            { name: "Free", monthlyCreditAllotment: 1000, priceInINR: 0, rolloverAllowed: false },
-            { name: "Pro", monthlyCreditAllotment: 8000, priceInINR: 499, rolloverAllowed: true },
-            { name: "Team", monthlyCreditAllotment: 15000, priceInINR: 1499, rolloverAllowed: true },
-        ];
-        plans = await Plan.insertMany(defaultPlans);
+        plans = await Plan.insertMany(DEFAULT_CREDIT_PLANS);
     }
 
     return plans.map((p) => ({
@@ -38,9 +34,18 @@ export const processPlanSubscription = async ({ userId, planId, planName, refere
 
     try {
         await session.withTransaction(async () => {
-            const wallet = await Wallet.findOne({ user: userId }).populate("plan").session(session);
+            let wallet = await Wallet.findOne({ user: userId }).populate("plan").session(session);
             if (!wallet) {
-                throw new Error("Wallet not found for this user");
+                const freePlan = await Plan.findOne({ name: "Free" }).session(session);
+                wallet = await Wallet.create([{
+                    user: userId,
+                    plan: freePlan?._id,
+                    balance: freePlan?.monthlyCreditAllotment || DEFAULT_CREDIT_PLANS[0].monthlyCreditAllotment,
+                    reserved: 0,
+                    lifetimeUsed: 0,
+                    renewsOn: getFirstOfNextMonth(),
+                }], { session });
+                wallet = wallet[0];
             }
 
             let planQuery;
@@ -65,13 +70,11 @@ export const processPlanSubscription = async ({ userId, planId, planName, refere
             let transactionAmount;
 
             if (rolloverAllowed) {
-
                 newBalance = balanceBefore + monthlyAllotment;
                 transactionAmount = monthlyAllotment;
             } else {
-
                 newBalance = monthlyAllotment;
-                transactionAmount = monthlyAllotment - balanceBefore;
+                transactionAmount = Math.max(0, monthlyAllotment - balanceBefore);
             }
 
             wallet.plan = targetPlan._id;
@@ -124,6 +127,8 @@ export const processPlanSubscription = async ({ userId, planId, planName, refere
 
     return result;
 };
+
+export const subscribeToPlan = processPlanSubscription;
 
 
 export const processPlanRenewal = async ({ userId }) => {
