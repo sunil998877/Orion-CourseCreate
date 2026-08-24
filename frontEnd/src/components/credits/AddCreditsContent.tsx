@@ -37,11 +37,11 @@ const AddCreditsContent: React.FC<Props> = ({ onPurchase }) => {
 
   return (
     <div className="space-y-12">
-      <section className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-8">
+      <section className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-8 max-md:rounded-2xl max-md:p-4">
         <PlanCards onSelectPlan={handleSelectPlan} />
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-8">
+      <section className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-8 max-md:rounded-2xl max-md:p-4">
         <CreditPackages
           onSelectPackage={handleSelectPackage}
           selectedPackageId={selectedPackage?.id}

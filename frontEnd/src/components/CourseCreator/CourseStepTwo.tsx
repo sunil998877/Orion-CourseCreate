@@ -118,7 +118,7 @@ const CourseStepTwo: React.FC = () => {
                       {refinePromptOpen && (
                         <div className="mt-3 bg-gray-800/80 p-3 rounded-xl border border-lime-500/30 animate-in fade-in zoom-in-95 duration-200">
                           <label className="block text-xs font-semibold text-lime-400 uppercase tracking-wider mb-2">How should I refine this?</label>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 max-md:flex-col">
                             <input
                               type="text"
                               value={refinePromptText}
@@ -262,7 +262,7 @@ const CourseStepTwo: React.FC = () => {
                     initial={{ opacity: 0, x: 50 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
-                    className="flex-1 xl:w-[45%] bg-gradient-to-br from-[#0D0D15] via-[#0A0A0E] to-[#050505] rounded-[2.5rem] p-6 sm:p-9 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group self-start sticky top-8"
+                    className="flex-1 xl:w-[45%] bg-gradient-to-br from-[#0D0D15] via-[#0A0A0E] to-[#050505] rounded-[2.5rem] p-6 sm:p-9 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group self-start sticky top-8 max-md:rounded-2xl max-md:p-4 max-md:static"
                   >
                     {/* Background glow lines */}
                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-lime-500/5 rounded-full blur-[100px] -mr-48 -mt-48 transition-all duration-700 group-hover:bg-lime-500/10 pointer-events-none"></div>

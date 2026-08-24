@@ -54,7 +54,7 @@ const AddCreditsPage: React.FC = () => {
             </div>
           )}
 
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gray-900/40 p-8 md:p-12 shadow-2xl backdrop-blur-2xl">
+          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gray-900/40 p-8 md:p-12 shadow-2xl backdrop-blur-2xl max-md:rounded-2xl max-md:p-4">
             <div className="absolute inset-0 bg-gradient-to-r from-lime-500/10 via-transparent to-transparent opacity-40" />
             <div className="absolute -right-20 -top-20 h-96 w-96 rounded-full bg-lime-500/10 blur-[80px]" />
 
@@ -64,10 +64,10 @@ const AddCreditsPage: React.FC = () => {
                   <Zap className="mr-2 h-3 w-3" />
                   AI Usage Credits
                 </div>
-                <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">
+                <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-5xl max-md:text-2xl">
                   Add Credits
                 </h1>
-                <p className="max-w-2xl text-base text-gray-400 md:text-lg">
+                <p className="max-w-2xl text-base text-gray-400 md:text-lg max-md:text-sm">
                   Top up your account to keep generating course outlines, modules, lessons, quizzes, and more with Orion AI.
                 </p>
 
@@ -94,7 +94,7 @@ const AddCreditsPage: React.FC = () => {
                 )}
               </div>
 
-              <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-black/30 p-6 backdrop-blur-md">
+              <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-black/30 p-6 backdrop-blur-md max-md:max-w-none max-md:p-4">
                 <p className="text-sm text-white/40">Current Balance</p>
                 {loading ? (
                   <div className="mt-2 space-y-3">
@@ -108,7 +108,7 @@ const AddCreditsPage: React.FC = () => {
                 ) : (
                   <>
                     <div className="mt-2 flex items-end gap-2">
-                      <span className="text-4xl font-black text-lime-400">
+                      <span className="text-4xl font-black text-lime-400 max-md:text-3xl">
                         {credits.remaining.toLocaleString()}
                       </span>
                       <span className="pb-1 text-sm text-white/40">
@@ -143,7 +143,7 @@ const AddCreditsPage: React.FC = () => {
           <AddCreditsContent />
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <section className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-8">
+            <section className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-8 max-md:rounded-2xl max-md:p-4">
               {loading ? (
                 <div className="space-y-3">
                   <Skeleton className="h-4 w-32" />
@@ -156,7 +156,7 @@ const AddCreditsPage: React.FC = () => {
               )}
             </section>
 
-            <section className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-8">
+            <section className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-8 max-md:rounded-2xl max-md:p-4">
               <div className="mb-5 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-lime-400" />
                 <h2 className="font-semibold text-white">Credit Usage Guide</h2>

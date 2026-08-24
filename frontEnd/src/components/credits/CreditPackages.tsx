@@ -16,7 +16,7 @@ const CreditPackages: React.FC<CreditPackagesProps> = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white">Buy Extra Credits</h2>
+        <h2 className="text-2xl font-bold text-white max-md:text-xl">Buy Extra Credits</h2>
         <p className="mt-1 text-sm text-white/40">
           Purchase additional credits for your wallet.
         </p>

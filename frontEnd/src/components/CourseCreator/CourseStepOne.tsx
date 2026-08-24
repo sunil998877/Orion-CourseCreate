@@ -52,8 +52,8 @@ const CourseStepOne: React.FC = () => {
             >
                 <div className="absolute inset-0 bg-gradient-to-br from-lime-500/[0.02] to-transparent pointer-events-none" />
                 <motion.div variants={itemVariants} className="mb-12 text-center relative z-10">
-                    <label className="block text-[10px] font-black text-white/40 mb-6 uppercase tracking-[0.3em] group-hover/card:text-lime-400 transition-colors">Cognitive complexity Level</label>
-                    <div className="max-w-2xl mx-auto flex bg-black/40 p-2 rounded-[2rem] border border-white/5 backdrop-blur-3xl shadow-2xl">
+                    <label className="block text-[10px] font-black text-white/40 mb-6 uppercase tracking-[0.3em] max-md:mb-3 max-md:tracking-wider group-hover/card:text-lime-400 transition-colors">Cognitive complexity Level</label>
+                    <div className="max-w-2xl mx-auto flex bg-black/40 p-2 rounded-[2rem] border border-white/5 backdrop-blur-3xl shadow-2xl max-md:grid max-md:grid-cols-2 max-md:gap-1.5 max-md:rounded-2xl">
                         {['Beginner', 'Intermediate', 'Advanced', 'Professional'].map(lvl => (
                             <button
                                 key={lvl}
@@ -61,8 +61,8 @@ const CourseStepOne: React.FC = () => {
                                     updateCourseData({ level: lvl });
                                     setIsCustomAudience(false);
                                 }}
-                                className={`flex-1 py-4 text-xs font-black rounded-2xl transition-all duration-500 uppercase tracking-widest ${courseData.level === lvl
-                                    ? 'bg-lime-500 text-black shadow-[0_0_30px_rgba(132,204,22,0.4)] scale-[1.05] z-10 font-black'
+                                className={`flex-1 py-4 text-xs font-black rounded-2xl transition-all duration-500 uppercase tracking-widest max-md:py-2.5 max-md:text-[10px] max-md:tracking-wide max-md:scale-100 ${courseData.level === lvl
+                                    ? 'bg-lime-500 text-black shadow-[0_0_30px_rgba(132,204,22,0.4)] scale-[1.05] max-md:scale-100 z-10 font-black'
                                     : 'text-white/20 hover:text-white/60 hover:bg-white/5'
                                     }`}
                                 type="button"
@@ -257,7 +257,7 @@ const CourseStepOne: React.FC = () => {
                     </div>
                     <div className="space-y-6">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">International/Regional Industry Standard</label>
+                            <label className="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider max-md:normal-case max-md:tracking-normal">International/Regional Industry Standard</label>
                             <div className="relative">
                                 <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
                                 <select
@@ -436,13 +436,13 @@ const CourseStepOne: React.FC = () => {
                     </div>
                 </motion.div>
 
-                <div className="mt-12 flex justify-start">
+                <div className="mt-12 flex justify-start max-md:mt-8">
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={goToNextStep}
                         disabled={isGeneratingDescription}
-                        className="flex items-center gap-2 bg-gradient-to-r from-lime-500 to-emerald-500 text-black px-8 py-3 rounded-xl font-black shadow-lg shadow-lime-500/20 hover:shadow-lime-500/40 transform hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-70 disabled:cursor-wait disabled:transform-none"
+                        className="flex items-center gap-2 bg-gradient-to-r from-lime-500 to-emerald-500 text-black px-8 py-3 rounded-xl font-black shadow-lg shadow-lime-500/20 hover:shadow-lime-500/40 transform hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-70 disabled:cursor-wait disabled:transform-none max-md:w-full max-md:justify-center"
                         type="button"
                     >
                         {isGeneratingDescription ? (
@@ -464,7 +464,7 @@ const CourseStepOne: React.FC = () => {
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="flex-1 xl:w-[38%] bg-gradient-to-br from-[#0D0D15] via-[#0A0A0E] to-[#050505] rounded-[2.5rem] p-6 sm:p-9 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group self-start sticky top-8"
+                className="flex-1 xl:w-[38%] bg-gradient-to-br from-[#0D0D15] via-[#0A0A0E] to-[#050505] rounded-[2.5rem] p-6 sm:p-9 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group self-start sticky top-8 max-md:rounded-2xl max-md:p-4 max-md:static"
             >
                 {/* Background glow lines */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-lime-500/5 rounded-full blur-[100px] -mr-48 -mt-48 transition-all duration-700 group-hover:bg-lime-500/10 pointer-events-none"></div>

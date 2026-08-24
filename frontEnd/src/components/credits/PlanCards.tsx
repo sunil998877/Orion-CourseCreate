@@ -65,7 +65,7 @@ const PlanCards: React.FC<PlanCardsProps> = ({ onSelectPlan }) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-white">Choose Your Plan</h2>
+        <h2 className="text-2xl font-bold text-white max-md:text-xl">Choose Your Plan</h2>
         <p className="text-sm text-white/40">
           Select a monthly subscription plan that suits your course creation demands.
         </p>

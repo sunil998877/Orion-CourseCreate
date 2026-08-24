@@ -27,7 +27,7 @@ const CreditsTracker: React.FC = () => {
   };
 
   return (
-    <div ref={containerRef} className="relative mt-auto border-t border-white/10 p-3">
+    <div ref={containerRef} className="relative mt-auto border-t border-white/10 p-3 max-md:p-2">
       {popoverOpen && (
         <CreditsPopover
           credits={credits}

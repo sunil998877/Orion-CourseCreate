@@ -114,17 +114,17 @@ const AnalyticsPage: React.FC = () => {
                   <Activity className="w-3 h-3 mr-2" />
                   Live Dashboard
                 </div>
-                <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight">
+                <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight max-md:text-2xl">
                   Analytics Overview
                 </h1>
-                <p className="text-lg text-gray-400 max-w-xl leading-relaxed">
+                <p className="text-lg text-gray-400 max-w-xl leading-relaxed max-md:text-sm">
                   Monitor your implementation metrics, engagement rates, and growth trajectory in real-time.
                 </p>
 
                 {/* ── Orion's Integrated Insight Card ── */}
-                <div className="mt-8 relative group/insight max-w-lg">
+                <div className="mt-8 relative group/insight max-w-lg max-md:mt-4 max-md:text-left">
                   <div className="absolute -inset-2 bg-lime-500/10 blur-xl rounded-2xl opacity-0 group-hover/insight:opacity-100 transition-opacity duration-700" />
-                  <div className="relative flex items-start gap-4 p-4 rounded-2xl bg-[#0F0F0F]/60 border border-white/10 backdrop-blur-xl shadow-xl transition-all duration-500 group-hover/insight:border-lime-500/30">
+                  <div className="relative flex items-start gap-4 p-4 rounded-2xl bg-[#0F0F0F]/60 border border-white/10 backdrop-blur-xl shadow-xl transition-all duration-500 group-hover/insight:border-lime-500/30 max-md:gap-3 max-md:p-3">
                     <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-lime-400 to-emerald-500 p-[1px] shadow-[0_0_15px_rgba(132,204,22,0.2)]">
                       <div className="w-full h-full rounded-xl bg-[#0A0A0A] flex items-center justify-center">
                         <Sparkles className="w-5 h-5 text-lime-400" />
@@ -147,12 +147,12 @@ const AnalyticsPage: React.FC = () => {
               </div>
 
               {/* Right: Controls & Character */}
-              <div className="flex items-center gap-8 md:gap-12 relative max-md:w-full max-md:justify-center">
+              <div className="flex items-center gap-8 md:gap-12 relative max-md:w-full max-md:flex-col max-md:gap-4">
                 {/* Date Range Picker */}
                 <div className="relative z-20">
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-5 py-3 text-sm font-medium text-white hover:bg-white/5 hover:border-lime-500/30 hover:shadow-[0_0_15px_rgba(132,204,22,0.1)] transition-all duration-300 group/btn"
+                    className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-5 py-3 text-sm font-medium text-white hover:bg-white/5 hover:border-lime-500/30 hover:shadow-[0_0_15px_rgba(132,204,22,0.1)] transition-all duration-300 group/btn max-md:w-full max-md:justify-between"
                   >
                     <div className="p-1.5 rounded-lg bg-white/5 group-hover/btn:bg-lime-500/20 transition-colors">
                       <Clock className="w-4 h-4 text-gray-300 group-hover/btn:text-lime-400" />
