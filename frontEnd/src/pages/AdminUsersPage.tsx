@@ -211,7 +211,7 @@ export default function AdminUsersPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 max-md:flex-wrap">
           {["ALL", "Free", "Pro", "Team"].map((plan) => (
             <button
               key={plan}
@@ -394,7 +394,7 @@ export default function AdminUsersPage() {
           <div className="relative flex flex-col w-full max-w-4xl max-h-[92vh] rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden dark:border-white/10 dark:bg-[#0b1220] dark:text-white">
 
 
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]">
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] max-md:flex-col max-md:items-start max-md:gap-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-500/10 text-lg font-black text-lime-700 dark:bg-lime-400/10 dark:text-lime-400 border border-lime-500/30">
                   {userDetails?.user?.username ? userDetails.user.username.charAt(0).toUpperCase() : "U"}
@@ -501,7 +501,7 @@ export default function AdminUsersPage() {
             </div>
 
 
-            <div className="flex items-center gap-2 border-b border-slate-200 px-6 pt-3 dark:border-white/10">
+            <div className="flex items-center gap-2 border-b border-slate-200 px-6 pt-3 dark:border-white/10 overflow-x-auto max-md:px-3">
               <button
                 type="button"
                 onClick={() => setActiveTab("courses")}
@@ -980,7 +980,7 @@ export default function AdminUsersPage() {
             </div>
 
 
-            <div className="flex items-center justify-between border-t border-slate-200 px-6 py-4 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]">
+            <div className="flex items-center justify-between border-t border-slate-200 px-6 py-4 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] max-md:flex-col max-md:items-stretch max-md:gap-3">
               <div className="text-xs text-slate-400">
                 User MongoDB ID: <span className="font-mono text-slate-600 dark:text-white/60">{userDetails?.user?.id || activeUserId}</span>
               </div>

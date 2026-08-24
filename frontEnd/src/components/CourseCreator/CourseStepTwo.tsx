@@ -44,7 +44,7 @@ const CourseStepTwo: React.FC = () => {
                   exit="exit"
                   className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px]"
                 >
-                  <div className="flex-1 xl:w-[55%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group space-y-8">
+                  <div className="flex-1 xl:w-[55%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group space-y-8 max-md:rounded-2xl max-md:p-4">
                     {/* Experience Level Removed from here */}
 
                     <div>
@@ -272,7 +272,7 @@ const CourseStepTwo: React.FC = () => {
                     </div>
 
                     <div className="relative z-10">
-                      <div className="mb-6 pr-48 text-left min-h-[140px]">
+                      <div className="mb-6 pr-48 text-left min-h-[140px] max-md:pr-0 max-md:min-h-0">
                         <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight flex items-center gap-2">
                           Welcome to the second step <Sparkles className="text-lime-400 w-6 h-6 animate-pulse" />
                         </h3>

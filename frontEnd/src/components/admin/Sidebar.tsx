@@ -47,8 +47,8 @@ const menuItems: MenuItem[] = [
 
 export default function Sidebar() {
   const location = useLocation();
-  const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  const isCollapsed = state === "collapsed" && !isMobile;
 
   const isActive = (href: string) => {
     if (href === "/admin") return location.pathname === "/admin";
@@ -100,6 +100,7 @@ export default function Sidebar() {
             const linkContent = (
               <Link
                 to={item.href}
+                onClick={() => setOpenMobile(false)}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                   isCollapsed && "mx-auto h-11 w-11 justify-center rounded-xl px-0",

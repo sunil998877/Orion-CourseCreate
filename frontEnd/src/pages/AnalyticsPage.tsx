@@ -147,7 +147,7 @@ const AnalyticsPage: React.FC = () => {
               </div>
 
               {/* Right: Controls & Character */}
-              <div className="flex items-center gap-8 md:gap-12 relative">
+              <div className="flex items-center gap-8 md:gap-12 relative max-md:w-full max-md:justify-center">
                 {/* Date Range Picker */}
                 <div className="relative z-20">
                   <button
@@ -184,7 +184,7 @@ const AnalyticsPage: React.FC = () => {
                 </div>
 
                 {/* Ultra-High-Fidelity AI Hologram System */}
-                <div className="relative w-56 h-72 md:w-64 md:h-80 flex items-end justify-center pointer-events-auto select-none perspective-[1200px] group/holo">
+                <div className="relative w-56 h-72 md:w-64 md:h-80 flex items-end justify-center pointer-events-auto select-none perspective-[1200px] group/holo max-md:hidden">
 
                   {/* 1. Volumetric Projector Beams (Light Pillars) */}
                   <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-4/5 h-full bg-gradient-to-t from-lime-500/20 via-lime-500/5 to-transparent blur-2xl opacity-50 group-hover/holo:opacity-80 transition-opacity duration-700 pointer-events-none mix-blend-screen" />
@@ -307,7 +307,7 @@ const AnalyticsPage: React.FC = () => {
               <h2 className="text-xl font-bold text-white tracking-wide">Activity Visualization</h2>
             </div>
 
-            <div className="relative rounded-[2rem] bg-gray-900/40 border border-white/5 backdrop-blur-xl p-8 shadow-2xl h-[500px] hover:border-white/10 transition-colors duration-700">
+            <div className="relative rounded-[2rem] bg-gray-900/40 border border-white/5 backdrop-blur-xl p-8 shadow-2xl h-[500px] hover:border-white/10 transition-colors duration-700 max-md:h-[280px] max-md:rounded-2xl max-md:p-3">
               {/* Subtle Chart Glow */}
               <div className="absolute inset-x-20 bottom-0 h-64 bg-lime-500/5 blur-[100px] rounded-full pointer-events-none" />
 

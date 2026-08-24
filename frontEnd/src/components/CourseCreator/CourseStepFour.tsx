@@ -39,7 +39,7 @@ const CourseStepFour: React.FC = () => {
             className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] h-full"
         >
             {/* Left Side: Form Content */}
-            <div className="flex-1 xl:w-[66%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group flex flex-col h-full">
+            <div className="flex-1 xl:w-[66%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group flex flex-col h-full max-md:rounded-2xl max-md:p-4">
                 {!hasBlueprint && !isBlueprinting ? (
                     <div className="flex-1 flex flex-col h-full">
                         <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
@@ -222,7 +222,7 @@ const CourseStepFour: React.FC = () => {
                 <div className="relative z-10 flex flex-col h-full max-h-[80vh]">
                     {!hasBlueprint ? (
                         <>
-                            <div className="mb-6 pr-48 text-left min-h-[140px]">
+                            <div className="mb-6 pr-48 text-left min-h-[140px] max-md:pr-0 max-md:min-h-0">
                                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight">
                                     Design the Blueprint <Construction className="inline-block w-5 h-5 ml-1 text-lime-400" />
                                 </h3>
@@ -278,7 +278,7 @@ const CourseStepFour: React.FC = () => {
                         </>
                     ) : (
                         <>
-                            <div className="mb-6 pr-48 text-left min-h-[140px]">
+                            <div className="mb-6 pr-48 text-left min-h-[140px] max-md:pr-0 max-md:min-h-0">
                                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight">
                                     Curriculum Blueprint <Rocket className="inline-block w-5 h-5 ml-1 text-lime-400" />
                                 </h3>

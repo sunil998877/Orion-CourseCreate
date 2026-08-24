@@ -109,7 +109,7 @@ export default function Nav() {
         <div className="hidden h-5 w-[1px] bg-slate-200 dark:bg-white/10 md:block" />
 
       
-        <nav className="hidden items-center gap-1 sm:flex md:gap-2">
+        <nav className="hidden items-center gap-1 sm:flex md:gap-2 max-md:hidden">
           {quickNavItems.map((item) => {
             const active = isActive(item.href);
             return (
@@ -133,7 +133,7 @@ export default function Nav() {
       
       <div className="flex items-center gap-3">
         
-        <div className="relative flex items-center">
+        <div className="relative flex items-center max-md:hidden">
           <Search className="pointer-events-none absolute left-3 h-4 w-4 text-slate-400 dark:text-white/40" />
           <input
             ref={searchInputRef}
@@ -155,14 +155,14 @@ export default function Nav() {
           aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
           aria-pressed={isDark}
           title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          className="flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-2.5 text-slate-700 transition-colors hover:border-lime-500/40 hover:bg-lime-500/10 hover:text-lime-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-lime-400/40 dark:hover:bg-lime-400/10 dark:hover:text-lime-400 cursor-pointer"
+          className="flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-2.5 text-slate-700 transition-colors hover:border-lime-500/40 hover:bg-lime-500/10 hover:text-lime-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-lime-400/40 dark:hover:bg-lime-400/10 dark:hover:text-lime-400 cursor-pointer max-md:h-9 max-md:w-9 max-md:justify-center max-md:px-0"
         >
           {isDark ? (
             <Sun className="h-4 w-4 text-amber-400" />
           ) : (
             <Moon className="h-4 w-4 text-slate-700" />
           )}
-          <span className="hidden text-[11px] font-semibold sm:inline">{isDark ? "Light" : "Dark"}</span>
+          <span className="hidden text-[11px] font-semibold sm:inline max-md:hidden">{isDark ? "Light" : "Dark"}</span>
         </button>
 
         
@@ -170,7 +170,7 @@ export default function Nav() {
           type="button"
           onClick={() => navigate("/admin/settings")}
           title="Settings"
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-700 transition-colors hover:border-lime-500/40 hover:bg-lime-500/10 hover:text-lime-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-lime-400/40 dark:hover:bg-lime-400/10 dark:hover:text-lime-400 cursor-pointer"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-700 transition-colors hover:border-lime-500/40 hover:bg-lime-500/10 hover:text-lime-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-lime-400/40 dark:hover:bg-lime-400/10 dark:hover:text-lime-400 cursor-pointer max-md:hidden"
         >
           <Settings className="h-4 w-4 transition-transform duration-200 hover:rotate-45" />
         </button>

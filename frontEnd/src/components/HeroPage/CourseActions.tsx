@@ -2,7 +2,7 @@ import React from 'react';
 import { BookOpen, BookText, Headphones, Loader2, Sparkles } from 'lucide-react';
 import type { Course } from '../../types/Course.types';
 export const CourseActions: React.FC<any> = ({ course, isGeneratingEbook, isGeneratingAudio, isGeneratingPodcast, showTranscript, showAudioPlayer, showPodcastTranscript, showPodcastPlayer, onGenerateEbook, onDownloadEbook, onGenerateAudio, onGeneratePodcast, onToggleTranscript, onToggleAudio, onTogglePodcastTranscript, onTogglePodcast }) =>
-<div className="flex flex-wrap items-center justify-end gap-3 max-md:justify-start">
+<div className="flex flex-wrap items-center justify-end gap-3 max-md:justify-stretch max-md:[&>button]:w-full max-md:[&>button]:justify-center">
   {course.ebookUrl ?
   <button onClick={onDownloadEbook} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold border border-emerald-400/30 text-emerald-300 hover:text-white hover:bg-emerald-500/20">
     <BookText className="w-5 h-5" />

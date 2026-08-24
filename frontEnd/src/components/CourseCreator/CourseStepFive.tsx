@@ -63,10 +63,9 @@ const CourseStepFive: React.FC = () => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] h-full"
+            className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] h-full max-md:min-h-0"
         >
-            {/* Left Side: Form Content */}
-            <div className="flex-1 xl:w-[55%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group flex flex-col h-full">
+            <div className="flex-1 xl:w-[55%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group flex flex-col h-full max-md:rounded-2xl max-md:p-4">
                 <div className="grid lg:grid-cols-3 gap-8 mb-10 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar flex-1">
                     <div className="lg:col-span-1 space-y-6">
                         <div className="bg-gray-800/40 p-6 rounded-3xl border border-gray-800">
@@ -137,7 +136,7 @@ const CourseStepFive: React.FC = () => {
                         ))}
                     </div>
                 </div>
-                <div className="mt-auto pt-6 border-t border-gray-800 flex justify-between items-center">
+                <div className="mt-auto pt-6 border-t border-gray-800 flex justify-between items-center max-md:flex-col max-md:gap-3 max-md:items-stretch">
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -175,7 +174,7 @@ const CourseStepFive: React.FC = () => {
                 </div>
 
                 <div className="relative z-10 flex flex-col h-full max-h-[80vh]">
-                    <div className="mb-6 pr-48 text-left min-h-[140px]">
+                    <div className="mb-6 pr-48 text-left min-h-[140px] max-md:pr-0 max-md:min-h-0">
                         <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight">
                             Final Review & Launch <Rocket className="inline-block w-5 h-5 ml-1 text-lime-400" />
                         </h3>

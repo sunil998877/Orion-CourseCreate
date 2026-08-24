@@ -373,7 +373,7 @@ const ModuleGen = () => {
                     <div key={mod.id} className="group relative bg-[#111827]/30 border border-white/5 rounded-3xl transition-all duration-500 hover:border-lime-500/20 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] overflow-hidden backdrop-blur-xl">
                         <div className="absolute inset-0 bg-gradient-to-br from-lime-500/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                        <div className="p-8 relative z-10">
+                        <div className="p-8 relative z-10 max-md:p-4">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-6">
                                 <div className="flex items-center space-x-5">
                                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg bg-gradient-to-br from-lime-400/20 to-emerald-600/20 border border-lime-500/20 group-hover:scale-105 transition-transform duration-500">

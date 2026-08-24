@@ -48,7 +48,7 @@ const CourseStepOne: React.FC = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="flex-1 xl:w-[65%] bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 md:p-14 shadow-2xl relative overflow-hidden group/card shadow-[0_32px_100px_-20px_rgba(0,0,0,0.8)]"
+                className="flex-1 xl:w-[65%] bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 md:p-14 shadow-2xl relative overflow-hidden group/card shadow-[0_32px_100px_-20px_rgba(0,0,0,0.8)] max-md:rounded-2xl max-md:p-4"
             >
                 <div className="absolute inset-0 bg-gradient-to-br from-lime-500/[0.02] to-transparent pointer-events-none" />
                 <motion.div variants={itemVariants} className="mb-12 text-center relative z-10">
@@ -474,7 +474,7 @@ const CourseStepOne: React.FC = () => {
                 </div>
 
                 <div className="relative z-10">
-                    <div className="mb-6 pr-48 text-left min-h-[140px]">
+                    <div className="mb-6 pr-48 text-left min-h-[140px] max-md:pr-0 max-md:min-h-0">
                         <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight flex items-center gap-2">
                             Hey! Welcome to the first step <Sparkles className="text-lime-400 w-6 h-6 animate-pulse" />
                         </h3>

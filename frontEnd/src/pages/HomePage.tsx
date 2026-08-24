@@ -111,7 +111,7 @@ const HomePage: React.FC = () => {
             </div>
 
             <div className="shrink-0 w-full md:w-auto flex justify-center md:justify-end">
-              <div className="relative w-[300px] md:w-[430px] h-[370px] md:h-[445px] flex items-end justify-center perspective-[1200px] group/scene">
+              <div className="relative w-[300px] md:w-[430px] h-[370px] md:h-[445px] flex items-end justify-center perspective-[1200px] group/scene max-md:w-[220px] max-md:h-[260px]">
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-full bg-gradient-to-t from-lime-500/10 via-emerald-500/5 to-transparent blur-3xl opacity-60 pointer-events-none mix-blend-screen" />
                 <div
                   className="absolute top-10 left-6 right-6 bottom-16 bg-gray-900/60 backdrop-blur-md border border-white/10 rounded-2xl -z-10 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.5)] flex flex-col gap-4 p-6 transition-all duration-700 ease-out transform-gpu group-hover/scene:rotate-y-[-5deg] group-hover/scene:rotate-x-[5deg] group-hover/scene:translate-x-2"

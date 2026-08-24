@@ -218,7 +218,7 @@ export const HeroPage: React.FC = () => {
                     onOpenPublisher={() => setShowPublisherModal(true)}
                   />
                   <section className="mt-16">
-                    <div className="bg-black/50 border border-white/10 rounded-2xl p-6 shadow-lg ring-1 ring-lime-400/10">
+                    <div className="bg-black/50 border border-white/10 rounded-2xl p-6 shadow-lg ring-1 ring-lime-400/10 max-md:p-3">
                       <ModuleGen />
                     </div>
                   </section>

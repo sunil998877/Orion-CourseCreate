@@ -100,22 +100,35 @@ export const Sidebar = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & { collapsible?: "icon" | "offcanvas" }
 >(({ className, children, collapsible = "icon", ...props }, ref) => {
-  const { state } = useSidebar();
+  const { state, openMobile, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   return (
-    <aside
-      ref={ref}
-      data-collapsible={isCollapsed ? collapsible : undefined}
-      className={cn(
-        "group relative z-20 flex h-full shrink-0 flex-col overflow-hidden border-r border-[var(--admin-border)] bg-[var(--admin-sidebar)] transition-all duration-300",
-        isCollapsed ? "w-16" : "w-64",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </aside>
+    <>
+      {openMobile ? (
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setOpenMobile(false)}
+        />
+      ) : null}
+      <aside
+        ref={ref}
+        data-collapsible={isCollapsed ? collapsible : undefined}
+        className={cn(
+          "group relative z-20 flex h-full shrink-0 flex-col overflow-hidden border-r border-[var(--admin-border)] bg-[var(--admin-sidebar)] transition-all duration-300",
+          isCollapsed ? "w-16" : "w-64",
+          "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-64",
+          openMobile ? "max-md:translate-x-0" : "max-md:-translate-x-full",
+          "md:relative md:translate-x-0",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </aside>
+    </>
   );
 });
 Sidebar.displayName = "Sidebar";
