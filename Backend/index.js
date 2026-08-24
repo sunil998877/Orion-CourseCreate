@@ -50,7 +50,8 @@ app.use(
         /^https?:\/\/localhost(:\d+)?$/.test(origin) ||
         /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin) ||
         origin.endsWith('.vercel.app') ||
-        origin.endsWith('.vercel.dev');
+        origin.endsWith('.vercel.dev') ||
+        origin.endsWith('.onrender.com');
 
       if (isAllowed) {
         return callback(null, true);

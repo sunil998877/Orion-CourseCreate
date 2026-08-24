@@ -1,0 +1,71 @@
+services:
+  - type: web
+    name: orion-api
+    runtime: node
+    plan: free
+    rootDir: Backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: JWT_SECRET
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GAMMA_API_KEY
+        sync: false
+      - key: ELEVEN_API_KEY
+        sync: false
+      - key: VOICE_ID
+        sync: false
+      - key: OPENAI_EBOOK_ASSISTANT_ID
+        sync: false
+      - key: PODCAST_HOST_A_VOICE_ID
+        sync: false
+      - key: PODCAST_HOST_B_VOICE_ID
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+
+  - type: web
+    name: orion-web
+    runtime: static
+    rootDir: frontEnd
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: VITE_API_BASE_URL
+        fromService:
+          name: orion-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
