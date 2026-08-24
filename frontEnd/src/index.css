@@ -33,11 +33,6 @@ body {
 
 html[data-theme="dark"] body {
   background-color: #09090b;
-  background-image: url('/src/assests/background2.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
 }
 
 html[data-theme="light"] #admin-shell {
