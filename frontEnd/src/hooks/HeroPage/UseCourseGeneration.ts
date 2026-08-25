@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { toast } from 'react-toastify';
 import { API_BASE } from '../../utils/api';
-import { handleCreditApiFailure } from '../../utils/creditErrors';
+import { handleCreditApiFailure, handleCreditThrowable } from '../../utils/creditErrors';
 import type { Course } from '../../types/Course.types';
 
 type Args = {
@@ -47,7 +47,11 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
         setIsGeneratingAudio(false); toast.success('Audio book generated successfully!');
       }, 800);
     } catch (err: any) {
-      console.error('Audio generation error:', err); toast.error(`Generation failed: ${err.message || 'Something went wrong'}`); setIsGeneratingAudio(false);
+      console.error('Audio generation error:', err);
+      if (!handleCreditThrowable(err)) {
+        toast.error(`Generation failed: ${err.message || 'Something went wrong'}`);
+      }
+      setIsGeneratingAudio(false);
     }
   };
 
@@ -74,7 +78,11 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
         setIsGeneratingPodcast(false); toast.success('Podcast generated successfully!');
       }, 800);
     } catch (err: any) {
-      console.error('Podcast generation error:', err); toast.error(`Generation failed: ${err.message || 'Something went wrong'}`); setIsGeneratingPodcast(false);
+      console.error('Podcast generation error:', err);
+      if (!handleCreditThrowable(err)) {
+        toast.error(`Generation failed: ${err.message || 'Something went wrong'}`);
+      }
+      setIsGeneratingPodcast(false);
     }
   };
 
@@ -97,7 +105,10 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
       updateCourse(courseId, { ebookUrl: data.ebookUrl, ebookStatus: data.ebookStatus || 'completed' });
       toast.success('Ebook generated successfully!');
     } catch (err: any) {
-      console.error('Ebook generation error:', err); toast.error(`Ebook generation failed: ${err.message || 'Unknown error'}`);
+      console.error('Ebook generation error:', err);
+      if (!handleCreditThrowable(err)) {
+        toast.error(`Ebook generation failed: ${err.message || 'Unknown error'}`);
+      }
     } finally { setIsGeneratingEbook(false); setShowPublisherModal(false); setPublisherName(''); }
   };
 

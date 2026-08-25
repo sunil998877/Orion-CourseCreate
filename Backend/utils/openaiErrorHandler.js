@@ -26,10 +26,14 @@ export function handleOpenAIError(err, res, label = 'openai') {
 
   // ── Rate limit / quota exceeded ───────────────────────────────────────────
   if (status === 429 || code === 'rate_limit_exceeded' || code === 'insufficient_quota') {
-    return res.status(503).json({
-      error: 'AI service is temporarily unavailable.',
-      details: 'The AI usage limit has been reached. Please try again later.',
-      code: 'ai_rate_limit',
+    const isQuota = code === 'insufficient_quota' || /quota|billing/i.test(String(err.message || ''));
+    return res.status(isQuota ? 402 : 503).json({
+      error: isQuota ? 'OpenAI credits are exhausted.' : 'AI service is temporarily unavailable.',
+      details: isQuota
+        ? 'The OpenAI API key is out of quota. Recharge or upgrade the OpenAI plan, then retry.'
+        : 'The AI usage limit has been reached. Please try again later.',
+      code: isQuota ? 'openai_credits_exhausted' : 'ai_rate_limit',
+      message: err.message,
     });
   }
 

@@ -10,7 +10,7 @@ import { hasAudience, formatAudience } from '../utils/courseHelpers';
 import { INDUSTRIES, AUDIENCE_OPTIONS } from '../utils/courseHelpers';
 import type { PreviewLesson, PreviewModule } from '../utils/courseTypes';
 import { isStepComplete } from '../utils/courseValidation'
-import { handleCreditApiFailure } from '../utils/creditErrors';
+import { handleCreditApiFailure, handleCreditThrowable } from '../utils/creditErrors';
 
 export const CourseCreatorContext = createContext<any>(null);
 
@@ -610,7 +610,10 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
                     setRefinePromptOpen(false);
                 }
             } else {
-                toast.error('Could not refine description.');
+                const errData = await resp.json().catch(() => ({}));
+                if (!handleCreditApiFailure(resp.status, errData)) {
+                    toast.error('Could not refine description.');
+                }
             }
         } catch {
             toast.error('Error connecting to the refinement service.');
@@ -726,7 +729,9 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
             setHasBlueprint(true);
             // draft ready — UI updates visually, no toast needed
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Generation failed');
+            if (!handleCreditThrowable(err)) {
+                toast.error(err instanceof Error ? err.message : 'Generation failed');
+            }
         } finally {
             setIsBlueprinting(false);
         }
@@ -817,7 +822,9 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
             setTimeout(() => setHighlightedModuleId(moduleId), 50);
             // module regenerated — UI already reflects the update
         } catch (err) {
-            toast.error('Regeneration failed');
+            if (!handleCreditThrowable(err)) {
+                toast.error('Regeneration failed');
+            }
         } finally {
             setIsPreviewLoading(false);
             setRefineProgress(0);
@@ -932,7 +939,9 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
             }
         } catch (error: any) {
             console.error('Batch slide generation error:', error);
-            toast.error(error.message || "An unexpected error occurred.");
+            if (!handleCreditThrowable(error)) {
+                toast.error(error.message || "An unexpected error occurred.");
+            }
         } finally {
             setIsBatchGenerating(false);
             setBatchGeneratingModuleId(null);
@@ -1038,7 +1047,9 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
 
             return "I've successfully refined the module architecture based on your directives.";
         } catch (err) {
-            toast.error('Refinement failed');
+            if (!handleCreditThrowable(err)) {
+                toast.error('Refinement failed');
+            }
             return "Something went wrong during the refinement process.";
         } finally {
             clearInterval(progressInterval);
@@ -1317,7 +1328,9 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
             // download triggered — browser handles the file, no toast needed
         } catch (e: any) {
             console.error('Download error:', e);
-            toast.error(e.message || 'Failed to download PPTX');
+            if (!handleCreditThrowable(e)) {
+                toast.error(e.message || 'Failed to download PPTX');
+            }
         } finally {
             setDownloadingModuleId(null);
         }
@@ -1386,7 +1399,9 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
             } else {
             }
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Slide generation failed');
+            if (!handleCreditThrowable(err)) {
+                toast.error(err instanceof Error ? err.message : 'Slide generation failed');
+            }
         } finally {
             setGeneratingSlidesModuleId(null);
         }

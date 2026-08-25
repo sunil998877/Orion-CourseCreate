@@ -193,6 +193,11 @@ Rules:
     } catch (saveErr) {
       console.error('Failed to set podcast status to failed:', saveErr);
     }
-    res.status(500).json({ message: error.message || 'Internal server error' });
+    const msg = error.message || 'Internal server error';
+    const isQuota = /exceeds your quota|credits remaining|insufficient.?quota/i.test(msg);
+    res.status(isQuota ? 402 : 500).json({
+      message: msg,
+      code: isQuota ? 'elevenlabs_credits_exhausted' : undefined,
+    });
   }
 };

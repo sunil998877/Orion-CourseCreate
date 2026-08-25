@@ -95,19 +95,19 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
               </div>
 
               {/* Module Metadata */}
-              <div className="flex items-center justify-between border-b border-white/5 pb-8">
+              <div className="flex items-center justify-between border-b border-white/5 pb-8 max-md:flex-col max-md:items-start max-md:gap-4 max-md:pb-4">
                 <div>
                   <div className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Module Overview</div>
-                  <h1 className="text-3xl font-black text-white">
+                  <h1 className="text-3xl font-black text-white max-md:text-xl">
                     {cleanTitle(moduleData.Content?.Title || moduleData.Module) || 'Untitled Module'}
                   </h1>
                 </div>
-                <div className="flex gap-4">
-                  <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl text-center">
+                <div className="flex gap-4 max-md:w-full max-md:gap-2">
+                  <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl text-center max-md:flex-1 max-md:px-3">
                     <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Session Credits</div>
                     <div className="text-xl font-black text-lime-400">{credit || 0}</div>
                   </div>
-                  <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl text-center">
+                  <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl text-center max-md:flex-1 max-md:px-3">
                     <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Time Investment</div>
                     <div className="text-xl font-black text-lime-400">{duration?.split(' ')[0] || 'N/A'}<span className="text-xs ml-1 text-gray-500 uppercase">{duration?.split(' ')[1]}</span></div>
                   </div>
@@ -178,7 +178,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
                   </div>
                   <div className="bg-white/[0.02] border border-white/5 rounded-3xl overflow-hidden">
                     {moduleData.Content.TeachingContent?.map((item: any, i: number) => (
-                      <div key={i} className="flex justify-between items-center px-8 py-4 border-b border-white/5 last:border-0 hover:bg-white/[0.03] transition-colors">
+                      <div key={i} className="flex justify-between items-center px-8 py-4 border-b border-white/5 last:border-0 hover:bg-white/[0.03] transition-colors max-md:flex-col max-md:items-start max-md:gap-2 max-md:px-4">
                         <span className="text-gray-300 font-bold">{item.Topics}</span>
                         <div className="flex items-center gap-2">
                            <div className="w-2 h-2 rounded-full bg-lime-500/40" />
@@ -328,7 +328,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
                           }
                         }}
                         disabled={isRegenerating || isThinking}
-                        className="group relative flex items-center gap-4 bg-white text-black px-12 py-5 rounded-2xl font-black text-xl transition-all shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_rgba(163,230,53,0.2)] hover:bg-lime-400 hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:cursor-wait overflow-hidden"
+                        className="group relative flex items-center gap-4 bg-white text-black px-12 py-5 rounded-2xl font-black text-xl transition-all shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_rgba(163,230,53,0.2)] hover:bg-lime-400 hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:cursor-wait overflow-hidden max-md:w-full max-md:justify-center max-md:px-6 max-md:py-4 max-md:text-base"
                       >
                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
                         <div className="relative z-10 flex items-center gap-4">

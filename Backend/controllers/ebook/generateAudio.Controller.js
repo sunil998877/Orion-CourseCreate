@@ -165,6 +165,11 @@ Your job:
     res.json({ audioUrl, audioTranscript: course.audioTranscript });
   } catch (error) {
     console.error('Error generating audio:', error);
-    res.status(500).json({ message: error.message || 'Internal server error' });
+    const msg = error.message || 'Internal server error';
+    const isQuota = /exceeds your quota|credits remaining|insufficient.?quota/i.test(msg);
+    return res.status(isQuota ? 402 : 500).json({
+      message: msg,
+      code: isQuota ? 'elevenlabs_credits_exhausted' : undefined,
+    });
   }
 };
