@@ -4,7 +4,7 @@ import { GraduationCap, Trash2 } from 'lucide-react';
 import type { Course } from '../../types/Course.types';
 
 export const CourseCard: React.FC<{ course: Course; index: number; onClick: () => void; onDelete: () => void; variants: any }> = ({ course, index, onClick, onDelete, variants }) => (
-<motion.div key={index} variants={variants} onClick={onClick} className="group relative bg-[#111827]/40 border border-white/5 rounded-3xl p-8 hover:border-lime-500/30 transition-all duration-500 cursor-pointer overflow-hidden backdrop-blur-md hover:shadow-[0_0_50px_-12px_rgba(132,204,22,0.15)]">
+<motion.div key={index} variants={variants} onClick={onClick} className="group relative bg-[#111827]/40 border border-white/5 rounded-3xl p-8 max-md:p-5 max-md:rounded-2xl hover:border-lime-500/30 transition-all duration-500 cursor-pointer overflow-hidden backdrop-blur-md hover:shadow-[0_0_50px_-12px_rgba(132,204,22,0.15)]">
   <div className="absolute inset-0 bg-gradient-to-br from-lime-500/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
   <div className="relative z-10">
     <div className="flex justify-between items-start mb-6">
@@ -21,7 +21,7 @@ export const CourseCard: React.FC<{ course: Course; index: number; onClick: () =
         </button>
       </div>
     </div>
-    <h3 className="text-2xl font-bold text-white mb-3 tracking-tight group-hover:text-lime-400 transition-colors line-clamp-1">
+    <h3 className="text-2xl font-bold text-white mb-3 tracking-tight group-hover:text-lime-400 transition-colors line-clamp-1 max-md:text-xl">
       {course.title}
     </h3>
     <p className="text-white/40 text-sm mb-8 line-clamp-2 h-10 leading-relaxed font-medium">

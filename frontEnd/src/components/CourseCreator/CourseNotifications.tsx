@@ -28,7 +28,7 @@ const CourseNotifications: React.FC = () => {
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            className="absolute top-full right-0 mt-3 w-80 bg-[#0A0F1A]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100] ring-1 ring-white/5"
+                            className="absolute top-full right-0 mt-3 w-80 max-md:fixed max-md:left-3 max-md:right-3 max-md:w-auto max-md:top-16 bg-[#0A0F1A]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100] ring-1 ring-white/5"
                         >
                             <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
                                 <span className="text-xs font-bold text-white uppercase tracking-widest opacity-80">Notifications</span>

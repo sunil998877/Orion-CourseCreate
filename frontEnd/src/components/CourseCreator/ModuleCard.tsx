@@ -17,20 +17,20 @@ const ModuleCard: React.FC<{
                               <div
                                 key={mod.id}
                                 ref={(el) => (moduleRefs.current[mod.id] = el)}
-                                className={`bg-gray-900/40 backdrop-blur-md p-10 md:p-12 rounded-[2.5rem] border flex flex-col hover:border-lime-500/30 transition-all duration-300 group/card shadow-2xl hover:shadow-lime-500/10 ${highlightedModuleId === mod.id ? 'animate-blink-module' : 'border-gray-700/30'
+                                className={`bg-gray-900/40 backdrop-blur-md p-10 md:p-12 rounded-[2.5rem] border flex flex-col hover:border-lime-500/30 transition-all duration-300 group/card shadow-2xl hover:shadow-lime-500/10 max-md:rounded-2xl max-md:p-4 ${highlightedModuleId === mod.id ? 'animate-blink-module' : 'border-gray-700/30'
                                   }`}
                               >
                                 <div className="flex justify-between items-start mb-4">
-                                  <h4 className="font-black text-3xl text-white flex items-center gap-4">
-                                    <span className="px-5 h-12 rounded-2xl bg-lime-500/10 text-lime-500 flex items-center justify-center text-lg font-black ring-1 ring-lime-500/20 whitespace-nowrap">Module {mod.id}</span>
+                                  <h4 className="font-black text-3xl text-white flex items-center gap-4 max-md:flex-col max-md:items-start max-md:gap-2 max-md:text-lg">
+                                    <span className="px-5 h-12 rounded-2xl bg-lime-500/10 text-lime-500 flex items-center justify-center text-lg font-black ring-1 ring-lime-500/20 whitespace-nowrap max-md:h-9 max-md:px-3 max-md:text-sm">Module {mod.id}</span>
                                     {mod.title}
                                   </h4>
                                 </div>
-                                <div className="flex items-center gap-4 mb-8">
-                                  <div className="px-5 py-2 rounded-full bg-lime-500/10 border border-lime-500/20 text-xs font-black text-lime-400 uppercase tracking-widest flex items-center gap-2 shadow-sm">
+                                <div className="flex items-center gap-4 mb-8 max-md:flex-wrap max-md:gap-2 max-md:mb-4">
+                                  <div className="px-5 py-2 rounded-full bg-lime-500/10 border border-lime-500/20 text-xs font-black text-lime-400 uppercase tracking-widest flex items-center gap-2 shadow-sm max-md:px-3 max-md:py-1.5 max-md:text-[10px]">
                                     <Zap size={16} className="fill-lime-400" /> {moduleCredits[mod.id] || 0} Credits
                                   </div>
-                                  <div className="px-5 py-2 rounded-full bg-gray-800/50 border border-gray-700/30 text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                  <div className="px-5 py-2 rounded-full bg-gray-800/50 border border-gray-700/30 text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 max-md:px-3 max-md:py-1.5 max-md:text-[10px]">
                                     <Monitor size={16} /> {mod.lessons.length} LESSONS
                                   </div>
                                 </div>

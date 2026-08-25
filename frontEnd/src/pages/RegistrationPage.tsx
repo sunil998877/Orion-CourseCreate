@@ -219,14 +219,14 @@ function RegistrationPage() {
 
                   {/* Image Section */}
                   <div className="flex md:w-2/5 w-full items-center justify-center p-6">
-                    <img src={HeroImage} alt="Character" className="max-w-[300px] max-h-[300px] w-auto h-auto rounded-xl object-contain" />
+                    <img src={HeroImage} alt="Character" className="max-w-[300px] max-h-[300px] max-md:max-w-[160px] max-md:max-h-[160px] w-auto h-auto rounded-xl object-contain" />
                   </div>
 
                   {step === 'form' ? (
                     /* ============ REGISTRATION FORM ============ */
                     <form onSubmit={handleSubmit} className="space-y-5 p-6 md:w-3/5 w-full">
                       <div className="space-y-1">
-                        <h2 className="text-3xl font-bold text-white">Create Account</h2>
+                        <h2 className="text-3xl font-bold text-white max-md:text-2xl">Create Account</h2>
                         <p className="text-sm text-white/70">Start sharing your knowledge with the world.</p>
                       </div>
 

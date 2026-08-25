@@ -247,11 +247,11 @@ function App() {
               <div className="w-full">
                 <div className="mt-3 rounded-2xl bg-black shadow-2xl ring-1 ring-white/5 transition-transform duration-300 hover:shadow-2xl border border-white/5 flex flex-col md:flex-row">
                   <div className="flex md:w-2/5 w-full items-center justify-center p-6">
-                    <img src={HeroImage} alt="Avatar" className="max-w-[300px] max-h-[300px] md:max-w-[220px] md:max-h-[220px] w-auto h-auto rounded-xl object-contain" />
+                    <img src={HeroImage} alt="Avatar" className="max-w-[300px] max-h-[300px] md:max-w-[220px] md:max-h-[220px] max-md:max-w-[160px] max-md:max-h-[160px] w-auto h-auto rounded-xl object-contain" />
                   </div>
                   <form onSubmit={handleSubmit} className="space-y-5 p-6 md:w-3/5 w-full">
                     <div className="space-y-1">
-                      <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
+                      <h2 className="text-3xl font-bold text-white max-md:text-2xl">Welcome Back</h2>
                       <p className="text-sm text-white/70">Sign in to continue to your account.</p>
                     </div>
                     {errors.general && (

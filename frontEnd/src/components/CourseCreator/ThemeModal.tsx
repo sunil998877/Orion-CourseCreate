@@ -18,9 +18,9 @@ const ThemeModal: React.FC = () => {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
                 <div className="bg-[#12141a] border border-gray-800 w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
                     {/* Modal Header */}
-                    <div className="flex justify-between items-center p-6 border-b border-gray-800">
+                    <div className="flex justify-between items-center p-6 border-b border-gray-800 max-md:p-4 max-md:items-start max-md:gap-3">
                         <div>
-                            <h3 className="text-2xl font-bold text-white mb-1">
+                            <h3 className="text-2xl font-bold text-white mb-1 max-md:text-lg">
                                 {selectedModuleForTheme !== null ? `Choose Theme for Module ${selectedModuleForTheme}` : 'Choose Default Theme for Slides'}
                             </h3>
                             <p className="text-gray-400 text-sm">Select a visual style for your Orion generated presentation.</p>

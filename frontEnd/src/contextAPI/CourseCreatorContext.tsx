@@ -10,6 +10,7 @@ import { hasAudience, formatAudience } from '../utils/courseHelpers';
 import { INDUSTRIES, AUDIENCE_OPTIONS } from '../utils/courseHelpers';
 import type { PreviewLesson, PreviewModule } from '../utils/courseTypes';
 import { isStepComplete } from '../utils/courseValidation'
+import { handleCreditApiFailure } from '../utils/creditErrors';
 
 export const CourseCreatorContext = createContext<any>(null);
 
@@ -571,7 +572,10 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             } else {
-                toast.error('Could not generate description automatically.');
+                const errData = await resp.json().catch(() => ({}));
+                if (!handleCreditApiFailure(resp.status, errData)) {
+                    toast.error('Could not generate description automatically.');
+                }
             }
         } catch {
             toast.error('Could not generate description. Please fill it manually.');
@@ -675,6 +679,7 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
 
             if (!resp.ok) {
                 const errData = await resp.json().catch(() => ({}));
+                if (handleCreditApiFailure(resp.status, errData)) return;
                 throw new Error(errData.message || 'Module generation failed');
             }
 
@@ -774,6 +779,8 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
             });
 
             if (!resp.ok) {
+                const errData = await resp.json().catch(() => ({}));
+                if (handleCreditApiFailure(resp.status, errData)) return;
                 toast.error('Failed to regenerate module');
                 return;
             }
@@ -873,6 +880,7 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
         try {
             const newUrls: Record<number, string> = { ...orionUrlByModule };
             let completedCount = 0;
+            let creditBlocked = false;
 
             for (const mod of modulesToGenerate) {
                 setBatchGeneratingModuleId(mod.moduleNumber);
@@ -901,6 +909,10 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
                     } else {
                         const errData = await resp.json().catch(() => ({}));
                         console.error(`Module ${mod.moduleNumber} failed:`, errData);
+                        if (handleCreditApiFailure(resp.status, errData)) {
+                            creditBlocked = true;
+                            break;
+                        }
                     }
                 } catch (err) {
                     console.error(`Module ${mod.moduleNumber} error:`, err);
@@ -909,7 +921,9 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
                 setOrionUrlByModule({ ...newUrls });
             }
 
-            if (completedCount === modulesToGenerate.length) {
+            if (creditBlocked) {
+                // recharge / Gamma shortage popup already shown
+            } else if (completedCount === modulesToGenerate.length) {
                 toast.success("All module slides have been generated successfully!");
             } else if (completedCount > 0) {
                 toast.warn(`${completedCount}/${modulesToGenerate.length} slides generated. You can retry individual modules in the next step.`);
@@ -978,6 +992,10 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
             });
 
             if (!resp.ok) {
+                const errData = await resp.json().catch(() => ({}));
+                if (handleCreditApiFailure(resp.status, errData)) {
+                    return "I encountered an error while trying to refine the module.";
+                }
                 toast.error('Failed to refine module');
                 return "I encountered an error while trying to refine the module.";
             }
@@ -1281,6 +1299,7 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
             if (!resp.ok) {
                 toast.dismiss(toastId);
                 const err = await resp.json().catch(() => ({}));
+                if (handleCreditApiFailure(resp.status, err)) return;
                 throw new Error(err.message || 'Failed to download PPTX');
             }
 
@@ -1356,6 +1375,7 @@ export const CourseCreatorProvider: React.FC<{ children: React.ReactNode }> = ({
             });
             const data = await resp.json().catch(() => ({}));
             if (!resp.ok) {
+                if (handleCreditApiFailure(resp.status, data)) return;
                 toast.error(data.message || 'Slide generation failed');
                 return;
             }

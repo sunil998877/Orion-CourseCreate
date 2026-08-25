@@ -235,12 +235,12 @@ const CourseStepTwo: React.FC = () => {
                       </div>
                     )}
 
-                    <div className="mt-12 flex justify-between items-center">
+                    <div className="mt-12 flex justify-between items-center max-md:mt-8 max-md:gap-3">
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={goToPrevStep}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-gray-400 hover:text-white transition-all bg-white/5 hover:bg-white/10"
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-gray-400 hover:text-white transition-all bg-white/5 hover:bg-white/10 max-md:flex-1 max-md:justify-center max-md:px-3"
                         type="button"
                       >
                         <ChevronLeft size={20} /> Back
@@ -249,7 +249,7 @@ const CourseStepTwo: React.FC = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={goToNextStep}
-                        className="flex items-center gap-2 bg-gradient-to-r from-lime-500 to-emerald-500 text-black px-8 py-3 rounded-xl font-black shadow-lg shadow-lime-500/20 hover:shadow-lime-500/40 transform hover:-translate-y-0.5"
+                        className="flex items-center gap-2 bg-gradient-to-r from-lime-500 to-emerald-500 text-black px-8 py-3 rounded-xl font-black shadow-lg shadow-lime-500/20 hover:shadow-lime-500/40 transform hover:-translate-y-0.5 max-md:flex-1 max-md:justify-center max-md:px-3"
                         type="button"
                       >
                         Continue <ChevronRight size={20} strokeWidth={3} />

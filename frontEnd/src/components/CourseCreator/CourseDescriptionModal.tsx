@@ -33,11 +33,11 @@ const CourseDescriptionModal: React.FC = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="relative z-10 w-full max-w-3xl bg-[#0d0f1a] border border-white/10 rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden"
+              className="relative z-10 w-full max-w-3xl bg-[#0d0f1a] border border-white/10 rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden max-md:rounded-2xl max-h-[90vh] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-8 pt-7 pb-5 border-b border-white/5">
+              <div className="flex items-center justify-between px-8 pt-7 pb-5 border-b border-white/5 max-md:px-4 max-md:pt-5 max-md:pb-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-lime-500/10 border border-lime-500/20">
                     <Pencil className="w-4 h-4 text-lime-400" />
@@ -57,11 +57,11 @@ const CourseDescriptionModal: React.FC = () => {
               </div>
 
               {/* Body */}
-              <div className="px-8 py-6 space-y-4">
+              <div className="px-8 py-6 space-y-4 overflow-y-auto max-md:px-4 max-md:py-4">
                 <div className="relative">
                   <textarea
                     autoFocus
-                    className="w-full bg-gray-900/60 border border-gray-700 rounded-2xl p-5 min-h-[340px] text-white text-sm leading-relaxed focus:ring-2 focus:ring-lime-500 focus:border-lime-500/50 outline-none transition-all resize-none placeholder:text-gray-600"
+                    className="w-full bg-gray-900/60 border border-gray-700 rounded-2xl p-5 min-h-[340px] max-md:min-h-[200px] text-white text-sm leading-relaxed focus:ring-2 focus:ring-lime-500 focus:border-lime-500/50 outline-none transition-all resize-none placeholder:text-gray-600"
                     placeholder="Describe the primary learning outcomes, target skills, curriculum structure, and what makes this course unique... (Minimum 50 words required)"
                     value={courseData.description}
                     onChange={(e) => {
@@ -108,7 +108,7 @@ const CourseDescriptionModal: React.FC = () => {
               </div>
 
               
-              <div className="flex items-center justify-between px-8 py-5 border-t border-white/5 bg-white/[0.01]">
+              <div className="flex items-center justify-between px-8 py-5 border-t border-white/5 bg-white/[0.01] max-md:flex-col max-md:gap-3 max-md:px-4 max-md:py-4">
                 <button
                   type="button"
                   onClick={() => setRefinePromptOpen(!refinePromptOpen)}
@@ -117,7 +117,7 @@ const CourseDescriptionModal: React.FC = () => {
                   <Sparkles className="w-3.5 h-3.5" />
                   Refine with AI
                 </button>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 max-md:w-full max-md:[&>button]:flex-1">
                   <button
                     type="button"
                     onClick={() => setIsDescriptionModalOpen(false)}

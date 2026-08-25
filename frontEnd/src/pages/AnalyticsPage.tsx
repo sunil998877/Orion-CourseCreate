@@ -102,7 +102,7 @@ const AnalyticsPage: React.FC = () => {
         <div className="space-y-10 pb-20">
 
           {/* Futurstic Hero Header */}
-          <div className="relative rounded-[2.5rem] max-md:rounded-2xl bg-gray-900/40 border border-white/10 backdrop-blur-2xl p-8 md:p-12 max-md:p-5 overflow-hidden shadow-2xl group">
+          <div className="relative rounded-[2.5rem] max-md:rounded-2xl bg-gray-900/40 border border-white/10 backdrop-blur-2xl p-8 md:p-12 max-md:p-5 overflow-hidden max-md:overflow-visible shadow-2xl group">
             {/* Subtle Inner Glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-lime-500/10 via-transparent to-transparent opacity-30 group-hover:opacity-40 transition-opacity duration-700" />
             <div className="absolute -right-20 -top-20 w-96 h-96 bg-lime-500/10 rounded-full blur-[80px]" />
@@ -147,9 +147,9 @@ const AnalyticsPage: React.FC = () => {
               </div>
 
               {/* Right: Controls & Character */}
-              <div className="flex items-center gap-8 md:gap-12 relative max-md:w-full max-md:flex-col max-md:gap-4">
+              <div className="flex items-center gap-8 md:gap-12 relative max-md:w-full max-md:flex-col-reverse max-md:gap-2">
                 {/* Date Range Picker */}
-                <div className="relative z-20">
+                <div className="relative z-50 max-md:w-full">
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-5 py-3 text-sm font-medium text-white hover:bg-white/5 hover:border-lime-500/30 hover:shadow-[0_0_15px_rgba(132,204,22,0.1)] transition-all duration-300 group/btn max-md:w-full max-md:justify-between"
@@ -164,7 +164,7 @@ const AnalyticsPage: React.FC = () => {
                   {dropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
-                      <div className="absolute right-0 top-full mt-3 w-56 bg-[#0f1115] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden ring-1 ring-black/50 animate-in fade-in zoom-in-95 duration-200">
+                      <div className="absolute right-0 top-full mt-3 w-56 max-md:left-0 max-md:right-0 max-md:w-full max-md:top-auto max-md:bottom-full max-md:mt-0 max-md:mb-3 bg-[#0f1115] border border-white/10 rounded-xl shadow-2xl z-[60] overflow-hidden ring-1 ring-black/50 animate-in fade-in zoom-in-95 duration-200">
                         {rangeOptions.map(option => (
                           <button
                             key={option.value}
@@ -184,7 +184,7 @@ const AnalyticsPage: React.FC = () => {
                 </div>
 
                 {/* Ultra-High-Fidelity AI Hologram System */}
-                <div className="relative w-56 h-72 md:w-64 md:h-80 flex items-end justify-center pointer-events-auto select-none perspective-[1200px] group/holo max-md:hidden">
+                <div className="relative w-56 h-72 md:w-64 md:h-80 flex items-end justify-center pointer-events-auto select-none perspective-[1200px] group/holo max-md:w-36 max-md:h-48 max-md:mx-auto max-md:shrink-0">
 
                   {/* 1. Volumetric Projector Beams (Light Pillars) */}
                   <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-4/5 h-full bg-gradient-to-t from-lime-500/20 via-lime-500/5 to-transparent blur-2xl opacity-50 group-hover/holo:opacity-80 transition-opacity duration-700 pointer-events-none mix-blend-screen" />
@@ -241,7 +241,7 @@ const AnalyticsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="absolute -bottom-[5.5rem] left-0 right-0 h-24 transform scale-y-[-1] opacity-25 mask-image-[linear-gradient(to_top,black,transparent)] filter blur-sm">
+                  <div className="absolute -bottom-[5.5rem] left-0 right-0 h-24 transform scale-y-[-1] opacity-25 mask-image-[linear-gradient(to_top,black,transparent)] filter blur-sm max-md:hidden">
                     <img src={avtar3} alt="" className="h-full w-auto mx-auto object-contain object-bottom grayscale sepia" />
                   </div>
                 </div>

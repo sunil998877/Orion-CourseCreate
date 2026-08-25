@@ -36,7 +36,7 @@ const CourseStepFour: React.FC = () => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] h-full"
+            className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] h-full max-md:min-h-0"
         >
           
             <div className="flex-1 xl:w-[66%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group flex flex-col h-full max-md:rounded-2xl max-md:p-4">
@@ -46,7 +46,7 @@ const CourseStepFour: React.FC = () => {
                             <div className="bg-gray-800/50 p-8 rounded-full mb-6 border border-gray-700">
                                 <Sparkles className="w-16 h-16 text-lime-400" />
                             </div>
-                            <h2 className="text-3xl font-bold mb-4">Module Blueprinting</h2>
+                            <h2 className="text-3xl font-bold mb-4 max-md:text-2xl">Module Blueprinting</h2>
                             <p className="text-gray-400 max-w-lg mb-10 leading-relaxed">
                                 Based on your inputs, ORION is ready to architect {courseData.module} specialized modules for <span className="text-lime-400">"{courseData.title || 'Your Course'}"</span>.
                             </p>
@@ -58,7 +58,7 @@ const CourseStepFour: React.FC = () => {
                                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                            className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-72 bg-[#1a1c24] border border-red-500/30 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-xl"
+                                            className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-72 max-md:w-[min(18rem,calc(100vw-2.5rem))] bg-[#1a1c24] border border-red-500/30 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-xl"
                                         >
                                             <div className="flex flex-col justify-center items-center text-center">
                                                 <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
@@ -94,7 +94,7 @@ const CourseStepFour: React.FC = () => {
 
                                 <button
                                     onClick={() => setShowGenerateWarning(true)}
-                                    className="flex items-center gap-3 bg-lime-500 hover:bg-lime-400 text-black px-12 py-4 rounded-2xl font-black text-lg transition-all shadow-xl shadow-lime-500/20"
+                                    className="flex items-center gap-3 bg-lime-500 hover:bg-lime-400 text-black px-12 py-4 rounded-2xl font-black text-lg transition-all shadow-xl shadow-lime-500/20 max-md:w-full max-md:justify-center max-md:px-6 max-md:text-base"
                                     type="button"
                                 >
                                     <Zap size={24} /> Generate Modules
@@ -160,10 +160,10 @@ const CourseStepFour: React.FC = () => {
                     <div className="flex-1 flex flex-col">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
                             <div>
-                                <h2 className="text-4xl font-black tracking-tight text-white mb-2">Curriculum Blueprint</h2>
-                                <div className="flex items-center gap-2">
+                                <h2 className="text-4xl font-black tracking-tight text-white mb-2 max-md:text-2xl">Curriculum Blueprint</h2>
+                                <div className="flex items-center gap-2 max-md:flex-col max-md:items-start">
                                     <p className="text-gray-400 text-sm font-medium">Here is your Curriculum Blueprint — review and finalize the course structure, modules.</p>
-                                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 animate-pulse">
+                                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 animate-pulse shrink-0">
                                         <AlertTriangle size={12} />
                                         <span className="text-[10px] font-bold uppercase tracking-wider">Navigation Locked</span>
                                     </div>
@@ -191,12 +191,12 @@ const CourseStepFour: React.FC = () => {
                         <ThemeModal />
                         <ModuleList />
 
-                        <div className="mt-auto pt-8 flex justify-end">
+                        <div className="mt-auto pt-8 flex justify-end max-md:justify-stretch">
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={goToNextStep}
-                                className="flex items-center gap-2 bg-lime-500 hover:bg-lime-400 text-black px-8 py-3 rounded-xl font-black shadow-lg shadow-lime-500/20 transition-all"
+                                className="flex items-center gap-2 bg-lime-500 hover:bg-lime-400 text-black px-8 py-3 rounded-xl font-black shadow-lg shadow-lime-500/20 transition-all max-md:w-full max-md:justify-center"
                                 type="button"
                             >
                                 Looks Good, Continue <ChevronRight size={20} />
@@ -211,18 +211,18 @@ const CourseStepFour: React.FC = () => {
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="flex-1 xl:w-[30%] xl:ml-auto bg-gradient-to-br from-[#0D0D15] via-[#0A0A0E] to-[#050505] rounded-[2.5rem] p-6 sm:p-9 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group self-start sticky top-8 max-md:rounded-2xl max-md:p-4 max-md:static"
+                className="flex-1 xl:w-[30%] xl:ml-auto bg-gradient-to-br from-[#0D0D15] via-[#0A0A0E] to-[#050505] rounded-[2.5rem] p-6 sm:p-9 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group self-start sticky top-8 max-md:rounded-2xl max-md:p-4 max-md:static max-md:overflow-visible"
             >
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-lime-500/5 rounded-full blur-[100px] -mr-48 -mt-48 transition-all duration-700 group-hover:bg-lime-500/10 pointer-events-none"></div>
 
-                <div className="absolute top-8 right-8 w-32 h-32 rounded-full border-4 border-lime-500/30 overflow-hidden shadow-[0_0_50px_rgba(132,204,22,0.2)] z-20 hidden sm:block transition-all duration-700 group-hover:scale-110 group-hover:border-lime-500/50 group-hover:shadow-[0_0_60px_rgba(132,204,22,0.4)] bg-[#0A0A0E]">
+                <div className="absolute top-8 right-8 w-32 h-32 rounded-full border-4 border-lime-500/30 overflow-hidden shadow-[0_0_50px_rgba(132,204,22,0.2)] z-20 hidden xl:block transition-all duration-700 group-hover:scale-110 group-hover:border-lime-500/50 group-hover:shadow-[0_0_60px_rgba(132,204,22,0.4)] bg-[#0A0A0E]">
                     <img src={avatar} alt="Orion" className="w-full h-full object-top object-cover" />
                 </div>
 
-                <div className="relative z-10 flex flex-col h-full max-h-[80vh]">
+                <div className="relative z-10 flex flex-col h-full max-h-[80vh] max-md:h-auto max-md:max-h-none">
                     {!hasBlueprint ? (
                         <>
-                            <div className="mb-6 pr-48 text-left min-h-[140px] max-md:pr-0 max-md:min-h-0">
+                            <div className="mb-6 xl:pr-48 text-left xl:min-h-[140px] shrink-0">
                                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight">
                                     Design the Blueprint <Construction className="inline-block w-5 h-5 ml-1 text-lime-400" />
                                 </h3>
@@ -234,7 +234,7 @@ const CourseStepFour: React.FC = () => {
 
                             <div className="h-px w-full bg-gradient-to-r from-lime-500/20 via-gray-700/50 to-transparent mb-6"></div>
 
-                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar relative">
+                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar relative max-md:overflow-visible max-md:flex-none">
                                 <h4 className="text-xs font-black text-white uppercase tracking-[0.15em] mb-6 flex items-center gap-2">
                                     <span className="p-1.5 rounded bg-gray-800/80 border border-gray-700 shadow-sm text-sm">
                                         <Lightbulb className="w-4 h-4 text-lime-400" />
@@ -278,7 +278,7 @@ const CourseStepFour: React.FC = () => {
                         </>
                     ) : (
                         <>
-                            <div className="mb-6 pr-48 text-left min-h-[140px] max-md:pr-0 max-md:min-h-0">
+                            <div className="mb-6 xl:pr-48 text-left xl:min-h-[140px] shrink-0">
                                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight">
                                     Curriculum Blueprint <Rocket className="inline-block w-5 h-5 ml-1 text-lime-400" />
                                 </h3>
@@ -290,9 +290,9 @@ const CourseStepFour: React.FC = () => {
 
                             <div className="h-px w-full bg-gradient-to-r from-lime-500/20 via-gray-700/50 to-transparent mb-6"></div>
 
-                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar relative">
+                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar relative max-md:overflow-visible max-md:flex-none">
                                 <h4 className="text-xs font-black text-white uppercase tracking-[0.15em] mb-6 flex items-center gap-2">
-                                    <span className="p-1.5 rounded bg-gray-800/80 border border-gray-700 shadow-sm text-sm">
+                                    <span className="p-1.5 rounded bg-gray-800/80 border border-gray-700 shadow-sm text-sm shrink-0">
                                         <Layers className="w-4 h-4 text-lime-400" />
                                     </span>
                                     Advanced Blueprint Tools

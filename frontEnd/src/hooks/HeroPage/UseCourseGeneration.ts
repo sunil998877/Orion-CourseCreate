@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { toast } from 'react-toastify';
 import { API_BASE } from '../../utils/api';
+import { handleCreditApiFailure } from '../../utils/creditErrors';
 import type { Course } from '../../types/Course.types';
 
 type Args = {
@@ -34,6 +35,10 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
       const resp = await fetch(`${API_BASE}/courses/${courseId}/generate-audio`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));
+        if (handleCreditApiFailure(resp.status, err)) {
+          setIsGeneratingAudio(false);
+          return;
+        }
         throw new Error(err.message || 'Audio generation failed');
       }
       const data = await resp.json(); setAudioProgress(100);
@@ -55,6 +60,10 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
       const resp = await fetch(`${API_BASE}/courses/${courseId}/generate-podcast`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));
+        if (handleCreditApiFailure(resp.status, err)) {
+          setIsGeneratingPodcast(false);
+          return;
+        }
         const msg = err.message || 'Unknown error';
         if (msg.toLowerCase().includes('multiple voice') || msg.toLowerCase().includes('retry shortly')) throw new Error('Transient API error — please try again in a few seconds.');
         throw new Error(msg);
@@ -79,7 +88,11 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
         method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ publisherName })
       });
-      if (!resp.ok) { const err = await resp.json().catch(() => ({})); throw new Error(err.message || 'Failed to generate ebook'); }
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        if (handleCreditApiFailure(resp.status, err)) return;
+        throw new Error(err.message || 'Failed to generate ebook');
+      }
       const data = await resp.json();
       updateCourse(courseId, { ebookUrl: data.ebookUrl, ebookStatus: data.ebookStatus || 'completed' });
       toast.success('Ebook generated successfully!');

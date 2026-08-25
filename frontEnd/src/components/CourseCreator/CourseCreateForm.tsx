@@ -41,13 +41,13 @@ const CourseCreatorContent: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-8 mb-4 flex flex-col items-center justify-center gap-1 opacity-80 animate-pulse">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <p className="text-[10px] sm:text-xs text-amber-500 uppercase tracking-widest font-black text-center">
+        <div className="mt-8 mb-4 flex flex-col items-center justify-center gap-1 opacity-80 animate-pulse max-md:mt-6">
+          <div className="flex items-center justify-center gap-2 max-md:px-1">
+            <Sparkles className="w-4 h-4 text-amber-500 shrink-0 max-md:hidden" />
+            <p className="text-[10px] sm:text-xs text-amber-500 uppercase tracking-widest font-black text-center max-md:text-[9px] max-md:leading-relaxed max-md:tracking-wider">
               Warning: AI can make mistakes. Please verify all generated content before launching.
             </p>
-            <Sparkles className="w-4 h-4 text-amber-500" />
+            <Sparkles className="w-4 h-4 text-amber-500 shrink-0 max-md:hidden" />
           </div>
           <p className="text-[9px] sm:text-[10px] text-amber-500/60 uppercase tracking-[0.2em] font-bold">
             Internet connectivity may also affect the generation time

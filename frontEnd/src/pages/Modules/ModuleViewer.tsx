@@ -34,11 +34,11 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
         <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
 
         {/* Integrated Header */}
-        <div className="relative px-8 py-10 shrink-0 border-b border-white/5 bg-white/[0.02]">
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              <div className="relative p-5 rounded-2xl bg-lime-500/10 border border-lime-500/20 group animate-in slide-in-from-left duration-500">
-                <BookOpen className="w-10 h-10 text-lime-400 group-hover:scale-110 transition-transform duration-300" />
+        <div className="relative px-8 py-10 shrink-0 border-b border-white/5 bg-white/[0.02] max-md:px-4 max-md:py-5">
+          <div className="relative flex items-center justify-between max-md:flex-col max-md:items-stretch max-md:gap-4">
+            <div className="flex items-center space-x-6 max-md:space-x-3">
+              <div className="relative p-5 rounded-2xl bg-lime-500/10 border border-lime-500/20 group animate-in slide-in-from-left duration-500 max-md:p-3">
+                <BookOpen className="w-10 h-10 text-lime-400 group-hover:scale-110 transition-transform duration-300 max-md:h-7 max-md:w-7" />
                 <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-lime-500 animate-pulse shadow-[0_0_10px_rgba(132,204,22,0.5)]" />
               </div>
               <div>
@@ -46,7 +46,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-lime-500/60">AI Course Architect</span>
                   <div className="h-px w-8 bg-lime-500/30" />
                 </div>
-                <h2 className="text-4xl font-black tracking-tight text-white mb-2 animate-in slide-in-from-left duration-500 delay-200">
+                <h2 className="text-4xl font-black tracking-tight text-white mb-2 animate-in slide-in-from-left duration-500 delay-200 max-md:text-2xl">
                   Course Content
                 </h2>
                 <div className="flex items-center gap-3 text-gray-400 animate-in slide-in-from-left duration-500 delay-300">
@@ -58,7 +58,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
             
             <button
               onClick={onClose}
-              className="group relative px-6 py-3 rounded-2xl bg-white/5 border border-white/10 hover:border-lime-500/30 hover:bg-lime-500/5 transition-all duration-300 flex items-center gap-2 animate-in slide-in-from-right duration-500"
+              className="group relative px-6 py-3 rounded-2xl bg-white/5 border border-white/10 hover:border-lime-500/30 hover:bg-lime-500/5 transition-all duration-300 flex items-center gap-2 animate-in slide-in-from-right duration-500 max-md:w-full max-md:justify-center"
             >
               <svg className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -69,7 +69,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-transparent">
+        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-transparent max-md:p-4">
           {!moduleData || !moduleData.Content ? (
             <div className="flex flex-col items-center justify-center py-20 animate-in fade-in duration-700">
               <div className="relative">

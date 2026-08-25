@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCourseCreator } from '../../contextAPI/CourseCreatorContext';
 import avatar from '../../assests/avatar.png';
@@ -9,6 +9,16 @@ import {
     Rocket, X, Layers
 } from 'lucide-react';
 
+const REGION_OPTIONS = ['Australia', 'Canada', 'India', 'United States', 'London (UK)'];
+const STANDARD_OPTIONS = ['Global (ISO/IEC)', 'Regional', 'Industry Specific'];
+const STYLE_OPTIONS = [
+    'Academic / Formal Style',
+    'Storytelling Style',
+    'Interactive Coaching Style',
+    'Humanized Teaching Style',
+    'Modern Edutainment Style',
+    'Scenario-Based Style',
+];
 
 const CourseStepOne: React.FC = () => {
     const {
@@ -21,10 +31,6 @@ const CourseStepOne: React.FC = () => {
         setIsAudienceDropdownOpen,
         customAudienceInput,
         setCustomAudienceInput,
-        isCustomIndustry,
-        setIsCustomIndustry,
-        isCustomCountry,
-        setIsCustomCountry,
         goToNextStep,
         containerVariants,
         itemVariants,
@@ -33,6 +39,29 @@ const CourseStepOne: React.FC = () => {
         AUDIENCE_OPTIONS,
         INDUSTRIES
     } = useCourseCreator();
+
+    const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+    const [isIndustryDropdownOpen, setIsIndustryDropdownOpen] = useState(false);
+    const [isStandardsDropdownOpen, setIsStandardsDropdownOpen] = useState(false);
+    const [isStyleDropdownOpen, setIsStyleDropdownOpen] = useState(false);
+    const [customCountryInput, setCustomCountryInput] = useState('');
+    const [customIndustryInput, setCustomIndustryInput] = useState('');
+
+    const addCustomCountry = () => {
+        const capitalized = customCountryInput.trim().charAt(0).toUpperCase() + customCountryInput.trim().slice(1);
+        if (!capitalized) return;
+        updateCourseData({ country: capitalized });
+        setCustomCountryInput('');
+        setIsCountryDropdownOpen(false);
+    };
+
+    const addCustomIndustry = () => {
+        const capitalized = customIndustryInput.trim().charAt(0).toUpperCase() + customIndustryInput.trim().slice(1);
+        if (!capitalized) return;
+        updateCourseData({ industry: capitalized });
+        setCustomIndustryInput('');
+        setIsIndustryDropdownOpen(false);
+    };
 
     return (
         <motion.div
@@ -48,9 +77,9 @@ const CourseStepOne: React.FC = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="flex-1 xl:w-[65%] bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 md:p-14 shadow-2xl relative overflow-hidden group/card shadow-[0_32px_100px_-20px_rgba(0,0,0,0.8)] max-md:rounded-2xl max-md:p-4"
+                className="flex-1 xl:w-[65%] bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 md:p-14 shadow-2xl relative overflow-visible group/card shadow-[0_32px_100px_-20px_rgba(0,0,0,0.8)] max-md:rounded-2xl max-md:p-4"
             >
-                <div className="absolute inset-0 bg-gradient-to-br from-lime-500/[0.02] to-transparent pointer-events-none" />
+                <div className="absolute inset-0 rounded-[2.5rem] max-md:rounded-2xl bg-gradient-to-br from-lime-500/[0.02] to-transparent pointer-events-none overflow-hidden" />
                 <motion.div variants={itemVariants} className="mb-12 text-center relative z-10">
                     <label className="block text-[10px] font-black text-white/40 mb-6 uppercase tracking-[0.3em] max-md:mb-3 max-md:tracking-wider group-hover/card:text-lime-400 transition-colors">Cognitive complexity Level</label>
                     <div className="w-full max-w-2xl mx-auto grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl bg-black/40 border border-white/5 backdrop-blur-3xl shadow-2xl md:grid-cols-4 md:gap-1 md:p-2 md:rounded-[2rem]">
@@ -155,7 +184,7 @@ const CourseStepOne: React.FC = () => {
                                                     initial={{ opacity: 0, y: -10 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     exit={{ opacity: 0, y: -10 }}
-                                                    className="absolute z-50 w-full mt-2 bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden"
+                                                    className="absolute z-50 w-full mt-2 bg-[#111827] border border-gray-700 rounded-xl shadow-xl overflow-hidden max-md:overflow-y-auto max-md:max-h-[min(18rem,55vh)]"
                                                 >
                                                     <div className="max-h-60 overflow-y-auto p-2 space-y-1 custom-scrollbar">
                                                         {/* Select All Option */}
@@ -172,7 +201,7 @@ const CourseStepOne: React.FC = () => {
                                                                             updateCourseData({ audience: [...allOptions] });
                                                                         }
                                                                     }}
-                                                                    className={`w-full text-left px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors flex items-center justify-between border-b border-white/5 mb-1 pb-2 ${allSelected ? 'bg-lime-500/10 text-lime-400' : 'text-gray-300 hover:bg-gray-700/50'}`}
+                                                                    className={`w-full text-left px-3 py-2 max-md:py-3 rounded-lg text-sm cursor-pointer transition-colors flex items-center justify-between border-b border-white/5 mb-1 pb-2 ${allSelected ? 'bg-lime-500/20 text-lime-400' : 'text-gray-300 hover:bg-white/5'}`}
                                                                 >
                                                                     <span className="font-bold uppercase tracking-wider text-xs">Select All</span>
                                                                     {allSelected && <Check size={16} className="text-lime-500" />}
@@ -195,7 +224,7 @@ const CourseStepOne: React.FC = () => {
                                                                         }
                                                                         updateCourseData({ audience: current });
                                                                     }}
-                                                                    className={`w-full text-left px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors flex items-center justify-between ${isSelected ? 'bg-lime-500/10 text-lime-400' : 'text-gray-300 hover:bg-gray-700/50'}`}
+                                                                    className={`w-full text-left px-3 py-2 max-md:py-3 rounded-lg text-sm cursor-pointer transition-colors flex items-center justify-between ${isSelected ? 'bg-lime-500/20 text-lime-400' : 'text-gray-300 hover:bg-white/5'}`}
                                                                 >
                                                                     {opt}
                                                                     {isSelected && <Check size={16} className="text-lime-500" />}
@@ -259,77 +288,134 @@ const CourseStepOne: React.FC = () => {
                         <div>
                             <label className="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider max-md:normal-case max-md:tracking-normal">International/Regional Industry Standard</label>
                             <div className="relative">
-                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
-                                <select
-                                    className="w-full bg-gray-800/50 border border-gray-700 rounded-xl py-3 pl-11 pr-4 focus:ring-2 focus:ring-lime-500 outline-none appearance-none cursor-pointer"
-                                    value={courseData.standards}
-                                    onChange={(e) => {
-                                        updateCourseData({ standards: e.target.value });
-                                        if (e.target.value !== 'Regional') {
-                                            updateCourseData({ country: '' });
-                                        }
+                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 z-10 pointer-events-none" />
+                                <div
+                                    onClick={() => {
+                                        setIsStandardsDropdownOpen(!isStandardsDropdownOpen);
+                                        setIsCountryDropdownOpen(false);
+                                        setIsIndustryDropdownOpen(false);
+                                        setIsStyleDropdownOpen(false);
                                     }}
+                                    className="w-full min-h-[50px] bg-gray-800/50 border border-gray-700 rounded-xl py-3 pl-11 pr-10 flex items-center cursor-pointer transition-all hover:border-gray-600"
                                 >
-                                    <option>Global (ISO/IEC)</option>
-                                    <option>Regional</option>
-                                    <option>Industry Specific</option>
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 pointer-events-none" />
+                                    <span className="text-sm text-white select-none">{courseData.standards}</span>
+                                </div>
+                                <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 pointer-events-none transition-transform ${isStandardsDropdownOpen ? 'rotate-180' : ''}`} />
+                                <AnimatePresence>
+                                    {isStandardsDropdownOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            className="absolute z-50 w-full mt-2 bg-[#111827] border border-gray-700 rounded-xl shadow-xl overflow-hidden max-md:overflow-y-auto max-md:max-h-[min(18rem,55vh)]"
+                                        >
+                                            <div className="p-2 space-y-1">
+                                                {STANDARD_OPTIONS.map((opt) => {
+                                                    const isSelected = courseData.standards === opt;
+                                                    return (
+                                                        <div
+                                                            key={opt}
+                                                            onClick={() => {
+                                                                updateCourseData({
+                                                                    standards: opt,
+                                                                    ...(opt !== 'Regional' ? { country: '' } : {}),
+                                                                });
+                                                                setIsStandardsDropdownOpen(false);
+                                                                setIsCountryDropdownOpen(false);
+                                                                setIsIndustryDropdownOpen(false);
+                                                            }}
+                                                            className={`w-full text-left px-3 py-2 max-md:py-3 rounded-lg text-sm cursor-pointer transition-colors flex items-center justify-between ${isSelected ? 'bg-lime-500/20 text-lime-400' : 'text-gray-300 hover:bg-white/5'}`}
+                                                        >
+                                                            {opt}
+                                                            {isSelected && <Check size={16} className="text-lime-500" />}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                             {courseData.standards === 'Regional' && (
                                 <div className="mt-3 pl-4 border-l-2 border-lime-500/40 animate-in fade-in slide-in-from-top-2 duration-300">
                                     <label className="block text-[11px] font-semibold text-lime-400 mb-1.5 uppercase tracking-wider">Specific Region/Country</label>
                                     <div className="relative">
-                                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-                                        {!isCustomCountry ? (
-                                            <select
-                                                className={`w-full bg-gray-800/30 border rounded-xl py-2.5 pl-9 pr-10 text-sm focus:ring-2 focus:ring-lime-500 outline-none appearance-none cursor-pointer transition-all ${showValidation && !courseData.country ? 'border-amber-500/50 ring-1 ring-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-gray-700/50 hover:border-gray-600'
-                                                    }`}
-                                                value={courseData.country}
-                                                onChange={(e) => {
-                                                    if (e.target.value === 'Other') {
-                                                        setIsCustomCountry(true);
-                                                        updateCourseData({ country: '' });
-                                                    } else {
-                                                        updateCourseData({ country: e.target.value });
-                                                    }
-                                                }}
-                                            >
-                                                <option value="">Select a region...</option>
-                                                <option>Australia</option>
-                                                <option>Canada</option>
-                                                <option>India</option>
-                                                <option>United States</option>
-                                                <option>London (UK)</option>
-                                                <option value="Other">Other / Custom...</option>
-                                            </select>
-                                        ) : (
-                                            <div className="relative">
-                                                <input
-                                                    type="text"
-                                                    autoFocus
-                                                    className="w-full bg-gray-800/30 border border-lime-500/50 rounded-xl py-2.5 pl-9 pr-10 text-sm focus:ring-2 focus:ring-lime-500 outline-none"
-                                                    placeholder="Type custom region..."
-                                                    value={courseData.country}
-                                                    onChange={(e) => updateCourseData({ country: e.target.value })}
-                                                />
-                                                <button
-                                                    onClick={() => {
-                                                        setIsCustomCountry(false);
-                                                        updateCourseData({ country: '' });
-                                                    }}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            </div>
-                                        )}
-                                        {!isCustomCountry && <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 pointer-events-none" />}
+                                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 z-10 pointer-events-none" />
+                                        <div
+                                            onClick={() => {
+                                                setIsCountryDropdownOpen(!isCountryDropdownOpen);
+                                                setIsStandardsDropdownOpen(false);
+                                                setIsIndustryDropdownOpen(false);
+                                                setIsStyleDropdownOpen(false);
+                                            }}
+                                            className={`w-full min-h-[42px] bg-gray-800/50 border rounded-xl py-2.5 pl-9 pr-10 flex items-center cursor-pointer transition-all ${showValidation && !courseData.country ? 'border-amber-500/50 ring-1 ring-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-gray-700/50 hover:border-gray-600'}`}
+                                        >
+                                            <span className={`text-sm select-none ${courseData.country ? 'text-white' : 'text-gray-500'}`}>
+                                                {courseData.country || 'Select a region...'}
+                                            </span>
+                                        </div>
+                                        <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 pointer-events-none transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
                                         {showValidation && !courseData.country && (
-                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500 animate-pulse">
+                                            <div className="absolute right-8 top-1/2 -translate-y-1/2 text-amber-500 animate-pulse pointer-events-none">
                                                 <Zap size={18} fill="currentColor" />
                                             </div>
                                         )}
+                                        <AnimatePresence>
+                                            {isCountryDropdownOpen && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: -10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -10 }}
+                                                    className="absolute z-50 w-full mt-2 bg-[#111827] border border-gray-700 rounded-xl shadow-xl overflow-hidden max-md:overflow-y-auto max-md:max-h-[min(18rem,55vh)]"
+                                                >
+                                                    <div className="max-h-60 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                                                        {REGION_OPTIONS.map((opt) => {
+                                                            const isSelected = courseData.country === opt;
+                                                            return (
+                                                                <div
+                                                                    key={opt}
+                                                                    onClick={() => {
+                                                                        updateCourseData({ country: opt });
+                                                                        setIsCountryDropdownOpen(false);
+                                                                    }}
+                                                                    className={`w-full text-left px-3 py-2 max-md:py-3 rounded-lg text-sm cursor-pointer transition-colors flex items-center justify-between ${isSelected ? 'bg-lime-500/20 text-lime-400' : 'text-gray-300 hover:bg-white/5'}`}
+                                                                >
+                                                                    {opt}
+                                                                    {isSelected && <Check size={16} className="text-lime-500" />}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                    <div className="p-2 border-t border-gray-700 bg-gray-900/50">
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                type="text"
+                                                                value={customCountryInput}
+                                                                onChange={(e) => setCustomCountryInput(e.target.value)}
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        e.preventDefault();
+                                                                        addCustomCountry();
+                                                                    }
+                                                                }}
+                                                                placeholder="Add custom region..."
+                                                                className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-lime-500 outline-none"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    addCustomCountry();
+                                                                }}
+                                                                className="bg-lime-500/20 text-lime-400 p-2 rounded-lg hover:bg-lime-500/30 transition-colors"
+                                                            >
+                                                                <Plus size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 </div>
                             )}
@@ -338,54 +424,82 @@ const CourseStepOne: React.FC = () => {
                                 <div className="mt-3 pl-4 border-l-2 border-lime-500/40 animate-in fade-in slide-in-from-top-2 duration-300">
                                     <label className="block text-[11px] font-semibold text-lime-400 mb-1.5 uppercase tracking-wider">Select Industry</label>
                                     <div className="relative">
-                                        <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-                                        {!isCustomIndustry ? (
-                                            <select
-                                                className={`w-full bg-gray-800/30 border rounded-xl py-2.5 pl-9 pr-10 text-sm focus:ring-2 focus:ring-lime-500 outline-none appearance-none cursor-pointer transition-all ${showValidation && !courseData.industry ? 'border-amber-500/50 ring-1 ring-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-gray-700/50 hover:border-gray-600'
-                                                    }`}
-                                                value={courseData.industry}
-                                                onChange={(e) => {
-                                                    if (e.target.value === 'Other') {
-                                                        setIsCustomIndustry(true);
-                                                        updateCourseData({ industry: '' });
-                                                    } else {
-                                                        updateCourseData({ industry: e.target.value });
-                                                    }
-                                                }}
-                                            >
-                                                <option value="">Select an industry...</option>
-                                                {INDUSTRIES.map((ind: any) => (
-                                                    <option key={ind} value={ind}>{ind}</option>
-                                                ))}
-                                                <option value="Other">Other / Custom...</option>
-                                            </select>
-                                        ) : (
-                                            <div className="relative">
-                                                <input
-                                                    type="text"
-                                                    autoFocus
-                                                    className="w-full bg-gray-800/30 border border-lime-500/50 rounded-xl py-2.5 pl-9 pr-10 text-sm focus:ring-2 focus:ring-lime-500 outline-none"
-                                                    placeholder="Type custom industry..."
-                                                    value={courseData.industry}
-                                                    onChange={(e) => updateCourseData({ industry: e.target.value })}
-                                                />
-                                                <button
-                                                    onClick={() => {
-                                                        setIsCustomIndustry(false);
-                                                        updateCourseData({ industry: '' });
-                                                    }}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            </div>
-                                        )}
-                                        {!isCustomIndustry && <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 pointer-events-none" />}
+                                        <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 z-10 pointer-events-none" />
+                                        <div
+                                            onClick={() => {
+                                                setIsIndustryDropdownOpen(!isIndustryDropdownOpen);
+                                                setIsStandardsDropdownOpen(false);
+                                                setIsCountryDropdownOpen(false);
+                                                setIsStyleDropdownOpen(false);
+                                            }}
+                                            className={`w-full min-h-[42px] bg-gray-800/50 border rounded-xl py-2.5 pl-9 pr-10 flex items-center cursor-pointer transition-all ${showValidation && !courseData.industry ? 'border-amber-500/50 ring-1 ring-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-gray-700/50 hover:border-gray-600'}`}
+                                        >
+                                            <span className={`text-sm select-none ${courseData.industry ? 'text-white' : 'text-gray-500'}`}>
+                                                {courseData.industry || 'Select an industry...'}
+                                            </span>
+                                        </div>
+                                        <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 pointer-events-none transition-transform ${isIndustryDropdownOpen ? 'rotate-180' : ''}`} />
                                         {showValidation && !courseData.industry && (
-                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500 animate-pulse">
+                                            <div className="absolute right-8 top-1/2 -translate-y-1/2 text-amber-500 animate-pulse pointer-events-none">
                                                 <Zap size={18} fill="currentColor" />
                                             </div>
                                         )}
+                                        <AnimatePresence>
+                                            {isIndustryDropdownOpen && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: -10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -10 }}
+                                                    className="absolute z-50 w-full mt-2 bg-[#111827] border border-gray-700 rounded-xl shadow-xl overflow-hidden max-md:overflow-y-auto max-md:max-h-[min(18rem,55vh)]"
+                                                >
+                                                    <div className="max-h-60 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                                                        {INDUSTRIES.map((ind: any) => {
+                                                            const isSelected = courseData.industry === ind;
+                                                            return (
+                                                                <div
+                                                                    key={ind}
+                                                                    onClick={() => {
+                                                                        updateCourseData({ industry: ind });
+                                                                        setIsIndustryDropdownOpen(false);
+                                                                    }}
+                                                                    className={`w-full text-left px-3 py-2 max-md:py-3 rounded-lg text-sm cursor-pointer transition-colors flex items-center justify-between ${isSelected ? 'bg-lime-500/20 text-lime-400' : 'text-gray-300 hover:bg-white/5'}`}
+                                                                >
+                                                                    {ind}
+                                                                    {isSelected && <Check size={16} className="text-lime-500" />}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                    <div className="p-2 border-t border-gray-700 bg-gray-900/50">
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                type="text"
+                                                                value={customIndustryInput}
+                                                                onChange={(e) => setCustomIndustryInput(e.target.value)}
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        e.preventDefault();
+                                                                        addCustomIndustry();
+                                                                    }
+                                                                }}
+                                                                placeholder="Add custom industry..."
+                                                                className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-lime-500 outline-none"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    addCustomIndustry();
+                                                                }}
+                                                                className="bg-lime-500/20 text-lime-400 p-2 rounded-lg hover:bg-lime-500/30 transition-colors"
+                                                            >
+                                                                <Plus size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 </div>
                             )}
@@ -417,20 +531,48 @@ const CourseStepOne: React.FC = () => {
                         <div>
                             <label className="block text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">Course Tone & Style</label>
                             <div className="relative">
-                                <Palette className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
-                                <select
-                                    className="w-full bg-gray-800/50 border border-gray-700 rounded-xl py-3 pl-11 pr-4 focus:ring-2 focus:ring-lime-500 outline-none appearance-none cursor-pointer"
-                                    value={courseData.courseStyle || 'Academic / Formal Style'}
-                                    onChange={(e) => updateCourseData({ courseStyle: e.target.value })}
+                                <Palette className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 z-10 pointer-events-none" />
+                                <div
+                                    onClick={() => {
+                                        setIsStyleDropdownOpen(!isStyleDropdownOpen);
+                                        setIsStandardsDropdownOpen(false);
+                                        setIsCountryDropdownOpen(false);
+                                        setIsIndustryDropdownOpen(false);
+                                    }}
+                                    className="w-full min-h-[50px] bg-gray-800/50 border border-gray-700 rounded-xl py-3 pl-11 pr-10 flex items-center cursor-pointer transition-all hover:border-gray-600"
                                 >
-                                    <option>Academic / Formal Style</option>
-                                    <option>Storytelling Style</option>
-                                    <option>Interactive Coaching Style</option>
-                                    <option>Humanized Teaching Style</option>
-                                    <option>Modern Edutainment Style</option>
-                                    <option>Scenario-Based Style</option>
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 pointer-events-none" />
+                                    <span className="text-sm text-white select-none">{courseData.courseStyle || 'Academic / Formal Style'}</span>
+                                </div>
+                                <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 pointer-events-none transition-transform ${isStyleDropdownOpen ? 'rotate-180' : ''}`} />
+                                <AnimatePresence>
+                                    {isStyleDropdownOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            className="absolute z-50 w-full mt-2 bg-[#111827] border border-gray-700 rounded-xl shadow-xl overflow-hidden max-md:overflow-y-auto max-md:max-h-[min(18rem,55vh)]"
+                                        >
+                                            <div className="p-2 space-y-1">
+                                                {STYLE_OPTIONS.map((opt) => {
+                                                    const isSelected = (courseData.courseStyle || 'Academic / Formal Style') === opt;
+                                                    return (
+                                                        <div
+                                                            key={opt}
+                                                            onClick={() => {
+                                                                updateCourseData({ courseStyle: opt });
+                                                                setIsStyleDropdownOpen(false);
+                                                            }}
+                                                            className={`w-full text-left px-3 py-2 max-md:py-3 rounded-lg text-sm cursor-pointer transition-colors flex items-center justify-between ${isSelected ? 'bg-lime-500/20 text-lime-400' : 'text-gray-300 hover:bg-white/5'}`}
+                                                        >
+                                                            {opt}
+                                                            {isSelected && <Check size={16} className="text-lime-500" />}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
                     </div>

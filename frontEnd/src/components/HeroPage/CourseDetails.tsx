@@ -40,7 +40,7 @@ export const CourseDetails: React.FC<any> = ({ course, generation, audioPlayer, 
           }{showAudioPlayer&&<AudioBookPlayer audioUrl={course.audioUrl} player={audioPlayer}/>} {showPodcastPlayer&&<PodcastPlayer podcastUrl={course.podcastUrl} player={podcastPlayer}/>}
         </div>
       </div>
-      <h2 className="text-3xl lg:text-4xl font-semibold mb-2">
+      <h2 className="text-3xl lg:text-4xl font-semibold mb-2 max-md:text-xl">
         {course.title||'Frontend development'}
       </h2>
       <p className="text-white/80 w-full mb-8">

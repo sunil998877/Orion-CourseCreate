@@ -95,9 +95,9 @@ const CourseStepFive: React.FC = () => {
                     <div className="lg:col-span-2 space-y-4">
                         {previewModules.map((mod: any) => (
                             <div key={mod.id} className="group bg-gray-800/30 hover:bg-gray-800/60 p-6 rounded-3xl border border-gray-800 transition-all">
-                                <div className="flex justify-between items-center mb-1">
-                                    <h5 className="font-bold text-lg text-white group-hover:text-lime-400 transition-colors">Module {mod.id}: {mod.title}</h5>
-                                    <span className="text-[10px] font-black bg-gray-700 px-2 py-1 rounded text-gray-400 tracking-tighter">CERTIFIED</span>
+                                <div className="flex justify-between items-center mb-1 max-md:items-start max-md:gap-2">
+                                    <h5 className="font-bold text-lg text-white group-hover:text-lime-400 transition-colors max-md:text-base">Module {mod.id}: {mod.title}</h5>
+                                    <span className="text-[10px] font-black bg-gray-700 px-2 py-1 rounded text-gray-400 tracking-tighter shrink-0">CERTIFIED</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 mb-4">
                                     <div className="px-2 py-0.5 rounded-md bg-lime-500/10 border border-lime-500/20 text-[9px] font-black text-lime-400 uppercase tracking-wider flex items-center gap-1">

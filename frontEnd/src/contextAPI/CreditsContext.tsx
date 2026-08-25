@@ -14,6 +14,12 @@ import {
   rechargeWallet,
   subscribeToPlan as subscribeToPlanApi,
 } from '../services/walletService';
+import CreditShortageModal from '../components/credits/CreditShortageModal';
+import {
+  CREDIT_SHORTAGE_EVENT,
+  emitCreditShortage,
+  type CreditShortageKind,
+} from '../utils/creditErrors';
 
 
 
@@ -45,6 +51,7 @@ export const CreditsProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [shortage, setShortage] = useState<{ kind: CreditShortageKind; message?: string } | null>(null);
 
   const fetchWalletData = useCallback(async () => {
     const token = localStorage.getItem('token');
@@ -106,6 +113,16 @@ export const CreditsProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => window.removeEventListener('auth-changed', fetchWalletData);
   }, [fetchWalletData]);
 
+  useEffect(() => {
+    const onShortage = (event: Event) => {
+      const detail = (event as CustomEvent<{ kind: CreditShortageKind; message?: string }>).detail;
+      if (!detail?.kind) return;
+      setShortage({ kind: detail.kind, message: detail.message });
+    };
+    window.addEventListener(CREDIT_SHORTAGE_EVENT, onShortage as EventListener);
+    return () => window.removeEventListener(CREDIT_SHORTAGE_EVENT, onShortage as EventListener);
+  }, []);
+
   const isZeroBalance = useMemo(() => credits.remaining <= 0, [credits.remaining]);
 
   const usagePercentage = useMemo(() => {
@@ -124,7 +141,7 @@ export const CreditsProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (amount <= 0) return { success: true };
 
       if (credits.remaining < amount) {
-        toast.error(`Not enough credits. You need ${amount} credits for "${action}".`);
+        emitCreditShortage('wallet', `You need ${amount} credits for "${action}".`);
         return { success: false, reason: 'insufficient' };
       }
 
@@ -215,7 +232,18 @@ export const CreditsProvider: React.FC<{ children: React.ReactNode }> = ({ child
     ],
   );
 
-  return <CreditsContext.Provider value={value}>{children}</CreditsContext.Provider>;
+  return (
+    <CreditsContext.Provider value={value}>
+      {children}
+      {shortage && (
+        <CreditShortageModal
+          kind={shortage.kind}
+          message={shortage.message}
+          onClose={() => setShortage(null)}
+        />
+      )}
+    </CreditsContext.Provider>
+  );
 };
 
 

@@ -92,7 +92,8 @@ export const generateModuleSlidesGamma = async (req, res) => {
         console.warn(`[Credits] Insufficient credits for user ${userId}: ${reserveErr.message}`);
         return res.status(402).json({
           success: false,
-          message: reserveErr.message
+          message: reserveErr.message,
+          code: 'insufficient_credits',
         });
       }
       console.error(`[Credits] Reservation error for user ${userId}:`, reserveErr.message);
@@ -396,11 +397,21 @@ export const generateAllSlidesGamma = async (req, res) => {
           }
         }
 
-        return res.status(502).json({
+        const isWalletShort =
+          failedModuleError instanceof InsufficientCreditsError ||
+          failedModuleError?.name === 'InsufficientCreditsError';
+        const isGammaShort = failedModuleError?.code === 'gamma_credits_exhausted';
+
+        return res.status(isWalletShort ? 402 : (failedModuleError?.statusCode || 502)).json({
           success: false,
           retry_eligible: true,
           error: failedModuleError?.message || 'Partial batch generation failed',
-          message: 'Slide generation failed before completing all course modules. Because a partial course is not usable content, all credits have been fully refunded. You can retry generating slides at any time.',
+          message: isWalletShort
+            ? failedModuleError.message
+            : isGammaShort
+              ? failedModuleError.message
+              : 'Slide generation failed before completing all course modules. Because a partial course is not usable content, all credits have been fully refunded. You can retry generating slides at any time.',
+          code: isWalletShort ? 'insufficient_credits' : (failedModuleError?.code || 'gamma_error'),
           completed_count: successfulResults.length,
           total_count: modules.length,
         });

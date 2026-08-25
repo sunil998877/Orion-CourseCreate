@@ -576,11 +576,24 @@ body::-webkit-scrollbar {
 
 @media (max-width: 767px) {
   html,
-  body {
+  body,
+  #root {
     width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 
   #admin-shell table {
     min-width: 40rem;
+  }
+
+  select option,
+  select optgroup {
+    background-color: #111827;
+    color: #e5e7eb;
   }
 }

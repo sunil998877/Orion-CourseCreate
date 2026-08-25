@@ -7,3 +7,4 @@ export { default as PlanCards } from './PlanCards';
 export { default as CreditPackageCard } from './CreditPackageCard';
 export { default as CreditPackages } from './CreditPackages';
 export { default as CreditsPurchase } from './CreditsPurchase';
+export { default as CreditShortageModal } from './CreditShortageModal';
