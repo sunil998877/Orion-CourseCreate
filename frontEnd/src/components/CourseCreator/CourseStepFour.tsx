@@ -38,7 +38,7 @@ const CourseStepFour: React.FC = () => {
             exit="exit"
             className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] h-full"
         >
-            {/* Left Side: Form Content */}
+          
             <div className="flex-1 xl:w-[66%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group flex flex-col h-full max-md:rounded-2xl max-md:p-4">
                 {!hasBlueprint && !isBlueprinting ? (
                     <div className="flex-1 flex flex-col h-full">
@@ -60,7 +60,7 @@ const CourseStepFour: React.FC = () => {
                                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                             className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-72 bg-[#1a1c24] border border-red-500/30 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-xl"
                                         >
-                                            <div className="flex flex-col items-center text-center">
+                                            <div className="flex flex-col justify-center items-center text-center">
                                                 <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
                                                     <AlertTriangle className="text-red-500 w-6 h-6 animate-pulse" />
                                                 </div>

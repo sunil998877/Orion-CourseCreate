@@ -53,7 +53,7 @@ const CourseStepOne: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-lime-500/[0.02] to-transparent pointer-events-none" />
                 <motion.div variants={itemVariants} className="mb-12 text-center relative z-10">
                     <label className="block text-[10px] font-black text-white/40 mb-6 uppercase tracking-[0.3em] max-md:mb-3 max-md:tracking-wider group-hover/card:text-lime-400 transition-colors">Cognitive complexity Level</label>
-                    <div className="max-w-2xl mx-auto grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-black/40 border border-white/5 backdrop-blur-3xl shadow-2xl md:flex md:grid-cols-none md:gap-0 md:p-2 md:rounded-[2rem]">
+                    <div className="w-full max-w-2xl mx-auto grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl bg-black/40 border border-white/5 backdrop-blur-3xl shadow-2xl md:grid-cols-4 md:gap-1 md:p-2 md:rounded-[2rem]">
                         {['Beginner', 'Intermediate', 'Advanced', 'Professional'].map(lvl => (
                             <button
                                 key={lvl}
@@ -61,9 +61,9 @@ const CourseStepOne: React.FC = () => {
                                     updateCourseData({ level: lvl });
                                     setIsCustomAudience(false);
                                 }}
-                                className={`min-w-0 w-full px-1 py-3 text-[10px] leading-tight font-black rounded-xl transition-all duration-500 uppercase tracking-normal md:flex-1 md:w-auto md:px-0 md:py-4 md:text-xs md:leading-normal md:rounded-2xl md:tracking-widest ${courseData.level === lvl
-                                    ? 'bg-lime-500 text-black shadow-[0_0_30px_rgba(132,204,22,0.4)] z-10 font-black md:scale-[1.05]'
-                                    : 'text-white/20 hover:text-white/60 hover:bg-white/5'
+                                className={`flex items-center justify-center text-center min-w-0 w-full px-2 py-3 text-[10px] leading-tight font-black rounded-xl transition-all duration-500 uppercase tracking-wide whitespace-normal md:px-1 md:py-4 md:text-[11px] md:leading-normal md:rounded-2xl md:tracking-wider lg:text-xs lg:tracking-widest ${courseData.level === lvl
+                                    ? 'bg-lime-500 text-black shadow-[0_0_30px_rgba(132,204,22,0.4)] z-10 font-black'
+                                    : 'text-white/40 hover:text-white/70 hover:bg-white/5'
                                     }`}
                                 type="button"
                             >
