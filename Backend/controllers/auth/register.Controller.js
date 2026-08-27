@@ -41,7 +41,16 @@ export const register = async (req, res) => {
             existingUser.verificationOTPExpires = Date.now() + 600000;
 
             await existingUser.save();
-            queueVerificationOtpEmail(email, otp);
+            try {
+                await queueVerificationOtpEmail(email, otp);
+            } catch (emailError) {
+                console.error('Failed to send verification email:', emailError);
+                return res.status(503).json({
+                    message: 'Account saved but the verification email could not be sent. Check spam or tap Resend.',
+                    email,
+                    emailSent: false,
+                });
+            }
 
             return res.status(200).json({
                 message: 'Verification code sent to your email',
@@ -70,7 +79,16 @@ export const register = async (req, res) => {
             verificationOTPExpires: Date.now() + 600000
         });
         await newUser.save();
-        queueVerificationOtpEmail(email, otp);
+        try {
+            await queueVerificationOtpEmail(email, otp);
+        } catch (emailError) {
+            console.error('Failed to send verification email:', emailError);
+            return res.status(503).json({
+                message: 'Account created but the verification email could not be sent. Check spam or tap Resend.',
+                email,
+                emailSent: false,
+            });
+        }
 
         res.status(201).json({
             message: 'Verification code sent to your email',

@@ -20,7 +20,12 @@ export const resendRegistrationOtp = async (req, res) => {
     user.verificationOTP = otp;
     user.verificationOTPExpires = Date.now() + 600000;
     await user.save();
-    queueVerificationOtpEmail(email, otp);
+    try {
+      await queueVerificationOtpEmail(email, otp);
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      return res.status(503).json({ message: 'Could not send the verification email. Check SMTP settings or try again.' });
+    }
     res.status(200).json({ message: 'Verification code resent to your email' });
   } catch (error) {
     console.error('Error in resendRegistrationOtp:', error);

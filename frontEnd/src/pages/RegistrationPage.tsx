@@ -129,11 +129,15 @@ function RegistrationPage() {
         body: form,
       });
       const data = await response.json();
-      if (response.ok && data.email) {
+      if (data.email && (response.ok || response.status === 503)) {
         setOtpEmail(data.email);
         setStep('otp');
         startResendTimer();
-        toast.success('Verification code sent to your email!');
+        if (response.ok) {
+          toast.success('Verification code sent to your email!');
+        } else {
+          toast.error(data.message || 'Could not send email. Use Resend code.');
+        }
       } else {
         toast.error(data.message || 'Registration failed');
       }

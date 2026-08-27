@@ -2,46 +2,53 @@ import nodemailer from 'nodemailer';
 
 let transporter = null;
 
+const envVal = (key, fallback = '') =>
+  String(process.env[key] ?? fallback).trim().replace(/^["']|["']$/g, '');
+
+const assertSmtpConfig = () => {
+  const host = envVal('SMTP_HOST');
+  const user = envVal('SMTP_USER');
+  const pass = envVal('SMTP_PASS');
+  if (!host || !user || !pass) {
+    throw new Error('SMTP is not configured (set SMTP_HOST, SMTP_USER, SMTP_PASS on the API host)');
+  }
+  return { host, user, pass };
+};
+
 const getTransporter = () => {
   if (!transporter) {
-    const smtpPort = parseInt(process.env.SMTP_PORT || '465', 10);
+    const { host, user, pass } = assertSmtpConfig();
+    const smtpPort = parseInt(envVal('SMTP_PORT', '465'), 10) || 465;
+    const serverless = Boolean(process.env.VERCEL);
     transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
+      host,
       port: smtpPort,
       secure: smtpPort === 465,
+      requireTLS: smtpPort === 587,
       family: 4,
-      pool: true,
-      maxConnections: 3,
-      maxMessages: 100,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      authMethod: 'LOGIN',
-      tls: {
-        rejectUnauthorized: false,
-      },
-      connectionTimeout: 8000,
-      greetingTimeout: 8000,
-      socketTimeout: 15000,
+      pool: !serverless,
+      maxConnections: serverless ? 1 : 3,
+      maxMessages: 50,
+      auth: { user, pass },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 12000,
+      greetingTimeout: 12000,
+      socketTimeout: 20000,
     });
   }
   return transporter;
 };
 
-export const queueVerificationOtpEmail = (toEmail, otpCode) => {
-  sendVerificationOtpEmail(toEmail, otpCode)
-    .then(() => {
-      console.log(`Verification OTP emailed to ${toEmail}`);
-    })
-    .catch((emailError) => {
-      console.error('Failed to send verification email:', emailError);
-    });
+const mailFrom = () =>
+  envVal('EMAIL_FROM') || `"Course Creator" <${envVal('SMTP_USER')}>`;
+
+export const queueVerificationOtpEmail = async (toEmail, otpCode) => {
+  await sendVerificationOtpEmail(toEmail, otpCode);
 };
 
 export const sendOtpEmail = async (toEmail, otpCode, autoFillUrl) => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM || '"Course Creator" <help@evokeaisolutions.com>',
+    from: mailFrom(),
     to: toEmail,
     subject: 'Your 6-Digit Password Reset OTP Code',
     html: `
@@ -147,12 +154,13 @@ export const sendOtpEmail = async (toEmail, otpCode, autoFillUrl) => {
     `,
   };
 
-  await getTransporter().sendMail(mailOptions);
+  const resetInfo = await getTransporter().sendMail(mailOptions);
+  console.log(`Password-reset mail queued for ${toEmail} id=${resetInfo.messageId}`);
 };
 
 export const sendVerificationOtpEmail = async (toEmail, otpCode) => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM || '"Course Creator" <help@evokeaisolutions.com>',
+    from: mailFrom(),
     to: toEmail,
     subject: 'Verify Your Email - Course Creator',
     html: `
@@ -244,12 +252,13 @@ export const sendVerificationOtpEmail = async (toEmail, otpCode) => {
     `,
   };
 
-  await getTransporter().sendMail(mailOptions);
+  const info = await getTransporter().sendMail(mailOptions);
+  console.log(`Verification OTP mailed to ${toEmail} id=${info.messageId}`);
 };
 
 export const verifySmtpConnection = async () => {
   try {
-    console.log(`Connecting to SMTP Host: "${process.env.SMTP_HOST}:${process.env.SMTP_PORT}"`);
+    console.log(`Connecting to SMTP Host: "${envVal('SMTP_HOST')}:${envVal('SMTP_PORT')}" as ${envVal('SMTP_USER')}`);
     const t = getTransporter();
     await t.verify();
     console.log("✅ Connected to SMTP mail server successfully");
