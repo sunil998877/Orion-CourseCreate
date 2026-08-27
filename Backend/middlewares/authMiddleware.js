@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
+import { getJwtSecret } from '../utils/jwtSecret.js';
 
 export default async function authenticateJWT(req, res, next) {
   if (req.method === 'OPTIONS') return next();
@@ -46,8 +47,7 @@ export default async function authenticateJWT(req, res, next) {
   }
 
   try {
-    const JWT_SECRET = process.env.JWT_SECRET || 'course12@21';
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret());
 
     const userId = decoded.id || decoded.userId || decoded._id;
     const user = await User.findById(userId);

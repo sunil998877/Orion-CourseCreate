@@ -4,12 +4,15 @@ let transporter = null;
 
 const getTransporter = () => {
   if (!transporter) {
-    const smtpPort = parseInt(process.env.SMTP_PORT || '465');
+    const smtpPort = parseInt(process.env.SMTP_PORT || '465', 10);
     transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: smtpPort,
       secure: smtpPort === 465,
       family: 4,
+      pool: true,
+      maxConnections: 3,
+      maxMessages: 100,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -18,10 +21,22 @@ const getTransporter = () => {
       tls: {
         rejectUnauthorized: false,
       },
-      connectionTimeout: 10000,
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 15000,
     });
   }
   return transporter;
+};
+
+export const queueVerificationOtpEmail = (toEmail, otpCode) => {
+  sendVerificationOtpEmail(toEmail, otpCode)
+    .then(() => {
+      console.log(`Verification OTP emailed to ${toEmail}`);
+    })
+    .catch((emailError) => {
+      console.error('Failed to send verification email:', emailError);
+    });
 };
 
 export const sendOtpEmail = async (toEmail, otpCode, autoFillUrl) => {

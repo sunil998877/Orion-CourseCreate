@@ -23,21 +23,7 @@ export const CourseDetails: React.FC<any> = ({ course, generation, audioPlayer, 
           </span>
         </div>
         <div className="flex flex-col items-end gap-3 z-20">
-          <CourseActions course={course} isGeneratingEbook={generation.isGeneratingEbook} isGeneratingAudio={generation.isGeneratingAudio} isGeneratingPodcast={generation.isGeneratingPodcast} showTranscript={showTranscript} showAudioPlayer={showAudioPlayer} showPodcastTranscript={showPodcastTranscript} showPodcastPlayer={showPodcastPlayer} onGenerateEbook={course.ebookUrl ? onGenerateEbook : onOpenPublisher} onDownloadEbook={onDownloadEbook} onGenerateAudio={onGenerateAudio} onGeneratePodcast={onGeneratePodcast} onToggleTranscript={()=>{setShowTranscript(!showTranscript);if(!showTranscript)setShowPodcastTranscript(false)}} onToggleAudio={()=>{setShowAudioPlayer(!showAudioPlayer);if(!showAudioPlayer)setShowPodcastPlayer(false)}} onTogglePodcastTranscript={()=>{setShowPodcastTranscript(!showPodcastTranscript);if(!showPodcastTranscript)setShowTranscript(false)}} onTogglePodcast={()=>{setShowPodcastPlayer(!showPodcastPlayer);if(!showPodcastPlayer)setShowAudioPlayer(false)}}/>{generation.isGeneratingAudio&&
-          <div className="w-48 text-[8px] uppercase text-white/50">
-            Audio Progress {Math.round(generation.audioProgress)}%
-            <div className="bg-white/5 rounded-full h-1">
-              <div className="bg-gradient-to-r from-lime-500 to-emerald-500 h-full rounded-full" style={{width:`${generation.audioProgress}%`}}/>
-            </div>
-          </div>
-          }{generation.isGeneratingPodcast&&
-          <div className="w-48 text-[8px] uppercase text-white/50">
-            Podcast Progress {Math.round(generation.podcastProgress)}%
-            <div className="bg-white/5 rounded-full h-1">
-              <div className="bg-gradient-to-r from-lime-500 to-emerald-500 h-full rounded-full" style={{width:`${generation.podcastProgress}%`}}/>
-            </div>
-          </div>
-          }{showAudioPlayer&&<AudioBookPlayer audioUrl={course.audioUrl} player={audioPlayer}/>} {showPodcastPlayer&&<PodcastPlayer podcastUrl={course.podcastUrl} player={podcastPlayer}/>}
+          <CourseActions course={course} isGeneratingEbook={generation.isGeneratingEbook} isGeneratingAudio={generation.isGeneratingAudio} isGeneratingPodcast={generation.isGeneratingPodcast} showTranscript={showTranscript} showAudioPlayer={showAudioPlayer} showPodcastTranscript={showPodcastTranscript} showPodcastPlayer={showPodcastPlayer} onGenerateEbook={course.ebookUrl ? onGenerateEbook : onOpenPublisher} onDownloadEbook={onDownloadEbook} onGenerateAudio={onGenerateAudio} onGeneratePodcast={onGeneratePodcast} onToggleTranscript={()=>{setShowTranscript(!showTranscript);if(!showTranscript)setShowPodcastTranscript(false)}} onToggleAudio={()=>{setShowAudioPlayer(!showAudioPlayer);if(!showAudioPlayer)setShowPodcastPlayer(false)}} onTogglePodcastTranscript={()=>{setShowPodcastTranscript(!showPodcastTranscript);if(!showPodcastTranscript)setShowTranscript(false)}} onTogglePodcast={()=>{setShowPodcastPlayer(!showPodcastPlayer);if(!showPodcastPlayer)setShowAudioPlayer(false)}}/>{showAudioPlayer&&<AudioBookPlayer audioUrl={course.audioUrl} player={audioPlayer}/>} {showPodcastPlayer&&<PodcastPlayer podcastUrl={course.podcastUrl} player={podcastPlayer}/>}
         </div>
       </div>
       <h2 className="text-3xl lg:text-4xl font-semibold mb-2 max-md:text-xl">

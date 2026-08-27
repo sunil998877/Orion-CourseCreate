@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { getJwtSecret } from "../../utils/jwtSecret.js";
 
 function safeEqual(left, right) {
     const a = Buffer.from(String(left));
@@ -22,10 +23,9 @@ export const adminLogin = (req, res) => {
         return res.status(401).json({ message: "Invalid admin credentials" });
     }
 
-    const JWT_SECRET = process.env.JWT_SECRET || "course12@21";
     const token = jwt.sign(
         { id: "admin", email: adminEmail, username: "Administrator", isAdmin: true },
-        JWT_SECRET,
+        getJwtSecret(),
         { expiresIn: "8h" }
     );
 

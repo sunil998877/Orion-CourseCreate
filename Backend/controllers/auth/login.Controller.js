@@ -1,9 +1,11 @@
 import User from '../../models/userModel.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { getJwtSecret } from '../../utils/jwtSecret.js';
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const { password } = req.body;
 
   if (!email || !password)
     return res.status(400).json({ message: 'All the information are required' });
@@ -14,13 +16,17 @@ export const login = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
 
     const adminEmail = String(process.env.ADMIN_EMAIL || "").trim().toLowerCase();
-    if (adminEmail && String(email).trim().toLowerCase() === adminEmail) {
+    if (adminEmail && email === adminEmail) {
       return res.status(403).json({ message: "Use the admin sign-in page at /admin/login" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid)
       return res.status(401).json({ message: 'Invalid password' });
+
+    if (user.isVerified === false) {
+      return res.status(403).json({ message: 'Please verify your email before logging in' });
+    }
 
     const sessionId = `${user._id}-${Date.now()}`;
     user.activeSessionId = sessionId;
@@ -29,7 +35,6 @@ export const login = async (req, res) => {
     user.lastLoginIP = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'Unknown';
     await user.save();
 
-    const JWT_SECRET = process.env.JWT_SECRET || 'course12@21';
     const token = jwt.sign(
       {
         id: user._id,
@@ -38,7 +43,7 @@ export const login = async (req, res) => {
         username: user.username,
         sessionId
       },
-      JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: '7d' }
     );
 
@@ -56,6 +61,6 @@ export const login = async (req, res) => {
     });
   } catch (err) {
     console.error('Login Error:', err);
-    res.status(500).json({ message: 'Error logging in', error: err.message });
+    res.status(500).json({ message: 'Error logging in' });
   }
 };

@@ -3,7 +3,7 @@ import { sendOtpEmail } from '../../utils/emailService.js';
 
 export const forgotPassword = async (req, res) => {
   console.log("Controller Hit - forgotPassword");
-  const { email } = req.body;
+  const email = String(req.body.email || '').trim().toLowerCase();
 
   if (!email) {
     return res.status(400).json({ message: 'Email is required' });
@@ -23,7 +23,8 @@ export const forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
 
-    const resetUrl = `https://silly-puppy-66a1dd.netlify.app/login?token=${token}&email=${encodeURIComponent(email)}`;
+    const frontendUrl = String(process.env.FRONTEND_URL || 'https://orion.evokeaisolutions.com').replace(/\/$/, '');
+    const resetUrl = `${frontendUrl}/login?token=${token}&email=${encodeURIComponent(email)}`;
 
     try {
       await sendOtpEmail(email, token, resetUrl);

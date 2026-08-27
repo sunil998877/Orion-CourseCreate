@@ -1,5 +1,9 @@
 const getApiBase = () => {
-  let url = import.meta.env.VITE_API_BASE_URL || 'https://orion-back-developerevoke-6846s-projects.vercel.app/api';
+  const fromEnv = import.meta.env.VITE_API_BASE_URL;
+  let url = fromEnv || (import.meta.env.DEV ? 'http://localhost:3000/api' : '');
+  if (!url) {
+    throw new Error('VITE_API_BASE_URL must be set for production builds');
+  }
   url = url.replace(/orion-back-[a-z0-9]+-developerevoke/, 'orion-back-developerevoke');
   url = url.replace(/\/$/, '').replace(/\/login$/, '');
   if (!url.endsWith('/api')) {

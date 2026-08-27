@@ -1,7 +1,7 @@
 import { toast } from 'react-toastify';
 import { ORIGIN } from './api';
 
-const API_ORIGIN = ORIGIN || 'https://orion-back-developerevoke-6846s-projects.vercel.app/api';
+const API_ORIGIN = ORIGIN;
 
 function handleAuthError() {
   const onAdmin = window.location.pathname.startsWith('/admin');

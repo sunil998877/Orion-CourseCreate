@@ -1,9 +1,9 @@
 import User from '../../models/userModel.js';
-import { sendVerificationOtpEmail } from '../../utils/emailService.js';
+import { queueVerificationOtpEmail } from '../../utils/emailService.js';
 
 export const resendRegistrationOtp = async (req, res) => {
   console.log("Controller Hit - resendRegistrationOtp");
-  const { email } = req.body;
+  const email = String(req.body.email || '').trim().toLowerCase();
 
   if (!email) {
     return res.status(400).json({ message: 'Email is required' });
@@ -20,14 +20,8 @@ export const resendRegistrationOtp = async (req, res) => {
     user.verificationOTP = otp;
     user.verificationOTPExpires = Date.now() + 600000;
     await user.save();
-
-    try {
-      await sendVerificationOtpEmail(email, otp);
-      res.status(200).json({ message: 'Verification code resent to your email' });
-    } catch (emailError) {
-      console.error('Failed to send verification email:', emailError);
-      res.status(500).json({ message: 'Failed to send verification email' });
-    }
+    queueVerificationOtpEmail(email, otp);
+    res.status(200).json({ message: 'Verification code resent to your email' });
   } catch (error) {
     console.error('Error in resendRegistrationOtp:', error);
     res.status(500).json({ message: 'Internal server error' });

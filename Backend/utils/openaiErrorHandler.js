@@ -1,8 +1,4 @@
-/**
- * Centralised OpenAI error handler.
- * Maps OpenAI SDK errors to meaningful HTTP responses so the frontend
- * can show a helpful message instead of a vague "Internal Server Error".
- */
+
 
 /**
  * @param {Error} err  - The caught error from the openai SDK
@@ -55,7 +51,7 @@ export function handleOpenAIError(err, res, label = 'openai') {
     });
   }
 
-  // ── Fallback ──────────────────────────────────────────────────────────────
+  
   return res.status(500).json({
     error: 'Failed to generate AI content.',
     details: err.message,

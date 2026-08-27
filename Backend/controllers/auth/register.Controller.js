@@ -1,8 +1,10 @@
 import User from '../../models/userModel.js';
 import bcrypt from 'bcryptjs';
+import { queueVerificationOtpEmail } from '../../utils/emailService.js';
 
 export const register = async (req, res) => {
-    const { username, organisation, email, password } = req.body;
+    const { username, organisation, password } = req.body;
+    const email = String(req.body.email || '').trim().toLowerCase();
 
     if (!username || !organisation || !email || !password)
         return res.status(400).json({ message: 'All the information are required' });
@@ -39,12 +41,7 @@ export const register = async (req, res) => {
             existingUser.verificationOTPExpires = Date.now() + 600000;
 
             await existingUser.save();
-
-            try {
-                await sendVerificationOtpEmail(email, otp);
-            } catch (emailError) {
-                console.error('Failed to send verification email:', emailError);
-            }
+            queueVerificationOtpEmail(email, otp);
 
             return res.status(200).json({
                 message: 'Verification code sent to your email',
@@ -73,12 +70,7 @@ export const register = async (req, res) => {
             verificationOTPExpires: Date.now() + 600000
         });
         await newUser.save();
-
-        try {
-            await sendVerificationOtpEmail(email, otp);
-        } catch (emailError) {
-            console.error('Failed to send verification email:', emailError);
-        }
+        queueVerificationOtpEmail(email, otp);
 
         res.status(201).json({
             message: 'Verification code sent to your email',

@@ -267,8 +267,8 @@ export const createPlanStripeSession = async ({ userId, planId, planName, succes
                     planId: targetPlan._id.toString(),
                     planName: targetPlan.name,
                 },
-                success_url: successUrl || "http://localhost:5173/credits?session_id={CHECKOUT_SESSION_ID}",
-                cancel_url: cancelUrl || "http://localhost:5173/credits?cancelled=true",
+                success_url: successUrl || `${String(process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '')}/credits?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: cancelUrl || `${String(process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '')}/credits?cancelled=true`,
             });
 
             return {

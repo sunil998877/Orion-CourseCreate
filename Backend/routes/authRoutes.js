@@ -14,7 +14,10 @@ import {
   logout
 } from '../controllers/authController.js';
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 },
+});
 const router = express.Router();
 
 router.post('/register', upload.single('avatar'), register);

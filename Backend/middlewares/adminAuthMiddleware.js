@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { getJwtSecret } from '../utils/jwtSecret.js';
 
 export default function adminAuthMiddleware(req, res, next) {
   const authHeader = req.headers.authorization || req.headers.Authorization;
@@ -11,8 +12,7 @@ export default function adminAuthMiddleware(req, res, next) {
   }
 
   try {
-    const JWT_SECRET = process.env.JWT_SECRET || 'course12@21';
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret());
     if (!decoded.isAdmin) {
       return res.status(403).json({ success: false, message: 'Admin access required' });
     }

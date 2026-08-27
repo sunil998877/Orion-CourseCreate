@@ -14,6 +14,8 @@ import { useCourseDownloads } from '../hooks/HeroPage/UseCourseDownloads';
 import { CourseList } from '../components/HeroPage/CourseList';
 import { CourseDetails } from '../components/HeroPage/CourseDetails';
 import { OrionGuidance } from '../components/HeroPage/OrienGuidance';
+import GeneratePodcastModal from '../components/HeroPage/GeneratePodcastModal';
+import GenerateAudioModal from '../components/HeroPage/GenerateAudioModal';
 
 type Course = {
   _id?: string;
@@ -67,6 +69,8 @@ export const HeroPage: React.FC = () => {
   const [showPodcastTranscript, setShowPodcastTranscript] = useState(false);
   const [showPublisherModal, setShowPublisherModal] = useState(false);
   const [publisherName, setPublisherName] = useState('');
+  const [showPodcastModal, setShowPodcastModal] = useState(false);
+  const [showAudioModal, setShowAudioModal] = useState(false);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -213,8 +217,8 @@ export const HeroPage: React.FC = () => {
                     setShowPodcastTranscript={setShowPodcastTranscript}
                     onGenerateEbook={generation.handleGenerateEbook}
                     onDownloadEbook={() => downloads.downloadEbook(courseData.ebookUrl, courseData.title)}
-                    onGenerateAudio={generation.handleGenerateAudio}
-                    onGeneratePodcast={generation.handleGeneratePodcast}
+                    onGenerateAudio={() => setShowAudioModal(true)}
+                    onGeneratePodcast={() => setShowPodcastModal(true)}
                     onOpenPublisher={() => setShowPublisherModal(true)}
                   />
                   <section className="mt-16">
@@ -228,6 +232,44 @@ export const HeroPage: React.FC = () => {
             </div>
           )}
         </main>
+
+        {showAudioModal && (
+          <GenerateAudioModal
+            courseTitle={courseData.title || ''}
+            progress={generation.audioProgress}
+            isGenerating={generation.isGeneratingAudio}
+            error={generation.audioError}
+            hasAudio={Boolean(courseData.audioUrl)}
+            onGenerate={generation.handleGenerateAudio}
+            onListen={() => {
+              setShowAudioModal(false);
+              setShowAudioPlayer(true);
+              setShowPodcastPlayer(false);
+            }}
+            onClose={() => {
+              if (!generation.isGeneratingAudio) setShowAudioModal(false);
+            }}
+          />
+        )}
+
+        {showPodcastModal && (
+          <GeneratePodcastModal
+            courseTitle={courseData.title || ''}
+            progress={generation.podcastProgress}
+            isGenerating={generation.isGeneratingPodcast}
+            error={generation.podcastError}
+            hasPodcast={Boolean(courseData.podcastUrl)}
+            onGenerate={generation.handleGeneratePodcast}
+            onListen={() => {
+              setShowPodcastModal(false);
+              setShowPodcastPlayer(true);
+              setShowAudioPlayer(false);
+            }}
+            onClose={() => {
+              if (!generation.isGeneratingPodcast) setShowPodcastModal(false);
+            }}
+          />
+        )}
 
         {showDelete && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 max-md:p-4">

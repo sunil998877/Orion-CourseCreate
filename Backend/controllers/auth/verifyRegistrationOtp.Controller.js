@@ -1,10 +1,12 @@
 import User from '../../models/userModel.js';
 import jwt from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
+import { getJwtSecret } from '../../utils/jwtSecret.js';
 
 export const verifyRegistrationOtp = async (req, res) => {
   console.log("Controller Hit - verifyRegistrationOtp");
-  const { email, otp } = req.body;
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const { otp } = req.body;
 
   if (!email || !otp) {
     return res.status(400).json({ message: 'Email and OTP are required' });
@@ -31,10 +33,9 @@ export const verifyRegistrationOtp = async (req, res) => {
     user.verificationOTPExpires = undefined;
     await user.save();
 
-    const JWT_SECRET = process.env.JWT_SECRET || 'course12@21';
     const token = jwt.sign(
       { id: user._id, email: user.email, username: user.username, sessionId },
-      JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: '7d' }
     );
 

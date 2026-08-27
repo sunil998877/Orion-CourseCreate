@@ -1,5 +1,6 @@
 import express from "express";
 import authenticateJWT from "../middlewares/authMiddleware.js";
+import adminAuthMiddleware from "../middlewares/adminAuthMiddleware.js";
 
 import { getWallet } from "../controllers/credit/wallet.controller.js";
 import { getTransactions } from "../controllers/credit/transactions.controller.js";
@@ -14,6 +15,10 @@ import {
 
 const router = express.Router();
 
+router.post("/adjust/", adminAuthMiddleware, adjustWalletCredits);
+router.post("/cleanup-reservations/", adminAuthMiddleware, triggerCleanupReservations);
+router.post("/renew-subscriptions/", adminAuthMiddleware, triggerPlanRenewals);
+
 router.use(authenticateJWT);
 
 router.get("/", getWallet);
@@ -27,11 +32,6 @@ router.post("/recharge/stripe-session/", createRechargeStripeSession);
 router.get("/plans/", getPlans);
 router.post("/plans/subscribe/", subscribePlan);
 router.post("/plans/stripe-session/", createPlanStripeSession);
-
-// Support & Maintenance routes
-router.post("/adjust/", adjustWalletCredits);
-router.post("/cleanup-reservations/", triggerCleanupReservations);
-router.post("/renew-subscriptions/", triggerPlanRenewals);
 
 export default router;
 

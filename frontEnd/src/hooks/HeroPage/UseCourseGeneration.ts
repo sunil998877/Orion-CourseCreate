@@ -17,8 +17,10 @@ type Args = {
 export const useCourseGeneration = ({ courseData, setCourseData, setCourses, publisherName, setShowPublisherModal, setPublisherName }: Args) => {
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const [isGeneratingPodcast, setIsGeneratingPodcast] = useState(false);
   const [podcastProgress, setPodcastProgress] = useState(0);
+  const [podcastError, setPodcastError] = useState<string | null>(null);
   const [isGeneratingEbook, setIsGeneratingEbook] = useState(false);
 
   const updateCourse = (courseId: string, patch: Partial<Course>) => {
@@ -29,6 +31,7 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
   const handleGenerateAudio = async () => {
     const courseId = courseData.courseId || courseData._id;
     if (!courseId) return;
+    setAudioError(null);
     setIsGeneratingAudio(true); setAudioProgress(0);
     try {
       const token = localStorage.getItem('token');
@@ -44,12 +47,12 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
       const data = await resp.json(); setAudioProgress(100);
       setTimeout(() => {
         updateCourse(courseId, { audioUrl: data.audioUrl, audioTranscript: data.audioTranscript });
-        setIsGeneratingAudio(false); toast.success('Audio book generated successfully!');
+        setIsGeneratingAudio(false);
       }, 800);
     } catch (err: any) {
       console.error('Audio generation error:', err);
       if (!handleCreditThrowable(err)) {
-        toast.error(`Generation failed: ${err.message || 'Something went wrong'}`);
+        setAudioError(err.message || 'Something went wrong while generating the audiobook.');
       }
       setIsGeneratingAudio(false);
     }
@@ -58,6 +61,7 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
   const handleGeneratePodcast = async () => {
     const courseId = courseData.courseId || courseData._id;
     if (!courseId) return;
+    setPodcastError(null);
     setIsGeneratingPodcast(true); setPodcastProgress(0);
     try {
       const token = localStorage.getItem('token');
@@ -69,18 +73,18 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
           return;
         }
         const msg = err.message || 'Unknown error';
-        if (msg.toLowerCase().includes('multiple voice') || msg.toLowerCase().includes('retry shortly')) throw new Error('Transient API error — please try again in a few seconds.');
+        if (msg.toLowerCase().includes('multiple voice') || msg.toLowerCase().includes('retry shortly')) throw new Error('Voice studio is busy. Try again in a few seconds.');
         throw new Error(msg);
       }
       const data = await resp.json(); setPodcastProgress(100);
       setTimeout(() => {
         updateCourse(courseId, { podcastUrl: data.podcastUrl, podcastScript: data.podcastScript, podcastTranscript: data.podcastTranscript });
-        setIsGeneratingPodcast(false); toast.success('Podcast generated successfully!');
+        setIsGeneratingPodcast(false);
       }, 800);
     } catch (err: any) {
       console.error('Podcast generation error:', err);
       if (!handleCreditThrowable(err)) {
-        toast.error(`Generation failed: ${err.message || 'Something went wrong'}`);
+        setPodcastError(err.message || 'Something went wrong while generating the episode.');
       }
       setIsGeneratingPodcast(false);
     }
@@ -124,5 +128,5 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
     return () => clearInterval(interval);
   }, [isGeneratingPodcast]);
 
-  return { isGeneratingAudio, audioProgress, isGeneratingPodcast, podcastProgress, isGeneratingEbook, handleGenerateAudio, handleGeneratePodcast, handleGenerateEbook };
+  return { isGeneratingAudio, audioProgress, audioError, isGeneratingPodcast, podcastProgress, podcastError, isGeneratingEbook, handleGenerateAudio, handleGeneratePodcast, handleGenerateEbook };
 };
