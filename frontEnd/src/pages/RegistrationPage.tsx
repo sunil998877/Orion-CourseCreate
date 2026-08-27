@@ -134,9 +134,9 @@ function RegistrationPage() {
         setStep('otp');
         startResendTimer();
         if (response.ok) {
-          toast.success('Verification code sent to your email!');
+          toast.success('Verification code sent to your email. Check inbox and spam.');
         } else {
-          toast.error(data.message || 'Could not send email. Use Resend code.');
+          toast.error(data.message || 'Could not send email. Tap Resend after the mail service is set up.');
         }
       } else {
         toast.error(data.message || 'Registration failed');
@@ -194,8 +194,8 @@ function RegistrationPage() {
       });
       const data = await response.json();
       if (response.ok) {
-        toast.success('Verification code resent!');
         startResendTimer();
+        toast.success('The same verification code was sent to your email.');
       } else {
         toast.error(data.message || 'Failed to resend code');
       }
@@ -207,6 +207,7 @@ function RegistrationPage() {
 
   const handleBackToForm = () => {
     setStep('form');
+    setOtpCode('');
     if (timerRef.current) clearInterval(timerRef.current);
     setResendTimer(0);
   };
