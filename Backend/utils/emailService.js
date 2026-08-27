@@ -1,46 +1,110 @@
 import nodemailer from 'nodemailer';
 
-let transporter = null;
-
 const envVal = (key, fallback = '') =>
   String(process.env[key] ?? fallback).trim().replace(/^["']|["']$/g, '');
+
+const isCloudHost = Boolean(process.env.RENDER || process.env.VERCEL);
 
 const assertSmtpConfig = () => {
   const host = envVal('SMTP_HOST');
   const user = envVal('SMTP_USER');
   const pass = envVal('SMTP_PASS');
   if (!host || !user || !pass) {
-    throw new Error('SMTP is not configured (set SMTP_HOST, SMTP_USER, SMTP_PASS on the API host)');
+    throw new Error('SMTP is not configured (set SMTP_HOST, SMTP_USER, SMTP_PASS on orion-api in Render)');
   }
   return { host, user, pass };
 };
 
-const getTransporter = () => {
-  if (!transporter) {
-    const { host, user, pass } = assertSmtpConfig();
-    const smtpPort = parseInt(envVal('SMTP_PORT', '465'), 10) || 465;
-    const serverless = Boolean(process.env.VERCEL);
-    transporter = nodemailer.createTransport({
-      host,
-      port: smtpPort,
-      secure: smtpPort === 465,
-      requireTLS: smtpPort === 587,
-      family: 4,
-      pool: !serverless,
-      maxConnections: serverless ? 1 : 3,
-      maxMessages: 50,
-      auth: { user, pass },
-      tls: { rejectUnauthorized: false },
-      connectionTimeout: 12000,
-      greetingTimeout: 12000,
-      socketTimeout: 20000,
-    });
-  }
-  return transporter;
+const smtpPortOrder = () => {
+  const configured = parseInt(envVal('SMTP_PORT', isCloudHost ? '587' : '465'), 10);
+  const preferred = Number.isFinite(configured) && configured > 0 ? configured : (isCloudHost ? 587 : 465);
+  // Render often blocks or times out SMTPS 465; STARTTLS 587 usually works.
+  const rest = [587, 465].filter((port) => port !== preferred);
+  return isCloudHost ? [587, preferred, 465].filter((port, i, arr) => arr.indexOf(port) === i) : [preferred, ...rest];
 };
 
-const mailFrom = () =>
-  envVal('EMAIL_FROM') || `"Course Creator" <${envVal('SMTP_USER')}>`;
+const createSmtpTransport = (port) => {
+  const { host, user, pass } = assertSmtpConfig();
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    requireTLS: port === 587,
+    family: 4,
+    pool: false,
+    auth: { user, pass },
+    tls: { minVersion: 'TLSv1.2', rejectUnauthorized: false },
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
+    socketTimeout: 25000,
+  });
+};
+
+const mailFrom = () => {
+  const user = envVal('SMTP_USER');
+  return {
+    name: 'Course Creator',
+    address: user || 'noreply@localhost',
+  };
+};
+
+const sendViaResend = async (apiKey, mailOptions) => {
+  const fromAddress = mailFrom().address;
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: `Course Creator <${fromAddress}>`,
+      to: [mailOptions.to],
+      subject: mailOptions.subject,
+      html: mailOptions.html,
+    }),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(body?.message || `Resend failed with ${res.status}`);
+  }
+  console.log(`Mail sent via Resend id=${body.id} to ${mailOptions.to}`);
+  return { messageId: body.id };
+};
+
+const dispatchMail = async (mailOptions) => {
+  const resendKey = envVal('RESEND_API_KEY');
+  if (resendKey) {
+    return sendViaResend(resendKey, mailOptions);
+  }
+
+  const { host } = assertSmtpConfig();
+  const payload = {
+    ...mailOptions,
+    from: mailFrom(),
+    envelope: { from: mailFrom().address, to: mailOptions.to },
+  };
+
+  let lastError;
+  for (const port of smtpPortOrder()) {
+    const transport = createSmtpTransport(port);
+    try {
+      const info = await transport.sendMail(payload);
+      console.log(`Mail sent via ${host}:${port} id=${info.messageId} to ${mailOptions.to}`);
+      return info;
+    } catch (error) {
+      lastError = error;
+      console.error(
+        `SMTP ${host}:${port} failed:`,
+        error?.code || '',
+        error?.response || error?.message || error
+      );
+    } finally {
+      transport.close();
+    }
+  }
+
+  throw lastError || new Error('All SMTP ports failed');
+};
 
 export const queueVerificationOtpEmail = async (toEmail, otpCode) => {
   await sendVerificationOtpEmail(toEmail, otpCode);
@@ -154,7 +218,7 @@ export const sendOtpEmail = async (toEmail, otpCode, autoFillUrl) => {
     `,
   };
 
-  const resetInfo = await getTransporter().sendMail(mailOptions);
+  const resetInfo = await dispatchMail(mailOptions);
   console.log(`Password-reset mail queued for ${toEmail} id=${resetInfo.messageId}`);
 };
 
@@ -252,19 +316,35 @@ export const sendVerificationOtpEmail = async (toEmail, otpCode) => {
     `,
   };
 
-  const info = await getTransporter().sendMail(mailOptions);
+  const info = await dispatchMail(mailOptions);
   console.log(`Verification OTP mailed to ${toEmail} id=${info.messageId}`);
 };
 
 export const verifySmtpConnection = async () => {
   try {
-    console.log(`Connecting to SMTP Host: "${envVal('SMTP_HOST')}:${envVal('SMTP_PORT')}" as ${envVal('SMTP_USER')}`);
-    const t = getTransporter();
-    await t.verify();
-    console.log("✅ Connected to SMTP mail server successfully");
-    return true;
+    if (envVal('RESEND_API_KEY')) {
+      console.log('Email provider: Resend HTTPS (SMTP skipped)');
+      return true;
+    }
+    const { host, user } = assertSmtpConfig();
+    console.log(`Connecting to SMTP Host: "${host}" as ${user}`);
+    let lastError;
+    for (const port of smtpPortOrder()) {
+      const transport = createSmtpTransport(port);
+      try {
+        await transport.verify();
+        console.log(`Connected to SMTP ${host}:${port}`);
+        transport.close();
+        return true;
+      } catch (error) {
+        lastError = error;
+        console.error(`SMTP verify ${host}:${port} failed:`, error?.message || error);
+        transport.close();
+      }
+    }
+    throw lastError;
   } catch (error) {
-    console.error("❌ SMTP connection verification failed:", error);
+    console.error('SMTP connection verification failed:', error);
     return false;
   }
 };
