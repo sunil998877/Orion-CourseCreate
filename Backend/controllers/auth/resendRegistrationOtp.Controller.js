@@ -31,10 +31,11 @@ export const resendRegistrationOtp = async (req, res) => {
     await user.save();
 
     const emailSent = await trySendVerificationOtpEmail(email, otp);
-    if (!emailSent) {
+    if (!emailSent.ok) {
       return res.status(503).json({
-        message:
-          'Could not send the verification email. On Vercel set RESEND_API_KEY on the backend.',
+        message: emailSent.reason
+          ? `Could not send the verification email: ${emailSent.reason}`
+          : 'Could not send the verification email.',
         emailSent: false,
       });
     }

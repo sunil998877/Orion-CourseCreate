@@ -48,70 +48,7 @@ const mailFrom = () => {
   };
 };
 
-const sendViaResend = async (apiKey, mailOptions) => {
-  const fromAddress = envVal('RESEND_FROM') || envVal('EMAIL_FROM') || mailFrom().address;
-  const from = fromAddress.includes('<')
-    ? fromAddress
-    : `Course Creator <${fromAddress}>`;
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from,
-      to: [mailOptions.to],
-      subject: mailOptions.subject,
-      html: mailOptions.html,
-    }),
-  });
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(body?.message || `Resend failed with ${res.status}`);
-  }
-  console.log(`Mail sent via Resend id=${body.id} to ${mailOptions.to}`);
-  return { messageId: body.id };
-};
-
-const sendViaBrevo = async (apiKey, mailOptions) => {
-  const fromAddress = envVal('BREVO_FROM') || envVal('EMAIL_FROM') || mailFrom().address;
-  const email = fromAddress.replace(/.*<|>.*/g, '') || mailFrom().address;
-  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: {
-      accept: 'application/json',
-      'api-key': apiKey,
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      sender: { name: 'Course Creator', email },
-      to: [{ email: mailOptions.to }],
-      subject: mailOptions.subject,
-      htmlContent: mailOptions.html,
-    }),
-  });
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(body?.message || `Brevo failed with ${res.status}`);
-  }
-  console.log(`Mail sent via Brevo id=${body.messageId || body.id} to ${mailOptions.to}`);
-  return { messageId: body.messageId || body.id };
-};
-
 const dispatchMail = async (mailOptions) => {
-  const resendKey = envVal('RESEND_API_KEY');
-  if (resendKey) return sendViaResend(resendKey, mailOptions);
-
-  const brevoKey = envVal('BREVO_API_KEY');
-  if (brevoKey) return sendViaBrevo(brevoKey, mailOptions);
-
-  if (process.env.VERCEL) {
-    throw new Error(
-      'Vercel cannot send Hostinger SMTP. Set RESEND_API_KEY on the backend (https://resend.com) so the inbox OTP is real.'
-    );
-  }
-
   const { host } = assertSmtpConfig();
   const payload = {
     ...mailOptions,
@@ -144,10 +81,11 @@ export const queueVerificationOtpEmail = async (toEmail, otpCode) => {
 export const trySendVerificationOtpEmail = async (toEmail, otpCode) => {
   try {
     await sendVerificationOtpEmail(toEmail, otpCode);
-    return true;
+    return { ok: true };
   } catch (error) {
-    console.error('Verification email not delivered:', error?.message || error);
-    return false;
+    const reason = error?.message || String(error);
+    console.error('Verification email not delivered:', reason);
+    return { ok: false, reason };
   }
 };
 
@@ -363,10 +301,6 @@ export const sendVerificationOtpEmail = async (toEmail, otpCode) => {
 
 export const verifySmtpConnection = async () => {
   try {
-    if (envVal('RESEND_API_KEY')) {
-      console.log('Email provider: Resend HTTPS (SMTP skipped)');
-      return true;
-    }
     const { host, user } = assertSmtpConfig();
     console.log(`Connecting to SMTP Host: "${host}" as ${user}`);
     let lastError;

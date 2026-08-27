@@ -16,12 +16,13 @@ const reuseOrCreateOtp = (user) => {
 
 const buildOtpPayload = async (email, otp, status) => {
     const emailSent = await trySendVerificationOtpEmail(email, otp);
-    if (!emailSent) {
+    if (!emailSent.ok) {
         return {
             status: 503,
             body: {
-                message:
-                    'Could not send the verification email. On Vercel set RESEND_API_KEY on the backend. Then tap Resend.',
+                message: emailSent.reason
+                    ? `Could not send the verification email: ${emailSent.reason}`
+                    : 'Could not send the verification email. Then tap Resend.',
                 email,
                 emailSent: false,
             },
