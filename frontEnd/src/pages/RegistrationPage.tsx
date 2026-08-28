@@ -129,6 +129,11 @@ function RegistrationPage() {
         body: form,
       });
       const data = await response.json();
+      if (response.ok && data.skipOtp) {
+        toast.success('Registration successful. Please log in.');
+        navigate('/login', { replace: true });
+        return;
+      }
       if (data.email && (response.ok || response.status === 503)) {
         setOtpEmail(data.email);
         setStep('otp');

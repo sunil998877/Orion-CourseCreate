@@ -2,6 +2,14 @@ import User from '../../models/userModel.js';
 import bcrypt from 'bcryptjs';
 import { trySendVerificationOtpEmail } from '../../utils/emailService.js';
 
+// Local: email OTP. Render/Vercel: skip mail for now (SMTP times out). Set SKIP_REGISTRATION_OTP=false to require OTP again.
+const skipRegistrationOtp = () => {
+    const flag = String(process.env.SKIP_REGISTRATION_OTP || '').trim().toLowerCase();
+    if (flag === 'true' || flag === '1') return true;
+    if (flag === 'false' || flag === '0') return false;
+    return Boolean(process.env.RENDER || process.env.VERCEL);
+};
+
 const reuseOrCreateOtp = (user) => {
     const stillValid =
         user.verificationOTP &&
@@ -38,6 +46,16 @@ const buildOtpPayload = async (email, otp, status) => {
     };
 };
 
+const completeWithoutOtp = (status, email) => ({
+    status,
+    body: {
+        message: 'Registration successful. You can log in now.',
+        email,
+        skipOtp: true,
+        registered: true,
+    },
+});
+
 export const register = async (req, res) => {
     const { username, organisation, password } = req.body;
     const email = String(req.body.email || '').trim().toLowerCase();
@@ -72,6 +90,11 @@ export const register = async (req, res) => {
             existingUser.avatar = avatar;
 
             const otp = reuseOrCreateOtp(existingUser);
+            if (skipRegistrationOtp()) {
+                existingUser.isVerified = true;
+                await existingUser.save();
+                return res.status(200).json(completeWithoutOtp(200, email).body);
+            }
             await existingUser.save();
 
             const delivered = await buildOtpPayload(email, otp, 200);
@@ -87,17 +110,22 @@ export const register = async (req, res) => {
         }
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const skipOtp = skipRegistrationOtp();
         const newUser = new User({
             email,
             password: hashedPassword,
             organisation,
             username,
             avatar,
-            isVerified: false,
+            isVerified: skipOtp,
             verificationOTP: otp,
             verificationOTPExpires: Date.now() + 600000,
         });
         await newUser.save();
+
+        if (skipOtp) {
+            return res.status(201).json(completeWithoutOtp(201, email).body);
+        }
 
         const delivered = await buildOtpPayload(email, otp, 201);
         return res.status(delivered.status).json(delivered.body);
