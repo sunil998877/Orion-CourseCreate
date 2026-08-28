@@ -1,9 +1,8 @@
 export function clearAdminSession() {
-  localStorage.removeItem("adminToken");
-  localStorage.removeItem("adminEmail");
-  localStorage.removeItem("adminUsername");
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminEmail");
+    localStorage.removeItem("adminUsername");
 }
-
 export function hasAdminSession() {
-  return Boolean(localStorage.getItem("adminToken"));
+    return Boolean(localStorage.getItem("adminToken"));
 }

@@ -1,17 +1,14 @@
 import mongoose from 'mongoose';
-
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
-
     },
     avatar: {
-        type: String, // data URL (e.g., data:image/png;base64,...)
+        type: String,
         default: ''
     },
     organisation: {
         type: String,
-
     },
     email: {
         type: String,
@@ -52,12 +49,12 @@ const userSchema = new mongoose.Schema({
         type: Date
     },
     notifications: [{
-        title: { type: String, required: true },
-        message: { type: String, required: false },
-        type: { type: String, enum: ['success', 'info', 'warning', 'error'], default: 'info' },
-        isRead: { type: Boolean, default: false },
-        createdAt: { type: Date, default: Date.now }
-    }],
+            title: { type: String, required: true },
+            message: { type: String, required: false },
+            type: { type: String, enum: ['success', 'info', 'warning', 'error'], default: 'info' },
+            isRead: { type: Boolean, default: false },
+            createdAt: { type: Date, default: Date.now }
+        }],
     activeSessionId: {
         type: String,
         default: null
@@ -72,7 +69,5 @@ const userSchema = new mongoose.Schema({
         type: String
     }
 });
-
 const User = mongoose.model('User', userSchema);
-
 export default User;

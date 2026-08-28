@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
-
 const integerSetter = (val) => (typeof val === "number" ? Math.round(val) : val);
-
 const PricingSchema = new mongoose.Schema({
     actionKey: {
         type: String,
@@ -35,11 +33,6 @@ const PricingSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
-
-},
-    { timestamps: true }
-);
-
-
+}, { timestamps: true });
 const PricingRule = mongoose.model("PricingRule", PricingSchema);
 export default PricingRule;

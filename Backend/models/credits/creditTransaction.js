@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
-
 const integerSetter = (val) => (typeof val === "number" ? Math.round(val) : val);
-
 const CreditTransactionSchema = new mongoose.Schema({
     wallet: {
         type: mongoose.Schema.Types.ObjectId,
@@ -25,11 +23,11 @@ const CreditTransactionSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: [
-            "PENDING",      // For active reservations awaiting reconciliation or release
-            "RECONCILED",   // Reservation successfully fulfilled
-            "RELEASED",     // Reservation released/refunded
-            "EXPIRED",      // Stale reservation voided by cleanup job
-            "COMPLETED"     // For instant transactions like RECHARGE, PLAN_RESET, ADJUSTMENT
+            "PENDING",
+            "RECONCILED",
+            "RELEASED",
+            "EXPIRED",
+            "COMPLETED"
         ],
         default: function () {
             return this.type === "RESERVE" ? "PENDING" : "COMPLETED";
@@ -57,21 +55,19 @@ const CreditTransactionSchema = new mongoose.Schema({
     },
     approvedBy: {
         type: String,
-        default: null, // User ID or Email of support agent who approved an ADJUSTMENT
+        default: null,
     },
     reason: {
         type: String,
-        default: null, // Reason for ADJUSTMENT or failure/refund
+        default: null,
     },
     providerUsageMeta: {
         type: mongoose.Schema.Types.Mixed,
         default: null,
     }
 }, { timestamps: true });
-
 CreditTransactionSchema.index({ type: 1, status: 1, createdAt: 1 });
 CreditTransactionSchema.index({ createdAt: -1 });
 CreditTransactionSchema.index({ wallet: 1, type: 1, status: 1 });
-
 const CreditTransaction = mongoose.model("CreditTransaction", CreditTransactionSchema);
 export default CreditTransaction;

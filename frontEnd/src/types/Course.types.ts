@@ -6,7 +6,10 @@ export type Course = {
     type?: string;
     module?: number;
     level?: string;
-    duration?: { value: number; unit: string };
+    duration?: {
+        value: number;
+        unit: string;
+    };
     country?: string;
     standards?: string;
     audioUrl?: string;
@@ -15,13 +18,15 @@ export type Course = {
     ebookStatus?: 'idle' | 'generating' | 'completed' | 'failed';
     podcastUrl?: string;
     podcastTranscript?: string;
-    podcastScript?: { speaker: string; text: string }[];
+    podcastScript?: {
+        speaker: string;
+        text: string;
+    }[];
     podcastStatus?: 'idle' | 'generating' | 'completed' | 'failed';
     courseId?: string;
     createdAt?: string;
-  };
-  
-  export const emptyCourse: Course = {
+};
+export const emptyCourse: Course = {
     title: '',
     description: '',
     audience: '',
@@ -38,5 +43,4 @@ export type Course = {
     podcastScript: [],
     podcastStatus: 'idle',
     createdAt: '',
-  };
-  
+};

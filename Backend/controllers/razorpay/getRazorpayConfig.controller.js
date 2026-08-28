@@ -8,7 +8,8 @@ export const getRazorpayConfig = async (req, res) => {
             success: true,
             data: { keyId, currency: "INR", provider: "razorpay" },
         });
-    } catch (error) {
+    }
+    catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }
 };

@@ -1,5 +1,4 @@
 import { getPlansList } from "../../services/creditService/planService.js";
-
 export const getPlans = async (req, res) => {
     try {
         const plans = await getPlansList();
@@ -7,7 +6,8 @@ export const getPlans = async (req, res) => {
             success: true,
             data: plans,
         });
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Error fetching plans:", error);
         return res.status(500).json({
             success: false,

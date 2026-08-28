@@ -1,43 +1,36 @@
 import { OpenAI } from 'openai';
 import { handleOpenAIError } from '../../utils/openaiErrorHandler.js';
-
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'dummy-key' });
-
 export const generateAllModulesDraft = async (req, res) => {
-  const { modules } = req.body;
-
-  if (!Array.isArray(modules) || modules.length === 0) {
-    return res.status(400).json({ message: 'modules array is required' });
-  }
-
-  const CONCURRENCY_LIMIT = 5;
-  const results = [];
-  const errors = [];
-
-  try {
-  if (modules.length > 0) {
-    console.log("[DEBUG] Generating Modules for Topic:", modules[0].courseData?.title);
-    console.log("[DEBUG] Description provided:", modules[0].courseData?.description?.substring(0, 100) + "...");
-  }
-
-  const processModule = async (modData, index) => {
-    const { moduleNumber, courseData, previousModules, themeId } = modData;
-
+    const { modules } = req.body;
+    if (!Array.isArray(modules) || modules.length === 0) {
+        return res.status(400).json({ message: 'modules array is required' });
+    }
+    const CONCURRENCY_LIMIT = 5;
+    const results = [];
+    const errors = [];
     try {
-      const courseStyle = courseData?.courseStyle || 'Academic / Formal Style';
-      const previousModulesList = Array.isArray(previousModules)
-        ? previousModules.map((m) => {
-          const modNum = Number(m?.moduleNumber);
-          const modTitle = String(m?.title || '').trim();
-          const lessons = Array.isArray(m?.lessons) ? m.lessons.map((l) => String(l || '').trim()).filter(Boolean) : [];
-          const header = `Module ${Number.isFinite(modNum) ? modNum : '?'}`;
-          if (!modTitle && lessons.length === 0) return '';
-          return `${header}: ${modTitle || '(no title)'}${lessons.length ? ` | Lessons: ${lessons.join(', ')}` : ''}`;
-        }).filter(Boolean)
-        : [];
-      const previousModulesText = previousModulesList.length ? previousModulesList.join('\n') : 'None';
-
-      const prompt1 = `
+        if (modules.length > 0) {
+            console.log("[DEBUG] Generating Modules for Topic:", modules[0].courseData?.title);
+            console.log("[DEBUG] Description provided:", modules[0].courseData?.description?.substring(0, 100) + "...");
+        }
+        const processModule = async (modData, index) => {
+            const { moduleNumber, courseData, previousModules, themeId } = modData;
+            try {
+                const courseStyle = courseData?.courseStyle || 'Academic / Formal Style';
+                const previousModulesList = Array.isArray(previousModules)
+                    ? previousModules.map((m) => {
+                        const modNum = Number(m?.moduleNumber);
+                        const modTitle = String(m?.title || '').trim();
+                        const lessons = Array.isArray(m?.lessons) ? m.lessons.map((l) => String(l || '').trim()).filter(Boolean) : [];
+                        const header = `Module ${Number.isFinite(modNum) ? modNum : '?'}`;
+                        if (!modTitle && lessons.length === 0)
+                            return '';
+                        return `${header}: ${modTitle || '(no title)'}${lessons.length ? ` | Lessons: ${lessons.join(', ')}` : ''}`;
+                    }).filter(Boolean)
+                    : [];
+                const previousModulesText = previousModulesList.length ? previousModulesList.join('\n') : 'None';
+                const prompt1 = `
 You are an expert curriculum designer.
 
 Course Title: ${courseData?.title || ''}
@@ -92,8 +85,7 @@ Rules:
 - Each module MUST be designed for exactly 10-15 minutes of direct instructional content. Ensure the depth of teaching points and case studies reflects this duration.
 - Do NOT include text outside JSON
 `;
-
-      const prompt2 = `
+                const prompt2 = `
 Create slides for Module ${moduleNumber} of the course "${courseData?.title || 'Your Course'}".
 Course Style / Tone: ${courseStyle} (Ensure the slides and their voiceover transcript text rigidly adhere to this style. If scenario-based, introduce characters in the visuals/transcript. If storytelling, write a narrative transcript. If academic, remain formal.)
 Previously generated modules (must not be repeated):
@@ -147,82 +139,86 @@ Requirements:
 - Avoid generic repeated structures like "Introduction/Fundamentals/Overview" if already used in prior modules.
 - Do NOT include any text outside the JSON object.
 `;
-
-      const [resp1, resp2] = await Promise.all([
-        openai.chat.completions.create({
-          model: 'gpt-4o',
-          messages: [{ role: 'user', content: prompt1 + '\nReturn a JSON object with the specified structure.' }],
-          response_format: { type: 'json_object' }
-        }),
-        openai.chat.completions.create({
-          model: 'gpt-4o',
-          messages: [{ role: 'user', content: prompt2 + '\nReturn a JSON object with the specified structure.' }],
-          response_format: { type: 'json_object' }
-        })
-      ]);
-
-      let content = resp1.choices[0].message.content;
-      let slides = resp2.choices[0].message.content;
-
-      try { content = JSON.parse(content); } catch (e) {
-        const match = (content || '').match(/(\[.*\]|\{.*\})/s);
-        if (match) content = JSON.parse(match[0]);
-      }
-
-      try { slides = JSON.parse(slides); } catch (e) {
-        const match = (slides || '').match(/(\[.*\]|\{.*\})/s);
-        if (match) slides = JSON.parse(match[0]);
-      }
-
-      if (slides && slides.Module && !slides.Slides) slides = slides.Module;
-      if (Array.isArray(slides)) slides = { Slides: slides };
-
-      let slidesObj = slides || { Slides: [] };
-      if (!slidesObj.Slides) slidesObj.Slides = [];
-      if (slidesObj.Slides.length < 10) {
-        for (let i = slidesObj.Slides.length; i < 10; i++) {
-          slidesObj.Slides.push({
-            SlideNumber: i + 1,
-            Title: `Slide ${i + 1} - Key Takeaway`,
-            Bullets: ["Important module concept", "Practical implementation step", "Final review point"],
-            Content: "Reviewing the critical components of this module section.",
-            VisualPrompt: "A summary graphic representing the module's key learning outcomes.",
-            Transcript: "Reviewing the critical components of this module section to solidify the learner's understanding."
-          });
+                const [resp1, resp2] = await Promise.all([
+                    openai.chat.completions.create({
+                        model: 'gpt-4o',
+                        messages: [{ role: 'user', content: prompt1 + '\nReturn a JSON object with the specified structure.' }],
+                        response_format: { type: 'json_object' }
+                    }),
+                    openai.chat.completions.create({
+                        model: 'gpt-4o',
+                        messages: [{ role: 'user', content: prompt2 + '\nReturn a JSON object with the specified structure.' }],
+                        response_format: { type: 'json_object' }
+                    })
+                ]);
+                let content = resp1.choices[0].message.content;
+                let slides = resp2.choices[0].message.content;
+                try {
+                    content = JSON.parse(content);
+                }
+                catch (e) {
+                    const match = (content || '').match(/(\[.*\]|\{.*\})/s);
+                    if (match)
+                        content = JSON.parse(match[0]);
+                }
+                try {
+                    slides = JSON.parse(slides);
+                }
+                catch (e) {
+                    const match = (slides || '').match(/(\[.*\]|\{.*\})/s);
+                    if (match)
+                        slides = JSON.parse(match[0]);
+                }
+                if (slides && slides.Module && !slides.Slides)
+                    slides = slides.Module;
+                if (Array.isArray(slides))
+                    slides = { Slides: slides };
+                let slidesObj = slides || { Slides: [] };
+                if (!slidesObj.Slides)
+                    slidesObj.Slides = [];
+                if (slidesObj.Slides.length < 10) {
+                    for (let i = slidesObj.Slides.length; i < 10; i++) {
+                        slidesObj.Slides.push({
+                            SlideNumber: i + 1,
+                            Title: `Slide ${i + 1} - Key Takeaway`,
+                            Bullets: ["Important module concept", "Practical implementation step", "Final review point"],
+                            Content: "Reviewing the critical components of this module section.",
+                            VisualPrompt: "A summary graphic representing the module's key learning outcomes.",
+                            Transcript: "Reviewing the critical components of this module section to solidify the learner's understanding."
+                        });
+                    }
+                }
+                slidesObj.Slides = slidesObj.Slides.slice(0, 10);
+                return {
+                    moduleNumber,
+                    themeId: themeId || 'aurora',
+                    content: content || null,
+                    slides: slidesObj
+                };
+            }
+            catch (err) {
+                const isAuthError = err.status === 401 || err.code === 'invalid_api_key' || err.status === 429;
+                if (isAuthError)
+                    throw err;
+                console.error(`Error generating module ${moduleNumber}:`, err.message);
+                errors.push({ moduleNumber, error: err instanceof Error ? err.message : 'Generation failed' });
+                return { moduleNumber, themeId: themeId || 'aurora', content: null, slides: { Slides: [] }, error: true };
+            }
+        };
+        for (let i = 0; i < modules.length; i += CONCURRENCY_LIMIT) {
+            const batch = modules.slice(i, i + CONCURRENCY_LIMIT);
+            const batchResults = await Promise.all(batch.map((mod, idx) => processModule(mod, i + idx)));
+            results.push(...batchResults);
         }
-      }
-      slidesObj.Slides = slidesObj.Slides.slice(0, 10);
-
-      return {
-        moduleNumber,
-        themeId: themeId || 'aurora',
-        content: content || null,
-        slides: slidesObj
-      };
-    } catch (err) {
-      // Surface auth/rate-limit errors immediately — no point processing remaining modules
-      const isAuthError = err.status === 401 || err.code === 'invalid_api_key' || err.status === 429;
-      if (isAuthError) throw err;
-      console.error(`Error generating module ${moduleNumber}:`, err.message);
-      errors.push({ moduleNumber, error: err instanceof Error ? err.message : 'Generation failed' });
-      return { moduleNumber, themeId: themeId || 'aurora', content: null, slides: { Slides: [] }, error: true };
+        res.json({
+            modules: results.filter(r => !r.error),
+            errors: errors.length > 0 ? errors : undefined,
+            total: modules.length,
+            completed: results.filter(r => !r.error).length,
+            failed: errors.length
+        });
     }
-  };
-
-  for (let i = 0; i < modules.length; i += CONCURRENCY_LIMIT) {
-    const batch = modules.slice(i, i + CONCURRENCY_LIMIT);
-    const batchResults = await Promise.all(batch.map((mod, idx) => processModule(mod, i + idx)));
-    results.push(...batchResults);
-  }
-
-  res.json({
-    modules: results.filter(r => !r.error),
-    errors: errors.length > 0 ? errors : undefined,
-    total: modules.length,
-    completed: results.filter(r => !r.error).length,
-    failed: errors.length
-  });
-  } catch (err) {
-    return handleOpenAIError(err, res, 'generate-all-modules-draft');
-  }
+    catch (err) {
+        return handleOpenAIError(err, res, 'generate-all-modules-draft');
+    }
 };

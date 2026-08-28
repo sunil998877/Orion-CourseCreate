@@ -1,6 +1,5 @@
 import PricingRule from "../../models/credits/pricingRule.js";
 import { invalidateAdminCache } from "./admin.cache.js";
-
 export const updateAdminPricingRule = async (req, res) => {
     try {
         const { id } = req.params;
@@ -12,14 +11,17 @@ export const updateAdminPricingRule = async (req, res) => {
             }
             payload.creditCost = cost;
         }
-        if (req.body.isActive !== undefined) payload.isActive = Boolean(req.body.isActive);
-        if (req.body.displayName) payload.displayName = String(req.body.displayName);
-
+        if (req.body.isActive !== undefined)
+            payload.isActive = Boolean(req.body.isActive);
+        if (req.body.displayName)
+            payload.displayName = String(req.body.displayName);
         const updated = await PricingRule.findByIdAndUpdate(id, payload, { new: true });
-        if (!updated) return res.status(404).json({ success: false, message: "Rule not found" });
+        if (!updated)
+            return res.status(404).json({ success: false, message: "Rule not found" });
         invalidateAdminCache();
         return res.status(200).json({ success: true, data: updated });
-    } catch (error) {
+    }
+    catch (error) {
         console.error("[Admin] updateAdminPricingRule error:", error);
         return res.status(500).json({ success: false, message: "Failed to update pricing rule" });
     }

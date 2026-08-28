@@ -1,10 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
-
-
 import PricingRule from "../models/credits/pricingRule.js";
-
 const pricingRules = [
     {
         actionKey: "course_generation_gamma",
@@ -43,28 +40,25 @@ const pricingRules = [
         creditCost: 5,
     },
 ];
-
 const seedPricingRules = async () => {
     try {
         const mongoUri = process.env.MONGODB_URI;
         if (!mongoUri) {
             throw new Error("MONGODB_URI is not defined in environment variables");
         }
-
         await mongoose.connect(mongoUri);
         console.log("Connected to MongoDB");
-
         await PricingRule.deleteMany({});
         await PricingRule.insertMany(pricingRules);
-
         console.log("Pricing rules seeded successfully");
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Pricing rules seed failed:", error);
-    } finally {
+    }
+    finally {
         await mongoose.disconnect();
         console.log("MongoDB connection closed");
         process.exit(0);
     }
 };
-
 seedPricingRules();

@@ -1,27 +1,15 @@
 import PricingRule from "../../models/credits/pricingRule.js";
 import Wallet from "../../models/credits/wallet.js";
-
-/**
- * POST /api/wallet/estimate/
- * Returns the credit cost for a given action_key before the user confirms.
- *
- * Body:
- *   { "action_key": "course_generation_gamma" }
- *
- * Response includes whether the user has enough credits.
- */
 export const estimateCost = async (req, res) => {
     try {
         const userId = req.user?._id || req.user?.id;
         if (!userId) {
             return res.status(401).json({ success: false, message: "User not authenticated" });
         }
-
         const { actionKey } = req.body;
         if (!actionKey) {
             return res.status(400).json({ success: false, message: "actionKey is required in the request body" });
         }
-
         const rule = await PricingRule.findOne({ actionKey: actionKey, isActive: true });
         if (!rule) {
             return res.status(404).json({
@@ -29,11 +17,9 @@ export const estimateCost = async (req, res) => {
                 message: `No active pricing rule found for actionKey: "${actionKey}"`,
             });
         }
-
         const wallet = await Wallet.findOne({ user: userId });
         const currentBalance = wallet?.balance ?? 0;
         const canAfford = currentBalance >= rule.creditCost;
-
         return res.status(200).json({
             success: true,
             data: {
@@ -49,7 +35,8 @@ export const estimateCost = async (req, res) => {
                     : `Insufficient credits. This action requires ${rule.creditCost} credits but you only have ${currentBalance}.`,
             },
         });
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Error estimating cost:", error);
         return res.status(500).json({ success: false, message: "Failed to estimate credit cost" });
     }

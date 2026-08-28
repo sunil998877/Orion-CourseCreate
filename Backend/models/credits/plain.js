@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
-
 const integerSetter = (val) => (typeof val === "number" ? Math.round(val) : val);
-
 const PlansSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -32,9 +30,6 @@ const PlansSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     }
-},
-    { timestamps: true }
-);
-
+}, { timestamps: true });
 const Plan = mongoose.model("Plan", PlansSchema);
 export default Plan;

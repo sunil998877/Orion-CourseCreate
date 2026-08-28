@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import Razorpay from "razorpay";
-
 export const getRazorpayClient = () => {
     const key_id = process.env.RAZORPAY_KEY_ID;
     const key_secret = process.env.RAZORPAY_KEY_SECRET;
@@ -9,7 +8,6 @@ export const getRazorpayClient = () => {
     }
     return new Razorpay({ key_id, key_secret });
 };
-
 export const verifySignature = (orderId, paymentId, signature) => {
     const secret = process.env.RAZORPAY_KEY_SECRET;
     const expected = crypto

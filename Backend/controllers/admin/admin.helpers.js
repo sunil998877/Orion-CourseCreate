@@ -1,7 +1,6 @@
 import PricingRule from "../../models/credits/pricingRule.js";
 import Course from "../../models/courseModel.js";
 import { withCache } from "./admin.cache.js";
-
 export const COURSE_ADMIN_LIST_SELECT = [
     "courseId",
     "title",
@@ -22,7 +21,6 @@ export const COURSE_ADMIN_LIST_SELECT = [
     "modules.status",
     "modules.gammaUrl",
 ].join(" ");
-
 export const formatTransaction = (tx) => {
     const user = tx.wallet?.user;
     return {
@@ -46,7 +44,6 @@ export const formatTransaction = (tx) => {
             : { displayName: tx.reason || tx.type },
     };
 };
-
 export const providerSpendPipeline = [
     { $match: { type: "RESERVE", status: "RECONCILED" } },
     { $lookup: { from: "pricingrules", localField: "action", foreignField: "_id", as: "actionInfo" } },
@@ -59,9 +56,7 @@ export const providerSpendPipeline = [
         },
     },
 ];
-
 const emptyProvider = () => ({ totalCreditsCharged: 0, count: 0 });
-
 export const ledgerProviderBreakdown = (providerAgg) => {
     const breakdown = {
         gamma: emptyProvider(),
@@ -76,16 +71,13 @@ export const ledgerProviderBreakdown = (providerAgg) => {
     }
     return breakdown;
 };
-
-const getPricingCostMap = () =>
-    withCache("pricing-costs", 60_000, async () => {
-        const pricingRules = await PricingRule.find().select("actionKey creditCost").lean();
-        const ruleCostMap = {};
-        for (const r of pricingRules) ruleCostMap[r.actionKey] = r.creditCost;
-        return ruleCostMap;
-    });
-
-/** OpenAI / ElevenLabs jobs are not reserved on the ledger — estimate from generated courses. */
+const getPricingCostMap = () => withCache("pricing-costs", 60000, async () => {
+    const pricingRules = await PricingRule.find().select("actionKey creditCost").lean();
+    const ruleCostMap = {};
+    for (const r of pricingRules)
+        ruleCostMap[r.actionKey] = r.creditCost;
+    return ruleCostMap;
+});
 export const estimateProviderSpendFromCourses = async () => {
     const [ruleCostMap, totals] = await Promise.all([
         getPricingCostMap(),
@@ -142,7 +134,6 @@ export const estimateProviderSpendFromCourses = async () => {
             },
         ]),
     ]);
-
     const row = totals[0] || {
         completedModules: 0,
         totalModules: 0,
@@ -150,21 +141,18 @@ export const estimateProviderSpendFromCourses = async () => {
         quizJobs: 0,
         audioJobs: 0,
     };
-
     const gammaCostPerDeck = ruleCostMap.course_generation_gamma || 250;
     const outlineCost = ruleCostMap.course_outline_openai || 10;
     const workbookCost = ruleCostMap.workbook_openai || 20;
     const podcastCost = ruleCostMap.podcast_elevenlabs || 15;
     const quizCost = ruleCostMap.quiz_openai || 8;
-
     return {
         gamma: {
             totalCreditsCharged: row.completedModules * gammaCostPerDeck,
             count: row.completedModules,
         },
         openai: {
-            totalCreditsCharged:
-                row.courseCount * outlineCost + row.totalModules * workbookCost + row.quizJobs * quizCost,
+            totalCreditsCharged: row.courseCount * outlineCost + row.totalModules * workbookCost + row.quizJobs * quizCost,
             count: row.courseCount + row.totalModules + row.quizJobs,
         },
         elevenlabs: {
@@ -173,7 +161,6 @@ export const estimateProviderSpendFromCourses = async () => {
         },
     };
 };
-
 export const mergeProviderBreakdown = (ledger, estimated) => {
     const keys = ["gamma", "openai", "elevenlabs"];
     const out = {};

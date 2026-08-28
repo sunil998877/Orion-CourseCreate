@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
-
 const integerSetter = (val) => (typeof val === "number" ? Math.round(val) : val);
-
 const WalletSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -48,11 +46,6 @@ const WalletSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
-
-},
-    { timestamps: true }
-);
-
-
+}, { timestamps: true });
 const Wallet = mongoose.model("Wallet", WalletSchema);
 export default Wallet;

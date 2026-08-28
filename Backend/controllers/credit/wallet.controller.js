@@ -1,13 +1,11 @@
 import Wallet from "../../models/credits/wallet.js";
 import Plan from "../../models/credits/plain.js";
 import { DEFAULT_CREDIT_PLANS } from "../../config/creditPlans.js";
-
 function getFirstOfNextMonth() {
     const now = new Date();
     const firstOfNext = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     return firstOfNext;
 }
-
 export const getWallet = async (req, res) => {
     try {
         const userId = req.user?._id || req.user?.id;
@@ -17,10 +15,8 @@ export const getWallet = async (req, res) => {
                 message: "User not authenticated",
             });
         }
-
         let wallet = await Wallet.findOne({ user: userId })
             .populate("plan", "name monthlyCreditAllotment priceInINR rolloverAllowed");
-
         if (!wallet) {
             let freePlan = await Plan.findOne({ name: "Free" });
             if (!freePlan) {
@@ -31,7 +27,6 @@ export const getWallet = async (req, res) => {
                     rolloverAllowed: false,
                 });
             }
-
             wallet = await Wallet.create({
                 user: userId,
                 plan: freePlan._id,
@@ -39,16 +34,13 @@ export const getWallet = async (req, res) => {
                 lifetimeUsed: 0,
                 renewsOn: getFirstOfNextMonth(),
             });
-
             wallet = await Wallet.findById(wallet._id)
                 .populate("plan", "name monthlyCreditAllotment priceInINR rolloverAllowed");
         }
-
         if (!wallet.renewsOn) {
             wallet.renewsOn = getFirstOfNextMonth();
             await wallet.save();
         }
-
         if (!wallet.plan) {
             let freePlan = await Plan.findOne({ name: "Free" });
             if (!freePlan) {
@@ -64,16 +56,13 @@ export const getWallet = async (req, res) => {
             wallet = await Wallet.findById(wallet._id)
                 .populate("plan", "name monthlyCreditAllotment priceInINR rolloverAllowed");
         }
-
         const renewsOnFormatted = wallet.renewsOn
             ? wallet.renewsOn.toISOString().split("T")[0]
             : null;
-
         const balance = typeof wallet.balance === 'number' ? wallet.balance : 0;
         const lifetimeUsed = typeof wallet.lifetimeUsed === 'number' ? wallet.lifetimeUsed : 0;
         const planAllotment = wallet.plan?.monthlyCreditAllotment || 0;
         const total = Math.max(planAllotment, balance + lifetimeUsed);
-
         return res.status(200).json({
             success: true,
             data: {
@@ -88,7 +77,8 @@ export const getWallet = async (req, res) => {
                 currency: "INR",
             },
         });
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Error fetching wallet:", error);
         return res.status(500).json({
             success: false,
@@ -96,15 +86,12 @@ export const getWallet = async (req, res) => {
         });
     }
 };
-
 export const getPlans = async (req, res) => {
     try {
         let plans = await Plan.find({}).sort({ priceInINR: 1 });
-
         if (!plans || plans.length === 0) {
             plans = await Plan.insertMany(DEFAULT_CREDIT_PLANS);
         }
-
         const formattedPlans = plans.map((p) => ({
             id: p._id,
             name: p.name,
@@ -113,12 +100,12 @@ export const getPlans = async (req, res) => {
             priceInINR: p.priceInINR,
             rolloverAllowed: p.rolloverAllowed,
         }));
-
         return res.status(200).json({
             success: true,
             data: formattedPlans,
         });
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Error fetching plans:", error);
         return res.status(500).json({
             success: false,

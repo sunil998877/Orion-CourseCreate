@@ -1,24 +1,7 @@
 import express from 'express';
 import authenticateJWT from '../middlewares/authMiddleware.js';
-
-
-import {
-    chatWithAI,
-    generateCourseDescription,
-    refineCourseDescription,
-    saveModuleContents,
-    getModuleContents,
-    generateModuleDraft,
-    generateSingleModule,
-    generateAllModulesDraft
-} from '../controllers/aiController.js';
-
-
-
+import { chatWithAI, generateCourseDescription, refineCourseDescription, saveModuleContents, getModuleContents, generateModuleDraft, generateSingleModule, generateAllModulesDraft } from '../controllers/aiController.js';
 const router = express.Router();
-
-
-
 router.post('/chat', authenticateJWT, chatWithAI);
 router.post('/generate-course-description', authenticateJWT, generateCourseDescription);
 router.post('/refine-course-description', authenticateJWT, refineCourseDescription);
@@ -27,8 +10,4 @@ router.get('/module-contents', authenticateJWT, getModuleContents);
 router.post('/generate-module-draft', authenticateJWT, generateModuleDraft);
 router.post('/generate-module', authenticateJWT, generateSingleModule);
 router.post('/generate-all-modules-draft', authenticateJWT, generateAllModulesDraft);
-
-
 export default router;
-
-

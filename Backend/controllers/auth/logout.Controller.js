@@ -1,3 +1,3 @@
 export const logout = (req, res) => {
-  res.json({ message: 'Logged out successfully' });
+    res.json({ message: 'Logged out successfully' });
 };

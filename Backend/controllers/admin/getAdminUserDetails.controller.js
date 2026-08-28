@@ -5,16 +5,13 @@ import CreditTransaction from "../../models/credits/creditTransaction.js";
 import PricingRule from "../../models/credits/pricingRule.js";
 import Course from "../../models/courseModel.js";
 import { formatTransaction } from "./admin.helpers.js";
-
 export const getAdminUserDetails = async (req, res) => {
     try {
         const { userId } = req.params;
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ success: false, message: "Invalid user id" });
         }
-
         const userOid = new mongoose.Types.ObjectId(userId);
-
         const [user, wallet, courses, pricingRules] = await Promise.all([
             User.findById(userId).select("username email createdAt isVerified lastLoginAt").lean(),
             Wallet.findOne({ user: userId }).populate("plan", "name monthlyCreditAllotment priceInINR").lean(),
@@ -54,9 +51,8 @@ export const getAdminUserDetails = async (req, res) => {
             ]),
             PricingRule.find().select("actionKey creditCost").lean(),
         ]);
-
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
+        if (!user)
+            return res.status(404).json({ success: false, message: "User not found" });
         const transactions = wallet
             ? await CreditTransaction.find({ wallet: wallet._id })
                 .sort({ createdAt: -1 })
@@ -64,25 +60,20 @@ export const getAdminUserDetails = async (req, res) => {
                 .populate("action", "actionKey displayName provider creditCost")
                 .lean()
             : [];
-
         const ruleCostMap = {};
-        for (const r of pricingRules) ruleCostMap[r.actionKey] = r.creditCost;
-
+        for (const r of pricingRules)
+            ruleCostMap[r.actionKey] = r.creditCost;
         const gammaCostPerDeck = ruleCostMap.course_generation_gamma || 250;
         const outlineCost = ruleCostMap.course_outline_openai || 10;
         const workbookCost = ruleCostMap.workbook_openai || 20;
         const podcastCost = ruleCostMap.podcast_elevenlabs || 15;
         const quizCost = ruleCostMap.quiz_openai || 8;
-
         const enrichedCourses = courses.map((course) => {
             const courseIdStr = course.courseId || String(course._id);
-            const courseTx = transactions.filter(
-                (tx) => tx.referenceId && (String(tx.referenceId).includes(courseIdStr) || (course.courseId && String(tx.referenceId).includes(course.courseId)))
-            );
+            const courseTx = transactions.filter((tx) => tx.referenceId && (String(tx.referenceId).includes(courseIdStr) || (course.courseId && String(tx.referenceId).includes(course.courseId))));
             const txCreditsSum = courseTx
                 .filter((tx) => tx.type === "RECONCILE" || (tx.type === "RESERVE" && tx.status === "RECONCILED"))
                 .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
-
             const completedModules = (course.modules || []).filter((m) => m.gammaUrl || m.status === "completed").length;
             const totalModules = course.modules?.length || course.moduleCount || 0;
             const gammaCredits = completedModules * gammaCostPerDeck;
@@ -91,7 +82,6 @@ export const getAdminUserDetails = async (req, res) => {
             const quizCredits = (course.modules || []).reduce((sum, m) => sum + (m.quizCount ? quizCost : 0), 0);
             const estimatedCredits = gammaCredits + textCredits + audioCredits + quizCredits;
             const finalCredits = txCreditsSum > 0 ? txCreditsSum : estimatedCredits;
-
             return {
                 id: course._id,
                 courseId: course.courseId,
@@ -124,10 +114,8 @@ export const getAdminUserDetails = async (req, res) => {
                 transactions: courseTx.map(formatTransaction),
             };
         });
-
         const rechargeHistory = transactions.filter((tx) => tx.type === "RECHARGE").map(formatTransaction);
         const planHistory = transactions.filter((tx) => tx.type === "PLAN_RESET").map(formatTransaction);
-
         return res.status(200).json({
             success: true,
             data: {
@@ -173,7 +161,8 @@ export const getAdminUserDetails = async (req, res) => {
                 recentTransactions: transactions.slice(0, 50).map(formatTransaction),
             },
         });
-    } catch (error) {
+    }
+    catch (error) {
         console.error("[Admin] getAdminUserDetails error:", error);
         return res.status(500).json({ success: false, message: "Failed to load user details" });
     }

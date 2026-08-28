@@ -1,26 +1,14 @@
 import CreditTransaction from "../../models/credits/creditTransaction.js";
 import Wallet from "../../models/credits/wallet.js";
 import PricingRule from "../../models/credits/pricingRule.js";
-
-/**
- * GET /api/wallet/transactions/
- * Returns a paginated ledger history for the authenticated user.
- *
- * Query params:
- *   page     (default: 1)
- *   limit    (default: 20, max: 100)
- *   type     (optional) - filter by transaction type: RESERVE | RECONCILE | REFUND | RECHARGE | PLAN_RESET | ADJUSTMENT
- */
 export const getTransactions = async (req, res) => {
     try {
         const userId = req.user?._id || req.user?.id;
         if (!userId) {
             return res.status(401).json({ success: false, message: "User not authenticated" });
         }
-
         const wallet = await Wallet.findOne({ user: userId });
         if (!wallet) {
-            // Wallet may not be provisioned yet (new user). Return empty history gracefully.
             return res.status(200).json({
                 success: true,
                 data: {
@@ -29,11 +17,9 @@ export const getTransactions = async (req, res) => {
                 },
             });
         }
-
         const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
         const skip = (page - 1) * limit;
-
         const filter = { wallet: wallet._id };
         if (req.query.type) {
             const allowed = ["RESERVE", "RECONCILE", "REFUND", "RECHARGE", "PLAN_RESET", "ADJUSTMENT"];
@@ -45,7 +31,6 @@ export const getTransactions = async (req, res) => {
             }
             filter.type = req.query.type.toUpperCase();
         }
-
         const [transactions, total] = await Promise.all([
             CreditTransaction.find(filter)
                 .populate("action", "actionKey displayName provider creditCost")
@@ -55,7 +40,6 @@ export const getTransactions = async (req, res) => {
                 .lean(),
             CreditTransaction.countDocuments(filter),
         ]);
-
         const formattedTransactions = transactions.map((tx) => ({
             _id: tx._id,
             id: tx._id,
@@ -82,7 +66,6 @@ export const getTransactions = async (req, res) => {
             createdAt: tx.createdAt,
             created_at: tx.createdAt,
         }));
-
         return res.status(200).json({
             success: true,
             data: {
@@ -97,7 +80,8 @@ export const getTransactions = async (req, res) => {
                 },
             },
         });
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Error fetching transactions:", error);
         return res.status(500).json({ success: false, message: "Failed to fetch transaction history" });
     }
