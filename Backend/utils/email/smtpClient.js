@@ -1,12 +1,20 @@
 import nodemailer from 'nodemailer';
 import { assertSmtpConfig, envVal, mailFrom, smtpPortOrder } from './env.js';
 
+const getResendFromHeader = () => {
+  const custom = envVal('EMAIL_FROM');
+  const user = envVal('SMTP_USER');
+  const candidate = custom || user || 'help@evokeaisolutions.com';
+  if (candidate.includes('<') && candidate.includes('>')) {
+    return candidate;
+  }
+  return `Course Creator <${candidate}>`;
+};
+
 const sendViaResendHttp = async (mailOptions) => {
   const apiKey = (process.env.RESEND_API_KEY || '').trim();
   if (!apiKey) return null;
-  const fromObj = mailFrom();
-  const fromAddress = fromObj.address.includes('@') ? fromObj.address : 'onboarding@resend.dev';
-  const fromHeader = fromObj.name ? `${fromObj.name} <${fromAddress}>` : fromAddress;
+  const fromHeader = getResendFromHeader();
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
