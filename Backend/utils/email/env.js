@@ -24,8 +24,9 @@ export const smtpPortOrder = () => {
 
 export const mailFrom = () => {
   const user = envVal('SMTP_USER');
+  const customFrom = envVal('EMAIL_FROM');
   return {
     name: 'Course Creator',
-    address: user || 'noreply@localhost',
+    address: customFrom || user || 'noreply@localhost',
   };
 };

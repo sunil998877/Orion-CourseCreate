@@ -3,6 +3,18 @@ import { assertSmtpConfig, mailFrom, smtpPortOrder } from './env.js';
 
 export const createSmtpTransport = (port) => {
   const { host, user, pass } = assertSmtpConfig();
+  const isGmail = host.toLowerCase().includes('gmail');
+  if (isGmail) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user, pass },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 20000,
+      greetingTimeout: 20000,
+      socketTimeout: 25000,
+    });
+  }
+
   return nodemailer.createTransport({
     host,
     port,

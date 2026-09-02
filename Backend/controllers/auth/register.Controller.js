@@ -7,6 +7,11 @@ const skipRegistrationOtp = () => {
         return true;
     if (flag === 'false' || flag === '0')
         return false;
+    // If SMTP is configured in environment, do NOT skip OTP
+    const hasSmtp = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+    if (hasSmtp) {
+        return false;
+    }
     return Boolean(process.env.RENDER || process.env.VERCEL);
 };
 const reuseOrCreateOtp = (user) => {
