@@ -1,5 +1,33 @@
 import nodemailer from 'nodemailer';
-import { assertSmtpConfig, mailFrom, smtpPortOrder } from './env.js';
+import { assertSmtpConfig, envVal, mailFrom, smtpPortOrder } from './env.js';
+
+const sendViaResendHttp = async (mailOptions) => {
+  const apiKey = (process.env.RESEND_API_KEY || '').trim();
+  if (!apiKey) return null;
+  const fromObj = mailFrom();
+  const fromAddress = fromObj.address.includes('@') ? fromObj.address : 'onboarding@resend.dev';
+  const fromHeader = fromObj.name ? `${fromObj.name} <${fromAddress}>` : fromAddress;
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: fromHeader,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      html: mailOptions.html,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(`Resend API error: ${data.message || JSON.stringify(data)}`);
+  }
+  console.log(`Mail sent via Resend API id=${data.id} to ${mailOptions.to}`);
+  return { messageId: data.id };
+};
 
 export const createSmtpTransport = (port) => {
   const { host, user, pass } = assertSmtpConfig();
@@ -31,6 +59,16 @@ export const createSmtpTransport = (port) => {
 };
 
 export const dispatchMail = async (mailOptions) => {
+  if (process.env.RESEND_API_KEY?.trim()) {
+    try {
+      const resendInfo = await sendViaResendHttp(mailOptions);
+      if (resendInfo) return resendInfo;
+    } catch (resendError) {
+      console.error('Resend delivery failed, falling back to SMTP:', resendError?.message || resendError);
+      if (!envVal('SMTP_HOST')) throw resendError;
+    }
+  }
+
   const { host } = assertSmtpConfig();
   const payload = {
     ...mailOptions,
