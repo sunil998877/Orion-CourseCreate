@@ -2,6 +2,10 @@
 
 Orion is a world-class, AI-driven course architect designed to transform educational concepts into professional, multi-format learning assets. From interactive slide decks and studio-quality audiobooks to beautifully formatted ebooks, Orion handles the heavy lifting of instructional design.
 
+**Full technical documentation:** see [DOCUMENTATION.md](./DOCUMENTATION.md) for architecture, APIs, credits, admin, local setup, and **Render production deployment** (`render.yaml`). That file is the source of truth for the current codebase.
+
+**Production:** hosted on [Render](https://render.com) — `orion-api` (Node web service) + `orion-web` (static SPA), frontend domain `https://orion.evokeaisolutions.com`.
+
 ## 🌟 Key Capabilities
 
 ### 1. AI Slide Orchestration
