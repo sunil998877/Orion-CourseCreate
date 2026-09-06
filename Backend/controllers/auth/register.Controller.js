@@ -57,6 +57,7 @@ const completeWithoutOtp = (status, email) => ({
         registered: true,
     },
 });
+
 export const register = async (req, res) => {
     const { username, organisation, password } = req.body;
     const email = String(req.body.email || '').trim().toLowerCase();
@@ -100,6 +101,7 @@ export const register = async (req, res) => {
             const base64 = req.file.buffer.toString('base64');
             avatar = `data:${mime};base64,${base64}`;
         }
+        
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const skipOtp = skipRegistrationOtp();
         const newUser = new User({

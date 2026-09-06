@@ -87,6 +87,7 @@ function App() {
             return;
         }
         setIsLoading(true);
+        setErrors({});
         try {
             const response = await fetch(`${API_BASE}/login`, {
                 method: 'POST',
@@ -111,16 +112,21 @@ function App() {
                 navigate('/course-creator', { replace: true });
             }
             else {
+                const errorMsg = data.message || 'Login failed. Please check your credentials.';
                 setErrors({
-                    general: data.message || 'Login failed. Please check your credentials.',
+                    general: errorMsg,
                     email: data.errors?.email,
                 });
+                toast.error(errorMsg);
+                setIsLoading(false);
             }
         }
         catch {
+            const errorMsg = 'An error occurred. Please try again later.';
             setErrors({
-                general: 'An error occurred. Please try again later.',
+                general: errorMsg,
             });
+            toast.error(errorMsg);
             setIsLoading(false);
         }
     };
