@@ -19,7 +19,7 @@ const AnalyticsPage: React.FC = () => {
     return () => cancelAnimationFrame(id);
   }, []);
 
-  
+
   const theme = useMemo(() => {
     const t = (localStorage.getItem('theme') || 'blue').toLowerCase();
     const palettes: Record<string, { accent: string; accentSoft: string }> = {
@@ -61,12 +61,12 @@ const AnalyticsPage: React.FC = () => {
     if (!buckets.length) return '-';
     const max = Math.max(...buckets.map(b => b.count));
     if (max === 0) return '-';
-   
+
     const peak = buckets.find(b => b.count === max);
     return peak ? peak.label : '-';
   }, [buckets]);
 
- 
+
   const formatXAxis = (tick: string) => {
     if (!tick) return '';
     if (range === 'week' || range === 'month') {
@@ -101,14 +101,14 @@ const AnalyticsPage: React.FC = () => {
       <div className="min-h-screen text-white relative font-sans selection:bg-lime-500/30">
         <div className="space-y-10 pb-20">
 
-          
+
           <div className="relative rounded-[2.5rem] max-md:rounded-2xl bg-gray-900/40 border border-white/10 backdrop-blur-2xl p-8 md:p-12 max-md:p-5 overflow-hidden shadow-2xl group">
-            
+
             <div className="absolute inset-0 bg-gradient-to-r from-lime-500/10 via-transparent to-transparent opacity-30 group-hover:opacity-40 transition-opacity duration-700" />
             <div className="absolute -right-20 -top-20 w-96 h-96 bg-lime-500/10 rounded-full blur-[80px]" />
 
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-            
+
               <div className="space-y-3 text-center md:text-left flex-1">
                 <div className="inline-flex items-center px-3 py-1 rounded-full bg-lime-500/10 border border-lime-500/20 text-lime-400 text-xs font-bold uppercase tracking-widest mb-2 shadow-[0_0_10px_rgba(132,204,22,0.2)]">
                   <Activity className="w-3 h-3 mr-2" />
@@ -121,7 +121,7 @@ const AnalyticsPage: React.FC = () => {
                   Monitor your implementation metrics, engagement rates, and growth trajectory in real-time.
                 </p>
 
-                
+
                 <div className="mt-8 relative group/insight max-w-lg">
                   <div className="absolute -inset-2 bg-lime-500/10 blur-xl rounded-2xl opacity-0 group-hover/insight:opacity-100 transition-opacity duration-700" />
                   <div className="relative flex items-start gap-4 p-4 rounded-2xl bg-[#0F0F0F]/60 border border-white/10 backdrop-blur-xl shadow-xl transition-all duration-500 group-hover/insight:border-lime-500/30">
@@ -146,55 +146,23 @@ const AnalyticsPage: React.FC = () => {
                 </div>
               </div>
 
-             
+
               <div className="flex items-center gap-8 md:gap-12 relative">
-                
-                <div className="relative z-20">
-                  <button
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-5 py-3 text-sm font-medium text-white hover:bg-white/5 hover:border-lime-500/30 hover:shadow-[0_0_15px_rgba(132,204,22,0.1)] transition-all duration-300 group/btn"
-                  >
-                    <div className="p-1.5 rounded-lg bg-white/5 group-hover/btn:bg-lime-500/20 transition-colors">
-                      <Clock className="w-4 h-4 text-gray-300 group-hover/btn:text-lime-400" />
-                    </div>
-                    <span>{rangeOptions.find(o => o.value === range)?.label}</span>
-                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-300 ${dropdownOpen ? 'rotate-180 text-lime-400' : ''}`} />
-                  </button>
 
-                  {dropdownOpen && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
-                      <div className="absolute right-0 top-full mt-3 w-56 bg-[#0f1115] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden ring-1 ring-black/50 animate-in fade-in zoom-in-95 duration-200">
-                        {rangeOptions.map(option => (
-                          <button
-                            key={option.value}
-                            onClick={() => {
-                              setRange(option.value as any);
-                              setDropdownOpen(false);
-                            }}
-                            className="w-full text-left px-5 py-3.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-all flex items-center gap-3 border-b border-white/5 last:border-0 group/opt"
-                          >
-                            <span className={`w-2 h-2 rounded-full transition-all duration-300 ${range === option.value ? 'bg-lime-400 shadow-[0_0_8px_rgba(163,230,53,0.8)] scale-125' : 'bg-white/10 group-hover/opt:bg-lime-500/50'}`} />
-                            {option.label}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
 
-                {/* Ultra-High-Fidelity AI Hologram System */}
+
+
                 <div className="relative w-56 h-72 md:w-64 md:h-80 flex items-end justify-center pointer-events-auto select-none perspective-[1200px] group/holo">
 
-                  {/* 1. Volumetric Projector Beams (Light Pillars) */}
+
                   <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-4/5 h-full bg-gradient-to-t from-lime-500/20 via-lime-500/5 to-transparent blur-2xl opacity-50 group-hover/holo:opacity-80 transition-opacity duration-700 pointer-events-none mix-blend-screen" />
 
-                  {/* 2. Rotating Tech Rings (Base) */}
+
                   <div className="absolute bottom-6 w-full h-20 border border-lime-500/30 rounded-[100%] animate-[spin_8s_linear_infinite] shadow-[0_0_20px_rgba(132,204,22,0.2)] group-hover/holo:border-lime-400/50 transition-colors" />
                   <div className="absolute bottom-6 w-5/6 h-14 border border-dashed border-emerald-400/30 rounded-[100%] animate-[spin_12s_linear_infinite_reverse]" />
                   <div className="absolute bottom-6 w-2/3 h-8 border border-dotted border-white/20 rounded-[100%] animate-[spin_4s_linear_infinite]" />
 
-                  {/* 3. Rising Data Streams (Particles) */}
+
                   <div className="absolute inset-0 overflow-hidden rounded-full mask-image-[radial-gradient(circle,black,transparent)] pointer-events-none">
                     {[...Array(6)].map((_, i) => (
                       <div
@@ -211,13 +179,13 @@ const AnalyticsPage: React.FC = () => {
                     ))}
                   </div>
 
-                  {/* 4. The Character (Hologram with Signal Noise) */}
+
                   <div className="relative z-10 w-full h-full flex items-end justify-center">
 
-                    {/* Active Scanline - Moves Down */}
+
                     <div className="absolute inset-x-0 h-1 bg-lime-400/50 shadow-[0_0_15px_#a3e635] z-30 opacity-70 animate-[scan_3s_ease-in-out_infinite] group-hover/holo:opacity-30" />
 
-                    {/* Character Container with Glitch on Idle, Stable on Hover */}
+
                     <div className="relative w-full h-full transition-transform duration-500 group-hover/holo:scale-[1.02]">
                       <img
                         src={avtar3}
@@ -229,10 +197,10 @@ const AnalyticsPage: React.FC = () => {
                                mask-image-[linear-gradient(to_bottom,black_80%,transparent_100%)]"
                       />
 
-                      {/* Signal Noise Texture */}
+
                       <div className="absolute inset-0 opacity-20 mix-blend-overlay brightness-150 bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E')]" />
 
-                      {/* Ghost/Bloom Layer */}
+
                       <img
                         src={avtar3}
                         alt=""
@@ -246,7 +214,7 @@ const AnalyticsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Add styles for custom animations if not present in global CSS */}
+
                 <style>{`
                 @keyframes scan {
                   0%, 100% { top: 0%; opacity: 0; }
@@ -267,7 +235,7 @@ const AnalyticsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Stats Section with Neon Titles */}
+
           <div className="space-y-6">
             <div className="flex items-center gap-4 pl-1">
               <div className="w-1 h-8 bg-gradient-to-b from-lime-400 to-emerald-500 rounded-full shadow-[0_0_12px_#84cc16]" />
@@ -275,9 +243,70 @@ const AnalyticsPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Active Range Card with Dropdown Selector */}
+              <div className="relative z-30">
+                <div
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="group relative h-full bg-gray-900/40 border border-white/5 hover:border-lime-500/30 rounded-2xl p-6 backdrop-blur-md hover:bg-white/5 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(132,204,22,0.15)] cursor-pointer select-none"
+                >
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 group-hover:border-lime-500/20 group-hover:bg-lime-500/10 transition-colors duration-500 text-gray-400 group-hover:text-lime-400">
+                      <Clock className="w-6 h-6" />
+                    </div>
+
+                    <div className="relative">
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDropdownOpen(!dropdownOpen);
+                        }}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 hover:border-lime-500/30 hover:bg-white/5 transition-all duration-300 text-xs font-semibold text-gray-300 hover:text-lime-400 cursor-pointer ${dropdownOpen ? 'border-lime-500/50 bg-lime-500/10 text-lime-400' : ''}`}
+                      >
+                        <span>{rangeOptions.find(o => o.value === range)?.label}</span>
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${dropdownOpen ? 'rotate-180 text-lime-400' : ''}`} />
+                      </div>
+
+                      {dropdownOpen && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setDropdownOpen(false); }} />
+                          <div className="absolute right-0 top-full mt-2 min-w-full w-max bg-[#0f1115] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden ring-1 ring-black/50 animate-in fade-in slide-in-from-top-2 zoom-in-95 duration-200">
+                            {rangeOptions.map(option => (
+                              <button
+                                key={option.value}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRange(option.value as any);
+                                  setDropdownOpen(false);
+                                }}
+                                className={`w-full text-left px-4 py-2.5 text-xs transition-all flex items-center gap-2.5 border-b border-white/5 last:border-0 hover:bg-white/5 group/opt ${
+                                  range === option.value
+                                    ? 'text-white font-medium bg-lime-500/5'
+                                    : 'text-gray-400 hover:text-white'
+                                }`}
+                              >
+                                <span className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${range === option.value ? 'bg-lime-400 shadow-[0_0_8px_rgba(163,230,53,0.8)] scale-125' : 'bg-white/10 group-hover/opt:bg-white/30'}`} />
+                                {option.label}
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-3xl font-extrabold text-white tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-lime-200 transition-all duration-500">
+                      {range === 'week' ? 'Weekly' : range === 'month' ? 'Monthly' : 'Yearly'}
+                    </h3>
+                    <p className="text-sm font-medium text-gray-500 group-hover:text-lime-500/80 uppercase tracking-wider transition-colors duration-300">
+                      Active Range
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {[
                 { label: "Total Courses", value: totalCourses, icon: Users, sub: "Lifetime created" },
-                { label: "Active Range", value: range === 'week' ? 'Weekly' : range === 'month' ? 'Monthly' : 'Yearly', icon: Clock, sub: "Current view" },
                 { label: "Peak Date", value: peakLabel, icon: TrendingUp, sub: "Highest activity" },
                 { label: "Average", value: buckets.length ? (totalCourses / buckets.length).toFixed(1) : '0.0', icon: Activity, sub: `Per ${range === 'year' ? 'month' : 'day'}` }
               ].map((stat, idx) => (
@@ -300,7 +329,7 @@ const AnalyticsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Main Chart Section */}
+
           <div className="space-y-6">
             <div className="flex items-center gap-4 pl-1">
               <div className="w-1 h-8 bg-gradient-to-b from-lime-400 to-emerald-500 rounded-full shadow-[0_0_12px_#84cc16]" />
@@ -308,7 +337,7 @@ const AnalyticsPage: React.FC = () => {
             </div>
 
             <div className="relative rounded-[2rem] bg-gray-900/40 border border-white/5 backdrop-blur-xl p-8 shadow-2xl h-[500px] hover:border-white/10 transition-colors duration-700">
-              {/* Subtle Chart Glow */}
+
               <div className="absolute inset-x-20 bottom-0 h-64 bg-lime-500/5 blur-[100px] rounded-full pointer-events-none" />
 
               {loading ? (

@@ -10,12 +10,6 @@ export default function Sidebar() {
     ];
     return (<aside className="hidden md:flex md:flex-col fixed top-16 left-0 bottom-0 w-[250px] z-30 shrink-0 bg-[#101720]/95 border-r border-white/10 shadow-[12px_0_40px_rgba(0,0,0,0.12)]">
             <div className="w-full flex-1 overflow-y-auto">
-                <div className="flex h-[78px] items-center border-b border-white/10 px-6">
-                    <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">Workspace</p>
-                        <h1 className="mt-1 text-[17px] font-bold tracking-tight text-lime-300">Course Creator</h1>
-                    </div>
-                </div>
                 <nav className="space-y-1.5 px-3 py-5 text-sm">
                     {navItems.map((item) => {
             const Icon = item.icon;

@@ -14,6 +14,8 @@ const ModuleGen = () => {
     const [modules, setModules] = useState<ModuleState[]>([]);
     const [selectedSlide, setSelectedSlide] = useState<ModuleState | null>(null);
     const [downloadingModuleId, setDownloadingModuleId] = useState<number | null>(null);
+    const [loadingDeckId, setLoadingDeckId] = useState<number | null>(null);
+    const [loadingScriptId, setLoadingScriptId] = useState<number | null>(null);
     const [selectedTranscriptMod, setSelectedTranscriptMod] = useState<ModuleState | null>(null);
     const moduleCredits = useMemo(() => {
         const n = modules.length;
@@ -173,6 +175,7 @@ const ModuleGen = () => {
     };
     const openSlidesPreview = async (mod: ModuleState, showOrion = false) => {
         try {
+            setLoadingDeckId(mod.id);
             const token = localStorage.getItem('token');
             const resp = await fetch(`${API_BASE}/module-contents?courseId=${courseData?.courseId}&moduleNumber=${mod.id}`, { headers: { Authorization: `Bearer ${token}` } });
             if (resp.ok) {
@@ -198,6 +201,9 @@ const ModuleGen = () => {
         }
         catch (e) {
             console.error("Failed to fetch slides:", e);
+        }
+        finally {
+            setLoadingDeckId(null);
         }
         setSelectedSlide({
             ...mod,
@@ -288,12 +294,16 @@ const ModuleGen = () => {
                             <div className="flex flex-col gap-3">
                                 <div className="flex flex-wrap gap-4">
                                     {mod.orionUrl && (<>
-                                            <button onClick={() => openSlidesPreview(mod, true)} className="group/btn flex items-center px-5 py-3 text-white/60 hover:text-white hover:bg-white/10 rounded-2xl border border-white/5 hover:border-white/20 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 shadow-lg bg-white/[0.02]">
-                                                <Book size={14} className="mr-3 text-lime-500 group-hover/btn:rotate-12 transition-transform"/>
-                                                View Deck
+                                            <button onClick={() => openSlidesPreview(mod, true)} disabled={loadingDeckId === mod.id} className="group/btn flex items-center px-5 py-3 text-white/60 hover:text-white hover:bg-white/10 rounded-2xl border border-white/5 hover:border-white/20 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 shadow-lg bg-white/[0.02] disabled:opacity-50 disabled:cursor-not-allowed">
+                                                {loadingDeckId === mod.id ? (
+                                                    <><Loader2 size={14} className="mr-3 animate-spin text-lime-500"/> Please wait...</>
+                                                ) : (
+                                                    <><Book size={14} className="mr-3 text-lime-500 group-hover/btn:rotate-12 transition-transform"/> View Deck</>
+                                                )}
                                             </button>
                                             <button onClick={async () => {
                     const token = localStorage.getItem('token');
+                    setLoadingScriptId(mod.id);
                     try {
                         const resp = await fetch(`${API_BASE}/module-contents?courseId=${courseData?.courseId}&moduleNumber=${mod.id}`, { headers: { Authorization: `Bearer ${token}` } });
                         if (resp.ok) {
@@ -316,10 +326,14 @@ const ModuleGen = () => {
                         }
                     }
                     catch { }
+                    finally { setLoadingScriptId(null); }
                     setSelectedTranscriptMod(mod);
-                }} className="group/btn flex items-center px-5 py-3 text-lime-400 hover:text-white hover:bg-lime-500/10 rounded-2xl border border-lime-500/10 hover:border-lime-500/40 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 shadow-[0_10px_30px_-10px_rgba(132,204,22,0.1)]">
-                                                <FileText size={14} className="mr-3 group-hover/btn:-translate-y-0.5 transition-transform"/>
-                                                Voice Script
+                }} disabled={loadingScriptId === mod.id} className="group/btn flex items-center px-5 py-3 text-lime-400 hover:text-white hover:bg-lime-500/10 rounded-2xl border border-lime-500/10 hover:border-lime-500/40 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 shadow-[0_10px_30px_-10px_rgba(132,204,22,0.1)] disabled:opacity-50 disabled:cursor-not-allowed">
+                                                {loadingScriptId === mod.id ? (
+                                                    <><Loader2 size={14} className="mr-3 animate-spin text-lime-500"/> Please wait...</>
+                                                ) : (
+                                                    <><FileText size={14} className="mr-3 group-hover/btn:-translate-y-0.5 transition-transform"/> Voice Script</>
+                                                )}
                                             </button>
                                             <button onClick={() => downloadOrionPPTX(mod)} disabled={downloadingModuleId === mod.id} className="group/btn flex items-center px-5 py-3 text-lime-400 hover:text-white hover:bg-lime-500/10 rounded-2xl border border-lime-500/10 hover:border-lime-500/40 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_10px_30px_-10px_rgba(132,204,22,0.1)]">
                                                 {downloadingModuleId === mod.id ? (<>
