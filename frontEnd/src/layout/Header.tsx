@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Bell, Menu, User, Camera, Shield, LogOut, Layers } from 'lucide-react';
+import { Search, Bell, Menu, User, Camera, Shield, LogOut } from 'lucide-react';
+import logo5 from '../assests/logo5.png';
 export interface NotificationItem {
   _id?: string;
   title: string;
@@ -56,14 +57,13 @@ export default function Header({ onOpenMobileMenu, userInfo, avatarUrl, notifica
         <button type="button" className="md:hidden p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition" onClick={onOpenMobileMenu} aria-label="Open navigation menu">
           <Menu className="w-5 h-5 text-white/80" />
         </button>
-        <Link to="/course-creator" className="flex items-center gap-3 shrink-0">
-          <div className="flex h-15 w-15 md:h-10 md:w-10 shrink-0 items-center justify-center object-cover  ">
-
-            <img src="src/assests/logo5.png" alt="logo" className="w-full h-full " />
+        <Link to="/course-creator" className="hidden md:flex items-center gap-2 md:gap-3 shrink-0">
+          <div className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center overflow-hidden">
+            <img src={logo5} alt="ORION" className="h-full w-full object-contain" />
           </div>
           <div className="min-w-0 leading-tight">
-            <h1 className="text-[15px] md:text-[17px] font-bold uppercase tracking-wide text-white">ORION</h1>
-            <p className="text-[11px] md:text-[13px] font-normal text-slate-400">Create Course</p>
+            <h1 className="truncate text-[13px] md:text-[17px] font-bold uppercase tracking-wide text-white">ORION</h1>
+            <p className="truncate text-[10px] md:text-[13px] font-normal text-slate-400">Create Course</p>
           </div>
         </Link>
       </div>
