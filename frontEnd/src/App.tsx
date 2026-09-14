@@ -28,6 +28,7 @@ const AdminRechargePlanPage = lazy(() => import('./pages/AdminRechargePlanPage')
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
 const AdminContactsPage = lazy(() => import('./pages/AdminContactsPage'));
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const PageFallback = () => (<div className="flex min-h-screen items-center justify-center bg-[#09090b]">
     <div className="h-10 w-10 animate-spin rounded-full border-2 border-lime-400 border-t-transparent"/>
   </div>);
@@ -88,6 +89,7 @@ const AnimatedRoutes = () => {
           <Route path="/dashboard" element={<ProtectedRoute><HeroPage /></ProtectedRoute>}/>
           <Route path="/course-dashboard" element={<ProtectedRoute><HeroPage /></ProtectedRoute>}/>
           <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>}/>
+          <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>}/>
           <Route path="/add-credits" element={<ProtectedRoute><AddCreditsPage /></ProtectedRoute>}/>
 
           <Route path="/create-course" element={<ProtectedRoute><CourseCreatorForm /></ProtectedRoute>}/>
