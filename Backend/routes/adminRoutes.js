@@ -1,6 +1,6 @@
 import express from "express";
 import adminAuthMiddleware from "../middlewares/adminAuthMiddleware.js";
-import { adminLogin, getAdminDashboardStats, getAdminAllUsers, getAdminUserDetails, adminAdjustCredits, getAdminTransactions, getAdminCourses, getAdminPricingRules, updateAdminPricingRule, getAdminAnalytics, getAdminRechargesAndPlans, } from "../controllers/admin/admin.controller.js";
+import { adminLogin, getAdminDashboardStats, getAdminAllUsers, getAdminUserDetails, adminAdjustCredits, getAdminTransactions, getAdminCourses, getAdminPricingRules, updateAdminPricingRule, getAdminAnalytics, getAdminRechargesAndPlans, getAdminContacts, updateAdminContactStatus, deleteAdminContact, } from "../controllers/admin/admin.controller.js";
 const router = express.Router();
 router.post("/login", adminLogin);
 router.use(adminAuthMiddleware);
@@ -14,4 +14,7 @@ router.get("/pricing-rules", getAdminPricingRules);
 router.put("/pricing-rules/:id", updateAdminPricingRule);
 router.get("/analytics", getAdminAnalytics);
 router.get("/recharges-and-plans", getAdminRechargesAndPlans);
+router.get("/contacts", getAdminContacts);
+router.patch("/contacts/:id/status", updateAdminContactStatus);
+router.delete("/contacts/:id", deleteAdminContact);
 export default router;

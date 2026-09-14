@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Coins, Users, CreditCard, ReceiptText, BookOpen, TrendingUp, Settings, LogOut, } from "lucide-react";
+import { LayoutDashboard, Coins, Users, CreditCard, ReceiptText, BookOpen, TrendingUp, Settings, LogOut, Mail, } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { clearAdminSession } from "@/utils/adminAuth";
 import brandLogo from "@/assests/logo3.svg";
@@ -21,6 +21,7 @@ const menuItems: MenuItem[] = [
     { title: "Recharges & Plans", href: "/admin/recharges", icon: CreditCard },
     { title: "Credit Ledger", href: "/admin/transactions", icon: ReceiptText },
     { title: "Generated Courses", href: "/admin/courses", icon: BookOpen },
+    { title: "Contact Inquiries", href: "/admin/contacts", icon: Mail },
     { title: "Cost & Margins", href: "/admin/analytics", icon: TrendingUp },
     { title: "Settings", href: "/admin/settings", icon: Settings },
 ];

@@ -9,3 +9,6 @@ export * from "./updateAdminPricingRule.controller.js";
 export * from "./getAdminAnalytics.controller.js";
 export * from "./getAdminRechargesAndPlans.controller.js";
 export * from "./adminLogin.controller.js";
+export * from "./getAdminContacts.controller.js";
+export * from "./updateAdminContactStatus.controller.js";
+export * from "./deleteAdminContact.controller.js";

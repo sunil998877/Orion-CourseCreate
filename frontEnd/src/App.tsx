@@ -16,6 +16,8 @@ const AppLayout = lazy(() => import('./layout/AppLayout'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const AddCreditsPage = lazy(() => import('./pages/AddCreditsPage'));
+const OrionLandingPage = lazy(() => import('./orion/components/Home'));
+const OrionPrivacyPolicy = lazy(() => import('./orion/components/PrivacyPolicy'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AdminPricingPage = lazy(() => import('./pages/AdminPricingPage'));
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
@@ -24,6 +26,7 @@ const AdminCoursesPage = lazy(() => import('./pages/AdminCoursesPage'));
 const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage'));
 const AdminRechargePlanPage = lazy(() => import('./pages/AdminRechargePlanPage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
+const AdminContactsPage = lazy(() => import('./pages/AdminContactsPage'));
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
 const PageFallback = () => (<div className="flex min-h-screen items-center justify-center bg-[#09090b]">
     <div className="h-10 w-10 animate-spin rounded-full border-2 border-lime-400 border-t-transparent"/>
@@ -47,6 +50,7 @@ const AnimatedRoutes = () => {
     const location = useLocation();
     const isAuthPage = [
         '/',
+        '/privacy-policy',
         '/login',
         '/register',
         '/registration',
@@ -58,7 +62,8 @@ const AnimatedRoutes = () => {
     const routes = (<Suspense fallback={<PageFallback />}>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<LoginPage />}/>
+          <Route path="/" element={<OrionLandingPage />}/>
+          <Route path="/privacy-policy" element={<OrionPrivacyPolicy />}/>
           <Route path="/login" element={<LoginPage />}/>
           <Route path="/register" element={<RegistrationPage />}/>
           <Route path="/registration" element={<RegistrationPage />}/>
@@ -73,6 +78,7 @@ const AnimatedRoutes = () => {
           <Route path="/admin/transactions" element={<AdminProtectedRoute><AdminLayout><AdminTransactionsPage /></AdminLayout></AdminProtectedRoute>}/>
           <Route path="/admin/courses" element={<AdminProtectedRoute><AdminLayout><AdminCoursesPage /></AdminLayout></AdminProtectedRoute>}/>
           <Route path="/admin/products" element={<AdminProtectedRoute><AdminLayout><AdminCoursesPage /></AdminLayout></AdminProtectedRoute>}/>
+          <Route path="/admin/contacts" element={<AdminProtectedRoute><AdminLayout><AdminContactsPage /></AdminLayout></AdminProtectedRoute>}/>
           <Route path="/admin/analytics" element={<AdminProtectedRoute><AdminLayout><AdminAnalyticsPage /></AdminLayout></AdminProtectedRoute>}/>
           <Route path="/admin/settings" element={<AdminProtectedRoute><AdminLayout><AdminSettingsPage /></AdminLayout></AdminProtectedRoute>}/>
 

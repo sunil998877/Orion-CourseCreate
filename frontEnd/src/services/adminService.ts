@@ -348,6 +348,57 @@ export const fetchAdminRechargesAndPlans = async (type = "ALL", search = "", pag
         throw new Error(json.message || "Failed to fetch recharge and plan history");
     return json.data;
 };
+
+export interface AdminContactItem {
+    id: string;
+    fullName: string;
+    company: string;
+    email: string;
+    phone: string;
+    message: string;
+    status: string;
+    createdAt: string;
+    updatedAt?: string;
+}
+
+export const fetchAdminContacts = async (
+    search = "",
+    status = "ALL",
+    page = 1,
+    limit = 50
+): Promise<{ contacts: AdminContactItem[]; total: number }> => {
+    const params = new URLSearchParams();
+    if (search) params.append("search", search);
+    if (status) params.append("status", status);
+    params.append("page", String(page));
+    params.append("limit", String(limit));
+    const res = await fetch(`${API_BASE}/admin/contacts?${params.toString()}`, { headers: getHeaders() });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || "Failed to fetch contacts");
+    return json.data;
+};
+
+export const updateAdminContactStatus = async (id: string, status: string) => {
+    const res = await fetch(`${API_BASE}/admin/contacts/${id}/status`, {
+        method: "PATCH",
+        headers: getHeaders(),
+        body: JSON.stringify({ status }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || "Failed to update contact status");
+    return json.data;
+};
+
+export const deleteAdminContact = async (id: string) => {
+    const res = await fetch(`${API_BASE}/admin/contacts/${id}`, {
+        method: "DELETE",
+        headers: getHeaders(),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || "Failed to delete contact");
+    return json;
+};
+
 export const getAdminDashboardStats = fetchAdminDashboardStats;
 export const getAdminAllUsers = fetchAdminUsers;
 export const adminAdjustCredits = adjustUserCreditsApi;

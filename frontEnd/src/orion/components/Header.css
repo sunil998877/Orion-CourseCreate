@@ -1,0 +1,50 @@
+
+#mobile-menu {
+  transition: transform 0.3s ease-in-out;
+}
+
+.nav-link {
+  position: relative;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #5BCB8A, #3FAF7C);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover::before {
+  width: 80%;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+#mobile-menu:not(.translate-x-full) .mobile-menu-link {
+  animation: slideInFromRight 0.4s ease forwards;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+#header {
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}

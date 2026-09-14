@@ -18,6 +18,7 @@ import { verifySmtpConnection } from './utils/emailService.js';
 import walletRoutes from './routes/walletRoutes.js';
 import razorpayRoutes from './routes/razorpayRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import contactRoutes from './routes/contactRoutes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -104,6 +105,7 @@ app.use('/api', ebookRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/razorpay", razorpayRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/contact", contactRoutes);
 app.get('/api/health', (req, res) => {
     const dbOk = mongoose.connection.readyState === 1;
     res.status(dbOk ? 200 : 503).json({

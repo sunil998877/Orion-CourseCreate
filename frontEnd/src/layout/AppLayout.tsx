@@ -128,7 +128,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("avatar");
     localStorage.removeItem("username");
     localStorage.removeItem("email");
-    navigate("/login");
+    navigate("/");
   };
 
   return (
