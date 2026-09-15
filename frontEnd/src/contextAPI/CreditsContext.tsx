@@ -15,8 +15,6 @@ import {
   subscribeToPlan as subscribeToPlanApi,
 } from '../services/walletService';
 
-
-
 type DeductResult = { success: true } | { success: false; reason: 'insufficient' };
 
 type CreditsContextValue = {
@@ -96,7 +94,6 @@ export const CreditsProvider: React.FC<{ children: React.ReactNode }> = ({ child
     fetchWalletData();
   }, [fetchWalletData]);
 
-  // Poll every 60 s so the sidebar balance stays in sync during long generation jobs
   useEffect(() => {
     const id = setInterval(() => {
       if (localStorage.getItem('token')) {
@@ -217,7 +214,6 @@ export const CreditsProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   return <CreditsContext.Provider value={value}>{children}</CreditsContext.Provider>;
 };
-
 
 export const useCredits = () => {
   const context = useContext(CreditsContext);

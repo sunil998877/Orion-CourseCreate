@@ -1,10 +1,5 @@
 import User from '../../models/userModel.js';
 
-/**
- * POST /notifications/course-launched
- * Called by the frontend ONLY after all module contents have been
- * successfully saved, so the notification fires at the right time.
- */
 export const courseLaunchedNotification = async (req, res) => {
     try {
         const { courseTitle } = req.body;
@@ -20,7 +15,6 @@ export const courseLaunchedNotification = async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error('Failed to add course-launched notification:', err);
-        // Non-critical — don't fail the response
         res.status(500).json({ message: 'Could not add notification' });
     }
 };

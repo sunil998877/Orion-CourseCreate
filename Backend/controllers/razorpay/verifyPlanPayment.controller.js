@@ -24,7 +24,6 @@ export const verifyPlanPayment = async (req, res) => {
             return res.status(400).json({ success: false, message: "Payment signature verification failed" });
         }
 
-        // Idempotency: avoid double-processing
         const existing = await CreditTransaction.findOne({ referenceId: razorpayPaymentId });
         if (existing) {
             const wallet = await Wallet.findOne({ user: userId }).populate("plan");
@@ -41,7 +40,6 @@ export const verifyPlanPayment = async (req, res) => {
             });
         }
 
-        // Process subscription logic using unified plan service
         const subscriptionResult = await processPlanSubscription({
             userId,
             planId,

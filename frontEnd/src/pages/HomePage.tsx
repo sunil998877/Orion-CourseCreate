@@ -174,7 +174,6 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
-
         <div className="relative overflow-hidden rounded-[2.5rem] max-md:rounded-2xl bg-[#0F0F0F] border border-white/10 p-12 max-md:p-6 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-10 group">
           <div className="absolute inset-0 bg-gradient-to-r from-lime-500/5 to-emerald-500/5 opacity-50"/>
           <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2"/>
@@ -196,13 +195,11 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-
         <div className="flex flex-col items-center text-center space-y-3   animate-fade-in-up">
           <div className="inline-flex items-center px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
             Platform Capabilities
           </div>
         </div>
-
 
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-md:gap-4 pb-12">
 
@@ -219,7 +216,6 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-
           <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-lime-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(132,204,22,0.1)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-lime-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
             <div className="relative z-10">
@@ -232,7 +228,6 @@ const HomePage: React.FC = () => {
               </p>
             </div>
           </motion.div>
-
 
           <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-rose-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(244,63,94,0.1)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
@@ -247,7 +242,6 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-
           <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-indigo-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(99,102,241,0.1)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
             <div className="relative z-10">
@@ -261,7 +255,6 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-
           <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-cyan-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(6,182,212,0.1)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
             <div className="relative z-10">
@@ -274,7 +267,6 @@ const HomePage: React.FC = () => {
               </p>
             </div>
           </motion.div>
-
 
           <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-amber-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(245,158,11,0.1)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>

@@ -44,9 +44,7 @@ const ModuleCard: React.FC<{
                                 {(() => {
                                   return (
                                     <div className="flex-1 flex flex-col">
-                                      {/* Action Hub - Moved from bottom */}
                                       <div className="space-y-3 mb-6">
-                                        {/* Theme Selector inside Module Card */}
                                         <div className="flex items-center justify-between p-3 rounded-2xl bg-gray-800/40 border border-gray-700/30 mb-4 transition-all">
                                           <div className="flex flex-col text-left">
                                             <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Slide Theme</span>

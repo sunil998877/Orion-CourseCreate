@@ -24,9 +24,7 @@ const CourseHeader: React.FC = () => {
                     <p className="text-[9px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-0.5">Designing Precision Learning</p>
                 </div>
 
-
                 <div className="flex-1 flex items-center justify-end gap-6 max-md:gap-2">
-                    {/* Desktop Exit Button */}
                     <motion.button
                         whileHover={{ scale: isExitingArchitect ? 1 : 1.05 }}
                         whileTap={{ scale: isExitingArchitect ? 1 : 0.95 }}
@@ -47,7 +45,6 @@ const CourseHeader: React.FC = () => {
                         )}
                     </motion.button>
 
-                    {/* Mobile Exit Button */}
                     <motion.button
                         whileTap={{ scale: isExitingArchitect ? 1 : 0.95 }}
                         onClick={handleExitArchitect}
@@ -62,7 +59,6 @@ const CourseHeader: React.FC = () => {
                     </motion.button>
 
                     <div className="h-8 w-px bg-white/10 hidden md:block"/>
-
 
                     <CourseNotifications />
                 </div>

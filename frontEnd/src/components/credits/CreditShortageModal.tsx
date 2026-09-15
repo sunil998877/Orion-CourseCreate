@@ -91,11 +91,9 @@ const CreditShortageModal: React.FC<Props> = ({ kind, message, onClose }) => {
         </div>
 
         <h3 className="pr-8 text-xl font-black text-white">{copy.title}</h3>
-        {/* Admins see technical body; regular users see a friendly message */}
         <p className="mt-2 text-sm leading-relaxed text-white/60">
           {isAdmin ? copy.body : copy.userBody}
         </p>
-        {/* Only show raw API error details to admins */}
         {message && isAdmin && <p className={`mt-3 rounded-xl border p-3 text-xs ${noteClass}`}>{message}</p>}
 
         {copy.showUserPlans ? (
@@ -111,7 +109,6 @@ const CreditShortageModal: React.FC<Props> = ({ kind, message, onClose }) => {
           </div>
         ) : (
           <div className="mt-6 space-y-2">
-            {/* External recharge links — admins only */}
             {isAdmin && copy.rechargeHref && (
               <a href={copy.rechargeHref} target="_blank" rel="noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-lime-500 py-3 text-sm font-black text-black hover:bg-lime-400">
                 <ExternalLink className="h-4 w-4"/>
@@ -123,7 +120,6 @@ const CreditShortageModal: React.FC<Props> = ({ kind, message, onClose }) => {
                 Open management settings
               </button>
             )}
-            {/* Regular users just see a "Try again" button */}
             {!isAdmin && (
               <button type="button" onClick={onClose} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 py-3 text-sm font-bold text-white hover:bg-white/10">
                 <RefreshCw className="h-4 w-4"/>

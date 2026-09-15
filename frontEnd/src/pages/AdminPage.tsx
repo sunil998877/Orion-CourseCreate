@@ -153,7 +153,6 @@ export default function AdminPage() {
           Note: {error}. Showing cached state.
         </div>)}
 
-
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {metricCards.map((card) => {
             const Icon = card.icon;
@@ -177,7 +176,6 @@ export default function AdminPage() {
         })}
       </div>
 
-      {/* External AI Provider API Keys & Quota Balances */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
@@ -377,7 +375,6 @@ export default function AdminPage() {
         })}
         </div>
       </div>
-
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">

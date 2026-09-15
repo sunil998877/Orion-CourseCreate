@@ -1,26 +1,69 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Sparkles, Loader2, Monitor } from 'lucide-react';
+import { Sparkles, Loader2, Monitor, Maximize2, Minimize2, ExternalLink } from 'lucide-react';
 import { ModuleState, cleanTitle } from './ModuleGen';
 interface SlideContentProps {
     moduleData: ModuleState;
     onClose: () => void;
 }
 export const SlideContent: React.FC<SlideContentProps> = ({ moduleData, onClose }) => {
-    return createPortal(<div className="fixed inset-0 flex items-center justify-center z-[9999] px-4 py-4 max-md:px-2 max-md:py-2 animate-in fade-in duration-300 bg-gray-950/40 backdrop-blur-xl">
-            <div className="fixed inset-0 z-0 bg-transparent" onClick={onClose}/>
-            <div className={`relative w-full ${moduleData.showOrion ? 'max-w-7xl' : 'max-w-4xl'} max-h-[96vh] max-md:max-h-[100dvh] max-md:h-full flex flex-col bg-gray-900/90 rounded-3xl max-md:rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden text-white z-10 transition-all duration-500 animate-in zoom-in-95 fade-in duration-300 backdrop-blur-2xl`}>
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
 
+    const toggleFullscreen = async () => {
+        if (!document.fullscreenElement) {
+            if (containerRef.current?.requestFullscreen) {
+                try {
+                    await containerRef.current.requestFullscreen();
+                    setIsFullscreen(true);
+                } catch {
+                    setIsFullscreen(prev => !prev);
+                }
+            } else {
+                setIsFullscreen(prev => !prev);
+            }
+        } else {
+            if (document.exitFullscreen) {
+                try {
+                    await document.exitFullscreen();
+                    setIsFullscreen(false);
+                } catch {
+                    setIsFullscreen(false);
+                }
+            } else {
+                setIsFullscreen(false);
+            }
+        }
+    };
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+        };
+    }, []);
+
+    return createPortal(<div className={`fixed inset-0 flex items-center justify-center z-[9999] ${isFullscreen ? 'p-0' : 'px-4 py-4 max-md:px-2 max-md:py-2'} animate-in fade-in duration-300 bg-gray-950/80 backdrop-blur-xl`}>
+            <div className="fixed inset-0 z-0 bg-transparent" onClick={isFullscreen ? undefined : onClose}/>
+            <div ref={containerRef} className={`relative w-full flex flex-col bg-gray-900 text-white z-10 transition-all duration-300 backdrop-blur-2xl ${
+                isFullscreen
+                    ? 'h-screen w-screen max-w-none max-h-none rounded-none border-0 overflow-hidden'
+                    : `${moduleData.showOrion ? 'max-w-7xl' : 'max-w-4xl'} max-h-[96vh] max-md:max-h-[100dvh] max-md:h-full rounded-3xl max-md:rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden`
+            }`}>
 
                 <div className="absolute -top-20 -left-20 w-64 h-64 bg-lime-500/10 rounded-full blur-[80px] pointer-events-none"/>
                 <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none"/>
 
-
-                <div className="relative px-8 py-10 shrink-0 border-b border-white/5 bg-white/[0.02] max-md:px-3 max-md:py-3">
+                <div className={`relative shrink-0 border-b border-white/5 bg-white/[0.02] ${isFullscreen ? 'px-6 py-3.5 max-md:px-3 max-md:py-2.5' : 'px-8 py-10 max-md:px-3 max-md:py-3'}`}>
                     <div className="relative flex items-center justify-between max-md:gap-2">
                         <div className="flex items-center space-x-6 min-w-0 max-md:space-x-2.5">
-                            <div className="relative p-5 rounded-2xl bg-lime-500/10 border border-lime-500/20 group animate-in slide-in-from-left duration-500 max-md:p-2.5 shrink-0">
-                                <Monitor className="w-10 h-10 text-lime-400 group-hover:scale-110 transition-transform duration-300 max-md:h-6 max-md:w-6"/>
+                            <div className={`relative rounded-2xl bg-lime-500/10 border border-lime-500/20 group animate-in slide-in-from-left duration-500 shrink-0 ${isFullscreen ? 'p-2.5' : 'p-5 max-md:p-2.5'}`}>
+                                <Monitor className={`text-lime-400 group-hover:scale-110 transition-transform duration-300 ${isFullscreen ? 'w-6 h-6' : 'w-10 h-10 max-md:h-6 max-md:w-6'}`}/>
                                 <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-lime-500 animate-pulse shadow-[0_0_10px_rgba(132,204,22,0.5)] max-md:w-2 max-md:h-2"/>
                             </div>
                             <div className="min-w-0">
@@ -28,27 +71,62 @@ export const SlideContent: React.FC<SlideContentProps> = ({ moduleData, onClose 
                                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-lime-500/60 max-md:tracking-wider">Module Presentation</span>
                                     <div className="h-px w-8 bg-lime-500/30 max-md:hidden"/>
                                 </div>
-                                <h2 className="text-4xl font-black tracking-tight text-white mb-2 animate-in slide-in-from-left duration-500 delay-200 max-md:text-lg max-md:mb-0.5">
+                                <h2 className={`font-black tracking-tight text-white animate-in slide-in-from-left duration-500 delay-200 ${isFullscreen ? 'text-xl mb-0' : 'text-4xl mb-2 max-md:text-lg max-md:mb-0.5'}`}>
                                     {moduleData.showOrion ? 'Orion Slide Deck' : 'Visual Storyboard'}
                                 </h2>
-                                <div className="flex items-center gap-3 text-gray-400 animate-in slide-in-from-left duration-500 delay-300 min-w-0">
-                                    <Sparkles className="w-4 h-4 text-lime-400 shrink-0 max-md:h-3.5 max-md:w-3.5"/>
-                                    <span className="text-sm font-medium italic truncate max-md:text-xs">{cleanTitle(moduleData.Content?.Title || moduleData.Module)}</span>
-                                </div>
+                                {!isFullscreen && (
+                                    <div className="flex items-center gap-3 text-gray-400 animate-in slide-in-from-left duration-500 delay-300 min-w-0">
+                                        <Sparkles className="w-4 h-4 text-lime-400 shrink-0 max-md:h-3.5 max-md:w-3.5"/>
+                                        <span className="text-sm font-medium italic truncate max-md:text-xs">{cleanTitle(moduleData.Content?.Title || moduleData.Module)}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        <button onClick={onClose} className="group relative px-6 py-3 rounded-2xl bg-white/5 border border-white/10 hover:border-lime-500/30 hover:bg-lime-500/5 transition-all duration-300 flex items-center gap-2 animate-in slide-in-from-right duration-500 shrink-0 max-md:px-2.5 max-md:py-2.5 max-md:rounded-xl" aria-label="Return to Studio">
-                            <svg className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                            </svg>
-                            <span className="font-black uppercase tracking-widest text-[10px] text-gray-400 group-hover:text-white transition-colors max-md:hidden">Return to Studio</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {moduleData.showOrion && moduleData.orionUrl && (
+                                <a
+                                    href={moduleData.orionUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-lime-500/30 hover:bg-lime-500/10 transition-all duration-300 flex items-center justify-center shrink-0 max-md:p-2.5 max-md:rounded-xl"
+                                    title="Open slide deck in new tab"
+                                >
+                                    <ExternalLink className="w-4 h-4 text-lime-400 group-hover:scale-110 transition-transform duration-300" />
+                                </a>
+                            )}
+
+                            <button
+                                type="button"
+                                onClick={toggleFullscreen}
+                                className="group relative px-4 py-3 rounded-2xl bg-white/5 border border-white/10 hover:border-lime-500/30 hover:bg-lime-500/10 transition-all duration-300 flex items-center gap-2 shrink-0 max-md:px-2.5 max-md:py-2.5 max-md:rounded-xl"
+                                aria-label={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+                                title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+                            >
+                                {isFullscreen ? (
+                                    <>
+                                        <Minimize2 className="w-4 h-4 text-lime-400 group-hover:scale-110 transition-transform duration-300" />
+                                        <span className="font-black uppercase tracking-widest text-[10px] text-gray-400 group-hover:text-white transition-colors max-md:hidden">Exit Full Screen</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Maximize2 className="w-4 h-4 text-lime-400 group-hover:scale-110 transition-transform duration-300" />
+                                        <span className="font-black uppercase tracking-widest text-[10px] text-gray-400 group-hover:text-white transition-colors max-md:hidden">Full Screen</span>
+                                    </>
+                                )}
+                            </button>
+
+                            <button onClick={onClose} className="group relative px-6 py-3 rounded-2xl bg-white/5 border border-white/10 hover:border-lime-500/30 hover:bg-lime-500/5 transition-all duration-300 flex items-center gap-2 animate-in slide-in-from-right duration-500 shrink-0 max-md:px-2.5 max-md:py-2.5 max-md:rounded-xl" aria-label="Return to Studio">
+                                <svg className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                                </svg>
+                                <span className="font-black uppercase tracking-widest text-[10px] text-gray-400 group-hover:text-white transition-colors max-md:hidden">Return to Studio</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-
-                <div className="flex-1 min-h-0 overflow-y-auto p-8 custom-scrollbar bg-transparent max-md:p-2">
+                <div className={`flex-1 min-h-0 overflow-y-auto ${isFullscreen ? 'p-4 max-md:p-2' : 'p-8 max-md:p-2'} custom-scrollbar bg-transparent`}>
                     {!(moduleData &&
             Array.isArray(moduleData.slide?.Slides) &&
             moduleData.slide?.Slides.length > 0) && !moduleData.showOrion ? (<div className="flex flex-col items-center justify-center py-20 animate-in fade-in duration-700">
@@ -60,14 +138,22 @@ export const SlideContent: React.FC<SlideContentProps> = ({ moduleData, onClose 
                             <p className="text-gray-500 text-center max-w-sm font-medium">
                                 Our AI is orchestrating the perfect visual sequence for this curriculum.
                             </p>
-                        </div>) : (<div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                            {moduleData.showOrion && moduleData.orionUrl ? (<div className="flex flex-col gap-2">
+                        </div>) : (<div className="animate-in fade-in slide-in-from-bottom-4 duration-700 h-full">
+                            {moduleData.showOrion && moduleData.orionUrl ? (<div className="flex flex-col gap-2 h-full">
                                     <p className="hidden max-md:block text-center text-[10px] font-semibold uppercase tracking-wider text-gray-500">
                                         Swipe or pinch to view the full slide · landscape works best
                                     </p>
-                                    <div className="relative w-full h-[75vh] max-md:h-[calc(100dvh-8.5rem)] max-md:min-h-[320px] rounded-[2rem] max-md:rounded-xl overflow-hidden max-md:overflow-auto border border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] group bg-black/40 backdrop-blur-sm">
+                                    <div className={`relative w-full ${isFullscreen ? 'h-[calc(100vh-5.5rem)]' : 'h-[75vh] max-md:h-[calc(100dvh-8.5rem)]'} max-md:min-h-[320px] rounded-[2rem] max-md:rounded-xl overflow-hidden max-md:overflow-auto border border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] group bg-black/40 backdrop-blur-sm`}>
                                         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-lime-500/20 to-transparent z-10 pointer-events-none"/>
                                         <iframe src={moduleData.orionUrl.replace('/docs/', '/embed/').replace('/view/', '/embed/')} className="h-full w-full border-0 md:absolute md:inset-0 max-md:min-w-[640px] max-md:min-h-full" allowFullScreen title="Orion Slide Deck"/>
+                                        <button
+                                            type="button"
+                                            onClick={toggleFullscreen}
+                                            className="absolute top-3 right-3 z-20 p-2.5 rounded-xl bg-black/60 hover:bg-black/90 border border-white/20 text-white hover:text-lime-400 backdrop-blur-md transition-all shadow-lg group-hover:opacity-100 opacity-80"
+                                            title={isFullscreen ? 'Exit Full Screen' : 'View Slide Full Screen'}
+                                        >
+                                            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                                        </button>
                                     </div>
                                 </div>) : (<div className="space-y-12">
                                     <div className="flex items-center gap-3 mb-8">

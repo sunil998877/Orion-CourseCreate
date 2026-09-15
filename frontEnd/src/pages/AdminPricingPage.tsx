@@ -64,7 +64,6 @@ export default function AdminPricingPage() {
 
   return (
     <div className="space-y-8 transition-colors duration-200">
-      {/* Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2">
@@ -105,7 +104,6 @@ export default function AdminPricingPage() {
         </div>
       )}
 
-      {/* Info Notice Box */}
       <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4 text-xs text-slate-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200">
         <div className="flex items-start gap-3">
           <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400" />
@@ -118,7 +116,6 @@ export default function AdminPricingPage() {
         </div>
       </div>
 
-      {/* SKUs Table Card */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-colors duration-200 dark:border-white/10 dark:bg-white/[0.03] dark:shadow-none">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">

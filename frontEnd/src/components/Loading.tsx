@@ -17,8 +17,6 @@ const Loading = () => {
     return (<div className="relative min-h-screen overflow-hidden animate-fadeIn">
       <style>{`
 
-
-
         .cloud {
           position: absolute;
           background: rgba(255, 255, 255, 0.9);

@@ -19,7 +19,6 @@ const AnalyticsPage: React.FC = () => {
     return () => cancelAnimationFrame(id);
   }, []);
 
-
   const theme = useMemo(() => {
     const t = (localStorage.getItem('theme') || 'blue').toLowerCase();
     const palettes: Record<string, { accent: string; accentSoft: string }> = {
@@ -66,7 +65,6 @@ const AnalyticsPage: React.FC = () => {
     return peak ? peak.label : '-';
   }, [buckets]);
 
-
   const formatXAxis = (tick: string) => {
     if (!tick) return '';
     if (range === 'week' || range === 'month') {
@@ -95,12 +93,10 @@ const AnalyticsPage: React.FC = () => {
     { value: 'year', label: 'This Year' }
   ];
 
-
   return (
     <PageTransition>
       <div className="min-h-screen text-white relative font-sans selection:bg-lime-500/30">
         <div className="space-y-10 pb-20">
-
 
           <div className="relative rounded-[2.5rem] max-md:rounded-2xl bg-gray-900/40 border border-white/10 backdrop-blur-2xl p-8 md:p-12 max-md:p-5 overflow-hidden shadow-2xl group">
 
@@ -120,7 +116,6 @@ const AnalyticsPage: React.FC = () => {
                 <p className="text-lg text-gray-400 max-w-xl leading-relaxed">
                   Monitor your implementation metrics, engagement rates, and growth trajectory in real-time.
                 </p>
-
 
                 <div className="mt-8 relative group/insight max-w-lg">
                   <div className="absolute -inset-2 bg-lime-500/10 blur-xl rounded-2xl opacity-0 group-hover/insight:opacity-100 transition-opacity duration-700" />
@@ -146,22 +141,15 @@ const AnalyticsPage: React.FC = () => {
                 </div>
               </div>
 
-
               <div className="flex items-center gap-8 md:gap-12 relative">
-
-
-
 
                 <div className="relative w-56 h-72 md:w-64 md:h-80 flex items-end justify-center pointer-events-auto select-none perspective-[1200px] group/holo">
 
-
                   <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-4/5 h-full bg-gradient-to-t from-lime-500/20 via-lime-500/5 to-transparent blur-2xl opacity-50 group-hover/holo:opacity-80 transition-opacity duration-700 pointer-events-none mix-blend-screen" />
-
 
                   <div className="absolute bottom-6 w-full h-20 border border-lime-500/30 rounded-[100%] animate-[spin_8s_linear_infinite] shadow-[0_0_20px_rgba(132,204,22,0.2)] group-hover/holo:border-lime-400/50 transition-colors" />
                   <div className="absolute bottom-6 w-5/6 h-14 border border-dashed border-emerald-400/30 rounded-[100%] animate-[spin_12s_linear_infinite_reverse]" />
                   <div className="absolute bottom-6 w-2/3 h-8 border border-dotted border-white/20 rounded-[100%] animate-[spin_4s_linear_infinite]" />
-
 
                   <div className="absolute inset-0 overflow-hidden rounded-full mask-image-[radial-gradient(circle,black,transparent)] pointer-events-none">
                     {[...Array(6)].map((_, i) => (
@@ -179,12 +167,9 @@ const AnalyticsPage: React.FC = () => {
                     ))}
                   </div>
 
-
                   <div className="relative z-10 w-full h-full flex items-end justify-center">
 
-
                     <div className="absolute inset-x-0 h-1 bg-lime-400/50 shadow-[0_0_15px_#a3e635] z-30 opacity-70 animate-[scan_3s_ease-in-out_infinite] group-hover/holo:opacity-30" />
-
 
                     <div className="relative w-full h-full transition-transform duration-500 group-hover/holo:scale-[1.02]">
                       <img
@@ -197,9 +182,7 @@ const AnalyticsPage: React.FC = () => {
                                mask-image-[linear-gradient(to_bottom,black_80%,transparent_100%)]"
                       />
 
-
                       <div className="absolute inset-0 opacity-20 mix-blend-overlay brightness-150 bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E')]" />
-
 
                       <img
                         src={avtar3}
@@ -213,7 +196,6 @@ const AnalyticsPage: React.FC = () => {
                     <img src={avtar3} alt="" className="h-full w-auto mx-auto object-contain object-bottom grayscale sepia" />
                   </div>
                 </div>
-
 
                 <style>{`
                 @keyframes scan {
@@ -235,7 +217,6 @@ const AnalyticsPage: React.FC = () => {
             </div>
           </div>
 
-
           <div className="space-y-6">
             <div className="flex items-center gap-4 pl-1">
               <div className="w-1 h-8 bg-gradient-to-b from-lime-400 to-emerald-500 rounded-full shadow-[0_0_12px_#84cc16]" />
@@ -243,7 +224,6 @@ const AnalyticsPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Active Range Card with Dropdown Selector */}
               <div className="relative z-30">
                 <div
                   onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -328,7 +308,6 @@ const AnalyticsPage: React.FC = () => {
               ))}
             </div>
           </div>
-
 
           <div className="space-y-6">
             <div className="flex items-center gap-4 pl-1">

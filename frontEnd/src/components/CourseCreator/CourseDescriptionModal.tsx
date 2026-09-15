@@ -21,13 +21,11 @@ const CourseDescriptionModal: React.FC = () => {
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-[200] flex items-center justify-center p-4"
           >
-            {/* Backdrop */}
             <div
               className="absolute inset-0 bg-black/80 backdrop-blur-md"
               onClick={() => setIsDescriptionModalOpen(false)}
             />
 
-            {/* Modal Panel */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -36,7 +34,6 @@ const CourseDescriptionModal: React.FC = () => {
               className="relative z-10 w-full max-w-3xl bg-[#0d0f1a] border border-white/10 rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
               <div className="flex items-center justify-between px-8 pt-7 pb-5 border-b border-white/5">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-lime-500/10 border border-lime-500/20">
@@ -56,7 +53,6 @@ const CourseDescriptionModal: React.FC = () => {
                 </button>
               </div>
 
-              {/* Body */}
               <div className="px-8 py-6 space-y-4">
                 <div className="relative">
                   <textarea
@@ -75,7 +71,6 @@ const CourseDescriptionModal: React.FC = () => {
                   />
                 </div>
 
-                {/* Refine with AI row inside modal */}
                 {refinePromptOpen && (
                   <div className="bg-gray-800/60 p-4 rounded-xl border border-lime-500/20 animate-in fade-in zoom-in-95 duration-200">
                     <label className="block text-xs font-semibold text-lime-400 uppercase tracking-wider mb-2">How should Orion refine this?</label>

@@ -1462,7 +1462,6 @@ export const CourseCreatorProvider: React.FC<{
                     });
                     if (!courseResp.ok) {
                         const errData = await courseResp.json().catch(() => ({}));
-                        // Show top-up modal for credit-related failures
                         if (handleCreditApiFailure(courseResp.status, errData))
                             return;
                         toast.error(`Course could not be launched successfully. ${errData.message || 'Please try again.'}`);
@@ -1497,7 +1496,6 @@ export const CourseCreatorProvider: React.FC<{
                     });
                     if (!saveResp.ok) {
                         const errData = await saveResp.json().catch(() => ({}));
-                        // Show top-up modal for credit-related failures on module save
                         if (handleCreditApiFailure(saveResp.status, errData))
                             return;
                         toast.error(`Course could not be launched successfully. Module ${mod.id} failed to save.`);
@@ -1505,14 +1503,12 @@ export const CourseCreatorProvider: React.FC<{
                     }
                 }
                 toast.success('Course launched and saved.');
-                // Refresh sidebar credit balance after credits were spent
-                refreshWallet().catch(() => {/* non-critical */});
-                // Fire the "Course Created" notification only after everything succeeded
+                refreshWallet().catch(() => {});
                 fetch(`${API_BASE}/notifications/course-launched`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                     body: JSON.stringify({ courseTitle: courseData.title }),
-                }).catch(() => {/* non-critical */});
+                }).catch(() => {});
                 resetCourseData();
                 setSavedCourseId(null);
                 navigate('/course-dashboard', { replace: true });
@@ -1520,7 +1516,6 @@ export const CourseCreatorProvider: React.FC<{
             }
             await handleGenerateContent('content');
         } catch (err: any) {
-            // Show top-up modal for credit errors, generic failure toast for everything else
             if (!handleCreditThrowable(err)) {
                 toast.error(`Course could not be launched successfully. ${err?.message || 'An unexpected error occurred. Please try again.'}`);
             }
@@ -1694,8 +1689,7 @@ export const CourseCreatorProvider: React.FC<{
             else {
                 toast.success('Slides generated successfully!');
                 setIsGeneratingSlides(false);
-                // Refresh sidebar credit balance after Gamma slide credits were spent
-                refreshWallet().catch(() => {/* non-critical */});
+                refreshWallet().catch(() => {});
             }
         }
         catch (error) {

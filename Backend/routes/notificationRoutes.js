@@ -8,6 +8,5 @@ router.put('/notifications/read', authenticateJWT, markNotificationsRead);
 router.put('/notifications/:id/read', authenticateJWT, markSingleNotificationRead);
 router.delete('/notifications', authenticateJWT, deleteNotifications);
 router.get('/analytics/activity', authenticateJWT, getActivityAnalytics);
-// Fired by the frontend ONLY after all module contents are successfully saved
 router.post('/notifications/course-launched', authenticateJWT, courseLaunchedNotification);
 export default router;

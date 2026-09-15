@@ -89,7 +89,6 @@ const AnimatedRoutes = () => {
           <Route path="/admin/api-keys" element={<AdminProtectedRoute><AdminLayout><AdminApiCreditsPage /></AdminLayout></AdminProtectedRoute>}/>
           <Route path="/admin/settings" element={<AdminProtectedRoute><AdminLayout><AdminSettingsPage /></AdminLayout></AdminProtectedRoute>}/>
 
-
           <Route path="/course-creator" element={<ProtectedRoute><HomePage /></ProtectedRoute>}/>
           <Route path="/course-details" element={<ProtectedRoute><HeroPage /></ProtectedRoute>}/>
           <Route path="/dashboard" element={<ProtectedRoute><HeroPage /></ProtectedRoute>}/>
@@ -115,11 +114,6 @@ const ThemedToasts = () => {
     return <ToastContainer position="top-right" autoClose={3000} limit={3} theme={isDark ? 'dark' : 'light'}/>;
 };
 
-/**
- * Global credit-shortage modal listener.
- * Catches any `orion-credit-shortage` custom event fired by handleCreditApiFailure / handleCreditThrowable
- * anywhere in the app and renders the CreditShortageModal with the correct kind + message.
- */
 const CreditShortageListener: React.FC = () => {
     const [shortage, setShortage] = useState<{ kind: CreditShortageKind; message?: string } | null>(null);
 
@@ -150,7 +144,6 @@ const App: React.FC = () => {
     return (<CourseDataProvider>
       <CreditsProvider>
         <ThemedToasts />
-        {/* Global credit-shortage modal — shown whenever any API call emits the shortage event */}
         <CreditShortageListener />
         <Router>
           <AnimatedRoutes />

@@ -43,9 +43,6 @@ export const createCourse = async (req, res) => {
             user.courseData = {};
         }
         await user.save();
-        // NOTE: "Course Created" notification is intentionally NOT sent here.
-        // It will be sent only after all module contents are successfully saved
-        // via the POST /notifications/course-launched endpoint.
         res.json({ success: true, course: courseDoc });
     }
     catch (error) {
