@@ -32,6 +32,10 @@ const systemApiBalanceSchema = new mongoose.Schema({
         enum: ['healthy', 'low_credits', 'exhausted', 'action_required', 'not_configured'],
         default: 'healthy'
     },
+    apiKey: {
+        type: String,
+        default: ''
+    },
     keyMasked: {
         type: String,
         default: ''

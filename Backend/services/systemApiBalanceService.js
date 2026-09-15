@@ -1,5 +1,4 @@
 import SystemApiBalance from '../models/credits/systemApiBalance.js';
-import CreditTransaction from '../models/credits/creditTransaction.js';
 
 function maskApiKey(key) {
     if (!key || typeof key !== 'string') return '';
@@ -12,28 +11,39 @@ const PROVIDER_DEFAULTS = {
     gamma: {
         displayName: 'Gamma AI',
         unit: 'credits',
-        lowCreditThreshold: 150, // approx 3 decks (40-50 cr each)
+        defaultBalance: 400,
+        lowCreditThreshold: 150,
         rechargeUrl: 'https://gamma.app/settings/billing',
+        envKey: 'GAMMA_API_KEY',
     },
     elevenlabs: {
         displayName: 'ElevenLabs (Audio)',
         unit: 'characters',
-        lowCreditThreshold: 5000, // approx 2-3 audio voiceovers
+        defaultBalance: 10000,
+        lowCreditThreshold: 5000,
         rechargeUrl: 'https://elevenlabs.io/app/subscription',
+        envKey: 'ELEVEN_API_KEY',
     },
     openai: {
         displayName: 'OpenAI (GPT-4o)',
-        unit: 'tokens / budget',
+        unit: 'tokens',
+        defaultBalance: 100000,
         lowCreditThreshold: 50000,
         rechargeUrl: 'https://platform.openai.com/settings/organization/billing/overview',
+        envKey: 'OPENAI_API_KEY',
     },
 };
 
-/**
- * Check live status of ElevenLabs API key and remaining characters.
- */
+function getEffectiveKey(provider, doc = null) {
+    if (doc?.apiKey && doc.apiKey.trim()) {
+        return doc.apiKey.trim();
+    }
+    const envVar = PROVIDER_DEFAULTS[provider]?.envKey;
+    return (envVar && process.env[envVar]) ? process.env[envVar].trim() : '';
+}
+
 async function checkElevenLabsLive(record) {
-    const key = process.env.ELEVEN_API_KEY;
+    const key = getEffectiveKey('elevenlabs', record);
     record.keyConfigured = Boolean(key);
     record.keyMasked = maskApiKey(key);
     record.rechargeUrl = PROVIDER_DEFAULTS.elevenlabs.rechargeUrl;
@@ -41,7 +51,7 @@ async function checkElevenLabsLive(record) {
     if (!key) {
         record.status = 'not_configured';
         record.liveCheckSuccess = false;
-        record.liveCheckMessage = 'ELEVEN_API_KEY is not set in environment variables';
+        record.liveCheckMessage = 'ElevenLabs API key is not configured';
         return record;
     }
 
@@ -81,7 +91,10 @@ async function checkElevenLabsLive(record) {
 
         if (isMissingPermissions) {
             record.liveCheckSuccess = true;
-            record.liveCheckMessage = "API key is active & valid for voice synthesis. (To display live character count automatically, enable 'user_read' permission on your ElevenLabs key, or set balance manually).";
+            record.liveCheckMessage = "API key active for TTS. Grant 'user_read' permission in ElevenLabs console for live quota counter.";
+            if (record.balance === null || record.balance === undefined) {
+                record.balance = PROVIDER_DEFAULTS.elevenlabs.defaultBalance;
+            }
             record.status = (record.balance !== null && record.balance < record.lowCreditThreshold)
                 ? (record.balance <= 0 ? 'exhausted' : 'low_credits')
                 : 'healthy';
@@ -106,11 +119,8 @@ async function checkElevenLabsLive(record) {
     return record;
 }
 
-/**
- * Check live status of Gamma API key.
- */
 async function checkGammaLive(record) {
-    const key = process.env.GAMMA_API_KEY;
+    const key = getEffectiveKey('gamma', record);
     record.keyConfigured = Boolean(key);
     record.keyMasked = maskApiKey(key);
     record.rechargeUrl = PROVIDER_DEFAULTS.gamma.rechargeUrl;
@@ -118,7 +128,7 @@ async function checkGammaLive(record) {
     if (!key) {
         record.status = 'not_configured';
         record.liveCheckSuccess = false;
-        record.liveCheckMessage = 'GAMMA_API_KEY is not set in environment variables';
+        record.liveCheckMessage = 'Gamma API key is not configured';
         return record;
     }
 
@@ -132,11 +142,10 @@ async function checkGammaLive(record) {
         if (testRes.ok) {
             record.liveCheckSuccess = true;
             record.liveCheckMessage = `Gamma API key active & authenticated (${latency}ms)`;
-            if (record.balance !== null) {
-                record.status = record.balance < record.lowCreditThreshold ? (record.balance <= 0 ? 'exhausted' : 'low_credits') : 'healthy';
-            } else {
-                record.status = 'healthy';
+            if (record.balance === null || record.balance === undefined) {
+                record.balance = PROVIDER_DEFAULTS.gamma.defaultBalance;
             }
+            record.status = record.balance < record.lowCreditThreshold ? (record.balance <= 0 ? 'exhausted' : 'low_credits') : 'healthy';
             record.meta = {
                 ...record.meta,
                 latencyMs: latency,
@@ -158,11 +167,8 @@ async function checkGammaLive(record) {
     return record;
 }
 
-/**
- * Check live status of OpenAI API key.
- */
 async function checkOpenAILive(record) {
-    const key = process.env.OPENAI_API_KEY;
+    const key = getEffectiveKey('openai', record);
     record.keyConfigured = Boolean(key);
     record.keyMasked = maskApiKey(key);
     record.rechargeUrl = PROVIDER_DEFAULTS.openai.rechargeUrl;
@@ -170,7 +176,7 @@ async function checkOpenAILive(record) {
     if (!key) {
         record.status = 'not_configured';
         record.liveCheckSuccess = false;
-        record.liveCheckMessage = 'OPENAI_API_KEY is not set in environment variables';
+        record.liveCheckMessage = 'OpenAI API key is not configured';
         return record;
     }
 
@@ -184,11 +190,10 @@ async function checkOpenAILive(record) {
         if (testRes.ok) {
             record.liveCheckSuccess = true;
             record.liveCheckMessage = `OpenAI API key active & authenticated (${latency}ms)`;
-            if (record.balance !== null) {
-                record.status = record.balance < record.lowCreditThreshold ? (record.balance <= 0 ? 'exhausted' : 'low_credits') : 'healthy';
-            } else {
-                record.status = 'healthy';
+            if (record.balance === null || record.balance === undefined) {
+                record.balance = PROVIDER_DEFAULTS.openai.defaultBalance;
             }
+            record.status = record.balance < record.lowCreditThreshold ? (record.balance <= 0 ? 'exhausted' : 'low_credits') : 'healthy';
             record.meta = {
                 ...record.meta,
                 latencyMs: latency,
@@ -210,41 +215,47 @@ async function checkOpenAILive(record) {
     return record;
 }
 
-/**
- * Ensures system balance documents exist in DB.
- */
 export async function ensureSystemApiBalances() {
     const providers = ['gamma', 'openai', 'elevenlabs'];
     for (const provider of providers) {
         const existing = await SystemApiBalance.findOne({ provider });
         if (!existing) {
             const def = PROVIDER_DEFAULTS[provider];
+            const envVal = process.env[def.envKey] || '';
             await SystemApiBalance.create({
                 provider,
                 displayName: def.displayName,
                 unit: def.unit,
+                balance: def.defaultBalance,
                 lowCreditThreshold: def.lowCreditThreshold,
                 rechargeUrl: def.rechargeUrl,
                 status: 'healthy',
-                balance: null,
+                apiKey: envVal,
+                keyMasked: maskApiKey(envVal),
+                keyConfigured: Boolean(envVal),
             });
+        } else if (existing.balance === null || existing.balance === undefined) {
+            existing.balance = PROVIDER_DEFAULTS[provider].defaultBalance;
+            await existing.save();
         }
     }
 }
 
-/**
- * Get all API balances, running live checks.
- */
 export async function getAllApiBalances(runLiveCheck = false) {
     await ensureSystemApiBalances();
     const records = await SystemApiBalance.find({}).lean();
 
     if (!runLiveCheck) {
-        return records.map(r => ({
-            ...r,
-            keyConfigured: Boolean(process.env[r.provider === 'gamma' ? 'GAMMA_API_KEY' : r.provider === 'elevenlabs' ? 'ELEVEN_API_KEY' : 'OPENAI_API_KEY']),
-            keyMasked: maskApiKey(process.env[r.provider === 'gamma' ? 'GAMMA_API_KEY' : r.provider === 'elevenlabs' ? 'ELEVEN_API_KEY' : 'OPENAI_API_KEY'])
-        }));
+        return records.map(r => {
+            const fullKey = getEffectiveKey(r.provider, r);
+            return {
+                ...r,
+                keyFull: fullKey,
+                keyConfigured: Boolean(fullKey),
+                keyMasked: maskApiKey(fullKey),
+                balance: r.balance !== null && r.balance !== undefined ? r.balance : PROVIDER_DEFAULTS[r.provider]?.defaultBalance ?? 0
+            };
+        });
     }
 
     const updated = [];
@@ -260,17 +271,20 @@ export async function getAllApiBalances(runLiveCheck = false) {
             await checkOpenAILive(doc);
         }
 
+        if (doc.balance === null || doc.balance === undefined) {
+            doc.balance = PROVIDER_DEFAULTS[doc.provider]?.defaultBalance ?? 0;
+        }
+
         doc.lastCheckedAt = new Date();
         await doc.save();
-        updated.push(doc.toObject());
+        const obj = doc.toObject();
+        obj.keyFull = getEffectiveKey(doc.provider, doc);
+        updated.push(obj);
     }
 
     return updated;
 }
 
-/**
- * Called by gammaService when a generation finishes and returns credits.remaining
- */
 export async function recordGammaCreditsRemaining(remainingCredits, deductedCredits = null) {
     if (typeof remainingCredits !== 'number') return;
     try {
@@ -289,16 +303,10 @@ export async function recordGammaCreditsRemaining(remainingCredits, deductedCred
                 };
             }
             await doc.save();
-            console.log(`[API Balances] Updated Gamma live remaining credits: ${remainingCredits}`);
         }
-    } catch (err) {
-        console.error('[API Balances] Failed to record Gamma credits remaining:', err.message);
-    }
+    } catch (_) {}
 }
 
-/**
- * Admin manually updates a provider balance (e.g. after a recharge).
- */
 export async function updateProviderBalanceByAdmin(provider, { balance, quotaLimit, lowCreditThreshold, notes }) {
     await ensureSystemApiBalances();
     const doc = await SystemApiBalance.findOne({ provider });
@@ -321,5 +329,37 @@ export async function updateProviderBalanceByAdmin(provider, { balance, quotaLim
 
     doc.lastCheckedAt = new Date();
     await doc.save();
-    return doc.toObject();
+    const obj = doc.toObject();
+    obj.keyFull = getEffectiveKey(doc.provider, doc);
+    return obj;
+}
+
+export async function updateProviderApiKey(provider, apiKey) {
+    await ensureSystemApiBalances();
+    const doc = await SystemApiBalance.findOne({ provider });
+    if (!doc) throw new Error(`Provider ${provider} not found`);
+
+    const trimmed = (apiKey || '').trim();
+    doc.apiKey = trimmed;
+    doc.keyMasked = maskApiKey(trimmed);
+    doc.keyConfigured = Boolean(trimmed);
+
+    const envVar = PROVIDER_DEFAULTS[provider]?.envKey;
+    if (envVar && trimmed) {
+        process.env[envVar] = trimmed;
+    }
+
+    if (doc.provider === 'elevenlabs') {
+        await checkElevenLabsLive(doc);
+    } else if (doc.provider === 'gamma') {
+        await checkGammaLive(doc);
+    } else if (doc.provider === 'openai') {
+        await checkOpenAILive(doc);
+    }
+
+    doc.lastCheckedAt = new Date();
+    await doc.save();
+    const obj = doc.toObject();
+    obj.keyFull = trimmed;
+    return obj;
 }

@@ -409,6 +409,7 @@ export interface AdminApiBalanceItem {
     lowCreditThreshold: number;
     status: 'healthy' | 'low_credits' | 'exhausted' | 'action_required' | 'not_configured';
     keyMasked: string;
+    keyFull?: string;
     keyConfigured: boolean;
     liveCheckSuccess: boolean;
     liveCheckMessage: string;
@@ -450,6 +451,20 @@ export const updateAdminApiBalance = async (payload: {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.message || "Failed to update API balance");
+    return json.data;
+};
+
+export const updateAdminApiKey = async (payload: {
+    provider: string;
+    apiKey: string;
+}): Promise<AdminApiBalanceItem> => {
+    const res = await fetch(`${API_BASE}/admin/api-balances/update-key`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || "Failed to update API key");
     return json.data;
 };
 

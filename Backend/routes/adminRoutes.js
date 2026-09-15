@@ -1,6 +1,6 @@
 import express from "express";
 import adminAuthMiddleware from "../middlewares/adminAuthMiddleware.js";
-import { adminLogin, getAdminDashboardStats, getAdminAllUsers, getAdminUserDetails, adminAdjustCredits, getAdminTransactions, getAdminCourses, getAdminPricingRules, updateAdminPricingRule, getAdminAnalytics, getAdminRechargesAndPlans, getAdminContacts, updateAdminContactStatus, deleteAdminContact, getAdminApiBalances, refreshAdminApiBalances, updateAdminApiBalance } from "../controllers/admin/admin.controller.js";
+import { adminLogin, getAdminDashboardStats, getAdminAllUsers, getAdminUserDetails, adminAdjustCredits, getAdminTransactions, getAdminCourses, getAdminPricingRules, updateAdminPricingRule, getAdminAnalytics, getAdminRechargesAndPlans, getAdminContacts, updateAdminContactStatus, deleteAdminContact, getAdminApiBalances, refreshAdminApiBalances, updateAdminApiBalance, updateAdminApiKey } from "../controllers/admin/admin.controller.js";
 const router = express.Router();
 router.post("/login", adminLogin);
 router.use(adminAuthMiddleware);
@@ -21,5 +21,6 @@ router.delete("/contacts/:id", deleteAdminContact);
 router.get("/api-balances", getAdminApiBalances);
 router.post("/api-balances/refresh", refreshAdminApiBalances);
 router.post("/api-balances/update", updateAdminApiBalance);
+router.post("/api-balances/update-key", updateAdminApiKey);
 
 export default router;

@@ -1,6 +1,7 @@
 import {
     getAllApiBalances,
-    updateProviderBalanceByAdmin
+    updateProviderBalanceByAdmin,
+    updateProviderApiKey
 } from '../../services/systemApiBalanceService.js';
 
 export const getAdminApiBalances = async (req, res) => {
@@ -60,6 +61,28 @@ export const updateAdminApiBalance = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: error.message || 'Failed to update API balance'
+        });
+    }
+};
+
+export const updateAdminApiKey = async (req, res) => {
+    try {
+        const { provider, apiKey } = req.body;
+        if (!provider || !apiKey) {
+            return res.status(400).json({ success: false, message: 'Provider and apiKey are required' });
+        }
+
+        const updated = await updateProviderApiKey(provider, apiKey);
+        return res.status(200).json({
+            success: true,
+            message: `Updated API key for ${provider}`,
+            data: updated
+        });
+    } catch (error) {
+        console.error('[Admin] updateAdminApiKey error:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to update API key'
         });
     }
 };
