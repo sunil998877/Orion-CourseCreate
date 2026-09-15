@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, CreditCard, ExternalLink, Layers, Mic, Sparkles, X } from 'lucide-react';
+import { AlertTriangle, CreditCard, ExternalLink, Layers, Mic, RefreshCw, Sparkles, X } from 'lucide-react';
 import type { CreditShortageKind } from '../../utils/creditErrors';
 type Props = {
     kind: CreditShortageKind;
@@ -9,6 +9,7 @@ type Props = {
 const COPY: Record<CreditShortageKind, {
     title: string;
     body: string;
+    userBody: string;
     accent: string;
     icon: 'wallet' | 'gamma' | 'openai' | 'elevenlabs';
     rechargeLabel: string;
@@ -18,14 +19,16 @@ const COPY: Record<CreditShortageKind, {
     wallet: {
         title: 'You need to recharge or pick a plan',
         body: 'Your wallet does not have enough credits for this action. Top up credits or upgrade your plan to continue generating.',
+        userBody: 'Your wallet does not have enough credits for this action. Top up credits or upgrade your plan to continue generating.',
         accent: 'lime',
         icon: 'wallet',
         rechargeLabel: 'Recharge',
         showUserPlans: true,
     },
     gamma: {
-        title: 'Gamma credits need a recharge',
+        title: 'Slide generation temporarily unavailable',
         body: 'This is a management limit on the Gamma API key used for slide decks — not your personal wallet. Recharge or upgrade the Gamma plan, then retry.',
+        userBody: 'Slide generation is temporarily at capacity. Please try again in a few minutes or contact support if the issue persists.',
         accent: 'amber',
         icon: 'gamma',
         rechargeLabel: 'Recharge Gamma',
@@ -33,8 +36,9 @@ const COPY: Record<CreditShortageKind, {
         showUserPlans: false,
     },
     openai: {
-        title: 'OpenAI quota needs a recharge',
+        title: 'AI generation temporarily unavailable',
         body: 'This is a management limit on the OpenAI API key — not your personal wallet. Add billing credits or upgrade the OpenAI plan, then retry.',
+        userBody: 'AI generation is temporarily at capacity. Please try again in a few minutes or contact support if the issue persists.',
         accent: 'sky',
         icon: 'openai',
         rechargeLabel: 'OpenAI billing',
@@ -42,8 +46,9 @@ const COPY: Record<CreditShortageKind, {
         showUserPlans: false,
     },
     elevenlabs: {
-        title: 'ElevenLabs credits need a recharge',
+        title: 'Audio generation temporarily unavailable',
         body: 'This is a management limit on the ElevenLabs API key used for audio and podcasts — not your personal wallet. Recharge or upgrade the ElevenLabs plan, then retry.',
+        userBody: 'Audio generation is temporarily at capacity. Please try again in a few minutes or contact support if the issue persists.',
         accent: 'violet',
         icon: 'elevenlabs',
         rechargeLabel: 'ElevenLabs billing',
@@ -86,10 +91,15 @@ const CreditShortageModal: React.FC<Props> = ({ kind, message, onClose }) => {
         </div>
 
         <h3 className="pr-8 text-xl font-black text-white">{copy.title}</h3>
-        <p className="mt-2 text-sm leading-relaxed text-white/60">{copy.body}</p>
-        {message && <p className={`mt-3 rounded-xl border p-3 text-xs ${noteClass}`}>{message}</p>}
+        {/* Admins see technical body; regular users see a friendly message */}
+        <p className="mt-2 text-sm leading-relaxed text-white/60">
+          {isAdmin ? copy.body : copy.userBody}
+        </p>
+        {/* Only show raw API error details to admins */}
+        {message && isAdmin && <p className={`mt-3 rounded-xl border p-3 text-xs ${noteClass}`}>{message}</p>}
 
-        {copy.showUserPlans ? (<div className="mt-6 grid grid-cols-2 gap-2 max-md:grid-cols-1">
+        {copy.showUserPlans ? (
+          <div className="mt-6 grid grid-cols-2 gap-2 max-md:grid-cols-1">
             <button type="button" onClick={() => go('/add-credits#recharge')} className="flex items-center justify-center gap-2 rounded-xl bg-lime-500 py-3 text-sm font-black text-black hover:bg-lime-400">
               <CreditCard className="h-4 w-4"/>
               Recharge
@@ -98,15 +108,30 @@ const CreditShortageModal: React.FC<Props> = ({ kind, message, onClose }) => {
               <Sparkles className="h-4 w-4"/>
               View plans
             </button>
-          </div>) : (<div className="mt-6 space-y-2">
-            {copy.rechargeHref && (<a href={copy.rechargeHref} target="_blank" rel="noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-lime-500 py-3 text-sm font-black text-black hover:bg-lime-400">
+          </div>
+        ) : (
+          <div className="mt-6 space-y-2">
+            {/* External recharge links — admins only */}
+            {isAdmin && copy.rechargeHref && (
+              <a href={copy.rechargeHref} target="_blank" rel="noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-lime-500 py-3 text-sm font-black text-black hover:bg-lime-400">
                 <ExternalLink className="h-4 w-4"/>
                 {copy.rechargeLabel}
-              </a>)}
-            {isAdmin && (<button type="button" onClick={() => go('/admin/settings')} className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-bold text-white hover:bg-white/10">
+              </a>
+            )}
+            {isAdmin && (
+              <button type="button" onClick={() => go('/admin/settings')} className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-bold text-white hover:bg-white/10">
                 Open management settings
-              </button>)}
-          </div>)}
+              </button>
+            )}
+            {/* Regular users just see a "Try again" button */}
+            {!isAdmin && (
+              <button type="button" onClick={onClose} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 py-3 text-sm font-bold text-white hover:bg-white/10">
+                <RefreshCw className="h-4 w-4"/>
+                Try again later
+              </button>
+            )}
+          </div>
+        )}
 
         <button type="button" onClick={onClose} className="mt-3 w-full py-2 text-xs font-semibold text-white/40 hover:text-white">
           Maybe later
