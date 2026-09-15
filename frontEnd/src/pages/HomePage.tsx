@@ -134,7 +134,7 @@ const HomePage: React.FC = () => {
                 </div>
 
                 <div className="relative z-20 w-full h-full flex items-end justify-center pointer-events-none">
-                  <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 1, duration: 0.8, ease: "easeOut" }} className="absolute top-0 right-0 z-30 animate-float-slow">
+                  <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 1, duration: 0.8, ease: "easeOut" }} className="absolute top-0 z-30 animate-float-slow" style={{ right: '-36px' }}>
                     <div className="relative bg-[#0F172A]/90 backdrop-blur-2xl border border-lime-500/30 rounded-[2rem] rounded-br-lg px-6 py-5 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(132,204,22,0.1)] max-w-[220px]">
                       <div className="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-lime-400 to-transparent"/>
                       <div className="flex items-center gap-2 mb-2">

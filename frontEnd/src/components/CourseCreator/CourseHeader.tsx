@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Loader2 } from 'lucide-react';
 import { useCourseCreator } from '../../contextAPI/CourseCreatorContext';
 import CourseNotifications from './CourseNotifications';
 import logo5 from '../../assests/logo5.png';
 const CourseHeader: React.FC = () => {
-    const { handleExitArchitect } = useCourseCreator();
+    const { handleExitArchitect, isExitingArchitect } = useCourseCreator();
     return (<nav className="relative z-[100] py-4 px-8 border-b border-white/10 backdrop-blur-xl bg-black/40 max-md:px-3 max-md:py-3">
             <div className="w-full flex justify-between items-center transition-all duration-500">
                 <div className="flex-1 flex justify-start">
@@ -26,12 +26,39 @@ const CourseHeader: React.FC = () => {
 
 
                 <div className="flex-1 flex items-center justify-end gap-6 max-md:gap-2">
-                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleExitArchitect} className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white hover:border-lime-500/30 transition-all text-xs font-bold shadow-sm">
-                        <ChevronLeft size={16} strokeWidth={2.5} className="text-lime-500"/>
-                        Exit Architect
+                    {/* Desktop Exit Button */}
+                    <motion.button
+                        whileHover={{ scale: isExitingArchitect ? 1 : 1.05 }}
+                        whileTap={{ scale: isExitingArchitect ? 1 : 0.95 }}
+                        onClick={handleExitArchitect}
+                        disabled={isExitingArchitect}
+                        className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white hover:border-lime-500/30 transition-all text-xs font-bold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                        {isExitingArchitect ? (
+                            <>
+                                <Loader2 size={14} className="animate-spin text-lime-500"/>
+                                Please wait…
+                            </>
+                        ) : (
+                            <>
+                                <ChevronLeft size={16} strokeWidth={2.5} className="text-lime-500"/>
+                                Exit Architect
+                            </>
+                        )}
                     </motion.button>
-                    <motion.button whileTap={{ scale: 0.95 }} onClick={handleExitArchitect} aria-label="Exit Architect" className="md:hidden flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/5 text-lime-400">
-                        <ChevronLeft size={18} strokeWidth={2.5}/>
+
+                    {/* Mobile Exit Button */}
+                    <motion.button
+                        whileTap={{ scale: isExitingArchitect ? 1 : 0.95 }}
+                        onClick={handleExitArchitect}
+                        disabled={isExitingArchitect}
+                        aria-label="Exit Architect"
+                        className="md:hidden flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/5 text-lime-400 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                        {isExitingArchitect
+                            ? <Loader2 size={18} className="animate-spin"/>
+                            : <ChevronLeft size={18} strokeWidth={2.5}/>
+                        }
                     </motion.button>
 
                     <div className="h-8 w-px bg-white/10 hidden md:block"/>

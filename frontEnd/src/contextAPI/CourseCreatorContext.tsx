@@ -68,6 +68,8 @@ export const CourseCreatorProvider: React.FC<{
     const [isCustomIndustry, setIsCustomIndustry] = useState(false);
     const [isCustomCountry, setIsCustomCountry] = useState(false);
     const [downloadingModuleId, setDownloadingModuleId] = useState<number | null>(null);
+    const [isLaunchingCourse, setIsLaunchingCourse] = useState(false);
+    const [isExitingArchitect, setIsExitingArchitect] = useState(false);
     const [showScrollArrow, setShowScrollArrow] = useState(false);
     const [showScrollArrowModules, setShowScrollArrowModules] = useState(false);
     const [showGenerateWarning, setShowGenerateWarning] = useState(false);
@@ -1443,64 +1445,70 @@ export const CourseCreatorProvider: React.FC<{
             navigate('/login');
             return;
         }
-        const mCount = courseData.module ?? 0;
-        const hasDraft = mCount > 0 && previewModules.length >= mCount &&
-            previewModules.every(m => prefetchedContentMap[m.id]);
-        if (hasDraft) {
-            let courseId = savedCourseId || courseData.courseId;
-            if (!courseId) {
-                const courseResp = await fetch(`${API_BASE}/courses`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ courseData })
-                });
-                if (!courseResp.ok) {
-                    const errData = await courseResp.json().catch(() => ({}));
-                    toast.error(errData.message || 'Failed to create course');
+        setIsLaunchingCourse(true);
+        try {
+            const mCount = courseData.module ?? 0;
+            const hasDraft = mCount > 0 && previewModules.length >= mCount &&
+                previewModules.every(m => prefetchedContentMap[m.id]);
+            if (hasDraft) {
+                let courseId = savedCourseId || courseData.courseId;
+                if (!courseId) {
+                    const courseResp = await fetch(`${API_BASE}/courses`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ courseData })
+                    });
+                    if (!courseResp.ok) {
+                        const errData = await courseResp.json().catch(() => ({}));
+                        toast.error(errData.message || 'Failed to create course');
+                        return;
+                    }
+                    const result = await courseResp.json();
+                    courseId = result.course?.courseId;
+                    if (courseId) {
+                        setSavedCourseId(courseId);
+                        updateCourseData({ courseId });
+                    }
+                }
+                if (!courseId) {
+                    toast.error('Could not create course');
                     return;
                 }
-                const result = await courseResp.json();
-                courseId = result.course?.courseId;
-                if (courseId) {
-                    setSavedCourseId(courseId);
-                    updateCourseData({ courseId });
+                for (const mod of previewModules) {
+                    const content = prefetchedContentMap[mod.id];
+                    const slides = prefetchedSlidesMap[mod.id];
+                    if (!content && !slides?.Slides?.length)
+                        continue;
+                    const saveResp = await fetch(`${API_BASE}/module-contents`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({
+                            courseId,
+                            moduleNumber: mod.id,
+                            content: content || undefined,
+                            slides: slides || undefined,
+                            orionUrl: orionUrlByModule[mod.id] || undefined
+                        })
+                    });
+                    if (!saveResp.ok) {
+                        const errData = await saveResp.json().catch(() => ({}));
+                        toast.error(`Failed to save module ${mod.id}: ${errData.message || 'Unknown error'}`);
+                        return;
+                    }
                 }
-            }
-            if (!courseId) {
-                toast.error('Could not create course');
+                toast.success('Course launched and saved.');
+                resetCourseData();
+                setSavedCourseId(null);
+                navigate('/course-dashboard', { replace: true });
                 return;
             }
-            for (const mod of previewModules) {
-                const content = prefetchedContentMap[mod.id];
-                const slides = prefetchedSlidesMap[mod.id];
-                if (!content && !slides?.Slides?.length)
-                    continue;
-                const saveResp = await fetch(`${API_BASE}/module-contents`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({
-                        courseId,
-                        moduleNumber: mod.id,
-                        content: content || undefined,
-                        slides: slides || undefined,
-                        orionUrl: orionUrlByModule[mod.id] || undefined
-                    })
-                });
-                if (!saveResp.ok) {
-                    const errData = await saveResp.json().catch(() => ({}));
-                    toast.error(`Failed to save module ${mod.id}: ${errData.message || 'Unknown error'}`);
-                    return;
-                }
-            }
-            toast.success('Course launched and saved.');
-            resetCourseData();
-            setSavedCourseId(null);
-            navigate('/course-dashboard', { replace: true });
-            return;
+            await handleGenerateContent('content');
+        } finally {
+            setIsLaunchingCourse(false);
         }
-        await handleGenerateContent('content');
     };
     const handleExitArchitect = async () => {
+        setIsExitingArchitect(true);
         const courseId = savedCourseId || courseData.courseId;
         if (courseId) {
             try {
@@ -1518,6 +1526,7 @@ export const CourseCreatorProvider: React.FC<{
         }
         resetCourseData();
         setSavedCourseId(null);
+        setIsExitingArchitect(false);
         navigate('/course-dashboard');
     };
     const handleGenerateContent = async (mode: 'slides' | 'content') => {
@@ -1856,7 +1865,9 @@ export const CourseCreatorProvider: React.FC<{
             handleGenerateSlidesOrion,
             openSlidesPreview,
             handleLaunchCourse,
+            isLaunchingCourse,
             handleExitArchitect,
+            isExitingArchitect,
             handleGenerateContent,
             isStepComplete,
             handleStepClick,

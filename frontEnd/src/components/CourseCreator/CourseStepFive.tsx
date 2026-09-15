@@ -7,7 +7,7 @@ import { formatAudience } from '../../utils/courseHelpers';
 import WarningSign from './WarningSign';
 import { Check, Clock, ChevronDown, ChevronRight, ChevronLeft, Loader2, FileText, Target, Palette, Globe, Zap, Sparkles, Book, BookOpen, Monitor, Eye, CheckCircle2, Pencil, Link, Plus, Trash2, ExternalLink, AlertCircle, X, Download, Layers, MapPin, Wrench, Rocket, AlertTriangle, Construction, Lightbulb, RefreshCw, Star, LogOut, User as UserIcon, Bell } from 'lucide-react';
 const CourseStepFive: React.FC = () => {
-    const { step, courseData, updateCourseData, isGeneratingSlides, isGeneratingContent, previewModules, selectedModule, selectedSlide, setSelectedModule, setSelectedSlide, isPreviewLoading, isDescriptionModalOpen, setIsDescriptionModalOpen, isRefiningDescription, refinePromptOpen, setRefinePromptOpen, refinePromptText, setRefinePromptText, prefetchedSlidesMap, orionUrlByModule, isBatchGenerating, batchSlidesProgress, batchSlidesDisplayProgress, batchGeneratingModuleId, batchSelectedModuleIdForPreview, refineProgress, downloadingModuleId, goToPrevStep, handleRefineDescription, regenerateSingleModule, refineSingleModule, downloadModulePPTX, openSlidesPreview, handleLaunchCourse, moduleCredits, stepVariants, containerVariants, itemVariants } = useCourseCreator();
+    const { step, courseData, updateCourseData, isGeneratingSlides, isGeneratingContent, isLaunchingCourse, previewModules, selectedModule, selectedSlide, setSelectedModule, setSelectedSlide, isPreviewLoading, isDescriptionModalOpen, setIsDescriptionModalOpen, isRefiningDescription, refinePromptOpen, setRefinePromptOpen, refinePromptText, setRefinePromptText, prefetchedSlidesMap, orionUrlByModule, isBatchGenerating, batchSlidesProgress, batchSlidesDisplayProgress, batchGeneratingModuleId, batchSelectedModuleIdForPreview, refineProgress, downloadingModuleId, goToPrevStep, handleRefineDescription, regenerateSingleModule, refineSingleModule, downloadModulePPTX, openSlidesPreview, handleLaunchCourse, moduleCredits, stepVariants, containerVariants, itemVariants } = useCourseCreator();
     return (<motion.div key="step5" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] h-full max-md:min-h-0">
             <div className="flex-1 xl:w-[55%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group flex flex-col h-full max-md:rounded-2xl max-md:p-4">
                 <div className="grid lg:grid-cols-3 gap-8 mb-10 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar flex-1">
@@ -64,9 +64,25 @@ const CourseStepFive: React.FC = () => {
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={goToPrevStep} className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 transition-all" type="button">
                         <ChevronLeft size={20}/> Back to Blueprint
                     </motion.button>
-                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleLaunchCourse} className="flex items-center gap-2 bg-gradient-to-r from-lime-500 to-emerald-500 text-black px-8 py-3 rounded-xl font-black shadow-lg shadow-lime-500/20 hover:shadow-lime-500/40 transform hover:-translate-y-0.5 active:translate-y-0 transition-all" type="button" disabled={isGeneratingSlides || isGeneratingContent}>
-                        {isGeneratingContent ? <Loader2 className="w-5 h-5 animate-spin"/> : null}
-                        Launch Course
+                    <motion.button
+                        whileHover={{ scale: isLaunchingCourse ? 1 : 1.05 }}
+                        whileTap={{ scale: isLaunchingCourse ? 1 : 0.95 }}
+                        onClick={handleLaunchCourse}
+                        className="flex items-center gap-2 bg-gradient-to-r from-lime-500 to-emerald-500 text-black px-8 py-3 rounded-xl font-black shadow-lg shadow-lime-500/20 hover:shadow-lime-500/40 transform hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                        type="button"
+                        disabled={isGeneratingSlides || isGeneratingContent || isLaunchingCourse}
+                    >
+                        {isLaunchingCourse ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin"/>
+                                Please wait…
+                            </>
+                        ) : (
+                            <>
+                                {isGeneratingContent ? <Loader2 className="w-5 h-5 animate-spin"/> : null}
+                                Launch Course
+                            </>
+                        )}
                     </motion.button>
                 </div>
             </div>
