@@ -16,7 +16,7 @@ interface MenuItem {
 }
 const menuItems: MenuItem[] = [
     { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { title: "API Credits & Keys", href: "/admin/api-credits", icon: KeyRound, badge: "AI Quota" },
+    { title: "API Credits & Keys", href: "/admin/api-credits", icon: KeyRound },
     { title: "Pricing Rules", href: "/admin/pricing", icon: Coins, badge: "6 SKUs" },
     { title: "User Wallets", href: "/admin/users", icon: Users },
     { title: "Recharges & Plans", href: "/admin/recharges", icon: CreditCard },
