@@ -236,14 +236,6 @@ export default function AdminPage() {
                       >
                         {revealedKeys['gamma'] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyKey('gamma', stats?.apiBalances?.find((b: any) => b.provider === 'gamma')?.keyFull || stats?.apiBalances?.find((b: any) => b.provider === 'gamma')?.keyMasked)}
-                        className="text-slate-400 hover:text-slate-700 dark:text-white/40 dark:hover:text-white"
-                        title="Copy key"
-                      >
-                        {copiedKey === 'gamma' ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -301,14 +293,6 @@ export default function AdminPage() {
                       >
                         {revealedKeys['openai'] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyKey('openai', stats?.apiBalances?.find((b: any) => b.provider === 'openai')?.keyFull || stats?.apiBalances?.find((b: any) => b.provider === 'openai')?.keyMasked)}
-                        className="text-slate-400 hover:text-slate-700 dark:text-white/40 dark:hover:text-white"
-                        title="Copy key"
-                      >
-                        {copiedKey === 'openai' ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -365,14 +349,6 @@ export default function AdminPage() {
                         title={revealedKeys['elevenlabs'] ? "Hide key" : "View key"}
                       >
                         {revealedKeys['elevenlabs'] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyKey('elevenlabs', stats?.apiBalances?.find((b: any) => b.provider === 'elevenlabs')?.keyFull || stats?.apiBalances?.find((b: any) => b.provider === 'elevenlabs')?.keyMasked)}
-                        className="text-slate-400 hover:text-slate-700 dark:text-white/40 dark:hover:text-white"
-                        title="Copy key"
-                      >
-                        {copiedKey === 'elevenlabs' ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
                       </button>
                     </div>
                   </div>

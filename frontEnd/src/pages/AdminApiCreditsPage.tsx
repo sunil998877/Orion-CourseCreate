@@ -312,19 +312,6 @@ export default function AdminApiCreditsPage() {
                                                         >
                                                             {isRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                                                         </button>
-
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleCopyKey(item.provider, item.keyFull || item.keyMasked)}
-                                                            className="p-1 text-slate-400 hover:text-slate-700 dark:text-white/40 dark:hover:text-white rounded hover:bg-slate-100 dark:hover:bg-white/10 cursor-pointer"
-                                                            title="Copy API key"
-                                                        >
-                                                            {copiedKey === item.provider ? (
-                                                                <Check className="h-3.5 w-3.5 text-emerald-400" />
-                                                            ) : (
-                                                                <Copy className="h-3.5 w-3.5" />
-                                                            )}
-                                                        </button>
                                                     </div>
                                                 )}
                                             </div>
