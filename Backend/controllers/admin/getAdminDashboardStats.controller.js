@@ -4,8 +4,10 @@ import CreditTransaction from "../../models/credits/creditTransaction.js";
 import Course from "../../models/courseModel.js";
 import { formatTransaction, providerSpendPipeline, ledgerProviderBreakdown, estimateProviderSpendFromCourses, mergeProviderBreakdown, } from "./admin.helpers.js";
 import { withCache } from "./admin.cache.js";
+import { getAllApiBalances } from "../../services/systemApiBalanceService.js";
+
 const loadDashboardStats = async () => {
-    const [totalUsers, totalCourses, walletAgg, transactionAgg, providerAgg, recentTransactions, estimatedProviders,] = await Promise.all([
+    const [totalUsers, totalCourses, walletAgg, transactionAgg, providerAgg, recentTransactions, estimatedProviders, apiBalances] = await Promise.all([
         User.countDocuments(),
         Course.countDocuments(),
         Wallet.aggregate([
@@ -36,6 +38,7 @@ const loadDashboardStats = async () => {
             .populate("action", "actionKey displayName provider creditCost")
             .lean(),
         estimateProviderSpendFromCourses(),
+        getAllApiBalances(false).catch(() => []),
     ]);
     const walletStats = walletAgg[0] || { totalBalance: 0, totalReserved: 0, totalLifetimeUsed: 0 };
     const txByType = {};
@@ -59,6 +62,7 @@ const loadDashboardStats = async () => {
         transactionBreakdown: txByType,
         providerBreakdown,
         recentTransactions: recentTransactions.map(formatTransaction),
+        apiBalances,
     };
 };
 export const getAdminDashboardStats = async (req, res) => {

@@ -396,7 +396,61 @@ export const deleteAdminContact = async (id: string) => {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.message || "Failed to delete contact");
-    return json;
+    return json.data;
+};
+
+export interface AdminApiBalanceItem {
+    _id?: string;
+    provider: 'gamma' | 'openai' | 'elevenlabs';
+    displayName: string;
+    balance: number | null;
+    unit: string;
+    quotaLimit: number | null;
+    lowCreditThreshold: number;
+    status: 'healthy' | 'low_credits' | 'exhausted' | 'action_required' | 'not_configured';
+    keyMasked: string;
+    keyConfigured: boolean;
+    liveCheckSuccess: boolean;
+    liveCheckMessage: string;
+    rechargeUrl: string;
+    lastCheckedAt: string;
+    lastRechargedAt?: string | null;
+    lastSyncSource?: string;
+    meta?: any;
+}
+
+export const fetchAdminApiBalances = async (): Promise<AdminApiBalanceItem[]> => {
+    const res = await fetch(`${API_BASE}/admin/api-balances`, { headers: getHeaders() });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || "Failed to fetch API balances");
+    return json.data || [];
+};
+
+export const refreshAdminApiBalances = async (): Promise<AdminApiBalanceItem[]> => {
+    const res = await fetch(`${API_BASE}/admin/api-balances/refresh`, {
+        method: "POST",
+        headers: getHeaders(),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || "Failed to refresh API balances");
+    return json.data || [];
+};
+
+export const updateAdminApiBalance = async (payload: {
+    provider: string;
+    balance?: number;
+    quotaLimit?: number;
+    lowCreditThreshold?: number;
+    notes?: string;
+}): Promise<AdminApiBalanceItem> => {
+    const res = await fetch(`${API_BASE}/admin/api-balances/update`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || "Failed to update API balance");
+    return json.data;
 };
 
 export const getAdminDashboardStats = fetchAdminDashboardStats;
@@ -409,3 +463,4 @@ export const getAdminCourses = fetchAdminCourses;
 export const getAdminAnalytics = fetchAdminAnalytics;
 export const getAdminUserDetails = fetchAdminUserDetails;
 export const getAdminRechargesAndPlans = fetchAdminRechargesAndPlans;
+export const getAdminApiBalances = fetchAdminApiBalances;

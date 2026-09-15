@@ -30,6 +30,7 @@ const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage'));
 const AdminRechargePlanPage = lazy(() => import('./pages/AdminRechargePlanPage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
 const AdminContactsPage = lazy(() => import('./pages/AdminContactsPage'));
+const AdminApiCreditsPage = lazy(() => import('./pages/AdminApiCreditsPage'));
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const PageFallback = () => (<div className="flex min-h-screen items-center justify-center bg-[#09090b]">
@@ -84,6 +85,8 @@ const AnimatedRoutes = () => {
           <Route path="/admin/products" element={<AdminProtectedRoute><AdminLayout><AdminCoursesPage /></AdminLayout></AdminProtectedRoute>}/>
           <Route path="/admin/contacts" element={<AdminProtectedRoute><AdminLayout><AdminContactsPage /></AdminLayout></AdminProtectedRoute>}/>
           <Route path="/admin/analytics" element={<AdminProtectedRoute><AdminLayout><AdminAnalyticsPage /></AdminLayout></AdminProtectedRoute>}/>
+          <Route path="/admin/api-credits" element={<AdminProtectedRoute><AdminLayout><AdminApiCreditsPage /></AdminLayout></AdminProtectedRoute>}/>
+          <Route path="/admin/api-keys" element={<AdminProtectedRoute><AdminLayout><AdminApiCreditsPage /></AdminLayout></AdminProtectedRoute>}/>
           <Route path="/admin/settings" element={<AdminProtectedRoute><AdminLayout><AdminSettingsPage /></AdminLayout></AdminProtectedRoute>}/>
 
 

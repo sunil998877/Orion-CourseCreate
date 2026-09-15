@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Coins, Users, CreditCard, ReceiptText, BookOpen, TrendingUp, Settings, LogOut, Mail, } from "lucide-react";
+import { LayoutDashboard, Coins, Users, CreditCard, ReceiptText, BookOpen, TrendingUp, Settings, LogOut, Mail, KeyRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { clearAdminSession } from "@/utils/adminAuth";
 import brandLogo from "@/assests/logo3.svg";
@@ -16,6 +16,7 @@ interface MenuItem {
 }
 const menuItems: MenuItem[] = [
     { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { title: "API Credits & Keys", href: "/admin/api-credits", icon: KeyRound, badge: "AI Quota" },
     { title: "Pricing Rules", href: "/admin/pricing", icon: Coins, badge: "6 SKUs" },
     { title: "User Wallets", href: "/admin/users", icon: Users },
     { title: "Recharges & Plans", href: "/admin/recharges", icon: CreditCard },
