@@ -1,15 +1,6 @@
 import Course from '../../models/courseModel.js';
 import User from '../../models/userModel.js';
 import { randomUUID } from 'crypto';
-const addNotification = async (userId, title, message, type = 'info') => {
-    try {
-        const notification = { title, message, type, isRead: false, createdAt: new Date() };
-        await User.findByIdAndUpdate(userId, { $push: { notifications: notification } });
-    }
-    catch (err) {
-        console.error('Failed to add notification:', err);
-    }
-};
 export const createCourse = async (req, res) => {
     console.log("Controller Hit - createCourse");
     try {
@@ -52,7 +43,9 @@ export const createCourse = async (req, res) => {
             user.courseData = {};
         }
         await user.save();
-        await addNotification(user._id, 'Course Created', `Your course "${normalized.title}" has been created successfully.`, 'success');
+        // NOTE: "Course Created" notification is intentionally NOT sent here.
+        // It will be sent only after all module contents are successfully saved
+        // via the POST /notifications/course-launched endpoint.
         res.json({ success: true, course: courseDoc });
     }
     catch (error) {

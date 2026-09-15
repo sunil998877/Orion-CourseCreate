@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { ToastContainer } from 'react-toastify';
@@ -9,6 +9,9 @@ import { CreditsProvider } from './contextAPI/CreditsContext';
 import AdminLayout from './layout/AdminLayout';
 import { useTheme } from './contextAPI/ThemeContext';
 import { hasAdminSession } from './utils/adminAuth';
+import CreditShortageModal from './components/credits/CreditShortageModal';
+import { CREDIT_SHORTAGE_EVENT } from './utils/creditErrors';
+import type { CreditShortageKind } from './utils/creditErrors';
 const RegistrationPage = lazy(() => import('./pages/RegistrationPage'));
 const HeroPage = lazy(() => import('./pages/HeroPages').then((m) => ({ default: m.HeroPage })));
 const CourseCreatorForm = lazy(() => import('./components/CourseCreator/CourseCreateForm'));
@@ -108,6 +111,34 @@ const ThemedToasts = () => {
     const { isDark } = useTheme();
     return <ToastContainer position="top-right" autoClose={3000} limit={3} theme={isDark ? 'dark' : 'light'}/>;
 };
+
+/**
+ * Global credit-shortage modal listener.
+ * Catches any `orion-credit-shortage` custom event fired by handleCreditApiFailure / handleCreditThrowable
+ * anywhere in the app and renders the CreditShortageModal with the correct kind + message.
+ */
+const CreditShortageListener: React.FC = () => {
+    const [shortage, setShortage] = useState<{ kind: CreditShortageKind; message?: string } | null>(null);
+
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const { kind, message } = (e as CustomEvent<{ kind: CreditShortageKind; message?: string }>).detail ?? {};
+            if (kind) setShortage({ kind, message });
+        };
+        window.addEventListener(CREDIT_SHORTAGE_EVENT, handler);
+        return () => window.removeEventListener(CREDIT_SHORTAGE_EVENT, handler);
+    }, []);
+
+    if (!shortage) return null;
+    return (
+        <CreditShortageModal
+            kind={shortage.kind}
+            message={shortage.message}
+            onClose={() => setShortage(null)}
+        />
+    );
+};
+
 const App: React.FC = () => {
     React.useEffect(() => {
         localStorage.removeItem('currentCourseId');
@@ -116,6 +147,8 @@ const App: React.FC = () => {
     return (<CourseDataProvider>
       <CreditsProvider>
         <ThemedToasts />
+        {/* Global credit-shortage modal — shown whenever any API call emits the shortage event */}
+        <CreditShortageListener />
         <Router>
           <AnimatedRoutes />
         </Router>

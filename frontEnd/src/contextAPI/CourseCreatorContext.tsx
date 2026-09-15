@@ -1460,7 +1460,10 @@ export const CourseCreatorProvider: React.FC<{
                     });
                     if (!courseResp.ok) {
                         const errData = await courseResp.json().catch(() => ({}));
-                        toast.error(errData.message || 'Failed to create course');
+                        // Show top-up modal for credit-related failures
+                        if (handleCreditApiFailure(courseResp.status, errData))
+                            return;
+                        toast.error(`Course could not be launched successfully. ${errData.message || 'Please try again.'}`);
                         return;
                     }
                     const result = await courseResp.json();
@@ -1471,7 +1474,7 @@ export const CourseCreatorProvider: React.FC<{
                     }
                 }
                 if (!courseId) {
-                    toast.error('Could not create course');
+                    toast.error('Course could not be launched successfully. Could not create course record.');
                     return;
                 }
                 for (const mod of previewModules) {
@@ -1492,17 +1495,31 @@ export const CourseCreatorProvider: React.FC<{
                     });
                     if (!saveResp.ok) {
                         const errData = await saveResp.json().catch(() => ({}));
-                        toast.error(`Failed to save module ${mod.id}: ${errData.message || 'Unknown error'}`);
+                        // Show top-up modal for credit-related failures on module save
+                        if (handleCreditApiFailure(saveResp.status, errData))
+                            return;
+                        toast.error(`Course could not be launched successfully. Module ${mod.id} failed to save.`);
                         return;
                     }
                 }
                 toast.success('Course launched and saved.');
+                // Fire the "Course Created" notification only after everything succeeded
+                fetch(`${API_BASE}/notifications/course-launched`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ courseTitle: courseData.title }),
+                }).catch(() => {/* non-critical */});
                 resetCourseData();
                 setSavedCourseId(null);
                 navigate('/course-dashboard', { replace: true });
                 return;
             }
             await handleGenerateContent('content');
+        } catch (err: any) {
+            // Show top-up modal for credit errors, generic failure toast for everything else
+            if (!handleCreditThrowable(err)) {
+                toast.error(`Course could not be launched successfully. ${err?.message || 'An unexpected error occurred. Please try again.'}`);
+            }
         } finally {
             setIsLaunchingCourse(false);
         }
@@ -1558,6 +1575,8 @@ export const CourseCreatorProvider: React.FC<{
                 if (!courseResp.ok) {
                     const errData = await courseResp.json().catch(() => ({}));
                     console.error('Save course error details:', errData);
+                    if (handleCreditApiFailure(courseResp.status, errData))
+                        return;
                     throw new Error(errData.message || 'Failed to save course');
                 }
                 const courseResult = await courseResp.json();
@@ -1651,6 +1670,8 @@ export const CourseCreatorProvider: React.FC<{
                     }
                 }
                 catch (err) {
+                    if (handleCreditThrowable(err))
+                        return;
                     console.error(`Failed to generate content for module ${i}`, err);
                 }
             }
