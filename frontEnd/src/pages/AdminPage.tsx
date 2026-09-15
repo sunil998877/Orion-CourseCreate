@@ -1,27 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Coins, TrendingUp, Clock, Sparkles, RefreshCw, Layers, FileText, Mic, ArrowUpRight, Users, KeyRound, ExternalLink, CheckCircle2, AlertTriangle, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import { Coins, TrendingUp, Clock, Sparkles, RefreshCw, Layers, FileText, Mic, ArrowUpRight, Users, KeyRound, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { getAdminDashboardStats } from '../services/adminService';
 import { cn } from '../lib/utils';
 export default function AdminPage() {
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [revealedKeys, setRevealedKeys] = useState<Record<string, boolean>>({});
-    const [copiedKey, setCopiedKey] = useState<string | null>(null);
-
-    const toggleRevealKey = (provider: string) => {
-        setRevealedKeys(prev => ({ ...prev, [provider]: !prev[provider] }));
-    };
-
-    const handleCopyKey = async (provider: string, keyVal?: string) => {
-        if (!keyVal) return;
-        try {
-            await navigator.clipboard.writeText(keyVal);
-            setCopiedKey(provider);
-            setTimeout(() => setCopiedKey(null), 2000);
-        } catch (_) {}
-    };
     const fetchStats = async () => {
         try {
             setLoading(true);
@@ -222,21 +207,6 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-slate-900 dark:text-white">Gamma AI</h3>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="font-mono text-[10px] text-slate-500 dark:text-white/60 select-all">
-                        {revealedKeys['gamma']
-                          ? (stats?.apiBalances?.find((b: any) => b.provider === 'gamma')?.keyFull || stats?.apiBalances?.find((b: any) => b.provider === 'gamma')?.keyMasked || 'sk-gam...')
-                          : (stats?.apiBalances?.find((b: any) => b.provider === 'gamma')?.keyMasked || 'sk-gam...')}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => toggleRevealKey('gamma')}
-                        className="text-slate-400 hover:text-slate-700 dark:text-white/40 dark:hover:text-white"
-                        title={revealedKeys['gamma'] ? "Hide key" : "View key"}
-                      >
-                        {revealedKeys['gamma'] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                      </button>
-                    </div>
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
@@ -279,21 +249,6 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-slate-900 dark:text-white">OpenAI (GPT-4o)</h3>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="font-mono text-[10px] text-slate-500 dark:text-white/60 select-all">
-                        {revealedKeys['openai']
-                          ? (stats?.apiBalances?.find((b: any) => b.provider === 'openai')?.keyFull || stats?.apiBalances?.find((b: any) => b.provider === 'openai')?.keyMasked || 'sk-pro...')
-                          : (stats?.apiBalances?.find((b: any) => b.provider === 'openai')?.keyMasked || 'sk-pro...')}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => toggleRevealKey('openai')}
-                        className="text-slate-400 hover:text-slate-700 dark:text-white/40 dark:hover:text-white"
-                        title={revealedKeys['openai'] ? "Hide key" : "View key"}
-                      >
-                        {revealedKeys['openai'] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                      </button>
-                    </div>
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
@@ -336,21 +291,6 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-slate-900 dark:text-white">ElevenLabs (Audio)</h3>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="font-mono text-[10px] text-slate-500 dark:text-white/60 select-all">
-                        {revealedKeys['elevenlabs']
-                          ? (stats?.apiBalances?.find((b: any) => b.provider === 'elevenlabs')?.keyFull || stats?.apiBalances?.find((b: any) => b.provider === 'elevenlabs')?.keyMasked || 'sk_357...')
-                          : (stats?.apiBalances?.find((b: any) => b.provider === 'elevenlabs')?.keyMasked || 'sk_357...')}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => toggleRevealKey('elevenlabs')}
-                        className="text-slate-400 hover:text-slate-700 dark:text-white/40 dark:hover:text-white"
-                        title={revealedKeys['elevenlabs'] ? "Hide key" : "View key"}
-                      >
-                        {revealedKeys['elevenlabs'] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                      </button>
-                    </div>
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold text-sky-600 dark:text-sky-400">

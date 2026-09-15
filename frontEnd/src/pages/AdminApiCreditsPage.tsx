@@ -13,10 +13,6 @@ import {
     ArrowUpRight,
     Zap,
     Clock,
-    Eye,
-    EyeOff,
-    Copy,
-    Check,
     Plus
 } from "lucide-react";
 import {
@@ -33,9 +29,6 @@ export default function AdminApiCreditsPage() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    const [revealedKeys, setRevealedKeys] = useState<Record<string, boolean>>({});
-    const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
     const [keyModalItem, setKeyModalItem] = useState<AdminApiBalanceItem | null>(null);
     const [newApiKey, setNewApiKey] = useState("");
@@ -77,22 +70,6 @@ export default function AdminApiCreditsPage() {
     useEffect(() => {
         loadData(false);
     }, []);
-
-    const toggleRevealKey = (provider: string) => {
-        setRevealedKeys(prev => ({
-            ...prev,
-            [provider]: !prev[provider]
-        }));
-    };
-
-    const handleCopyKey = async (provider: string, keyVal?: string) => {
-        if (!keyVal) return;
-        try {
-            await navigator.clipboard.writeText(keyVal);
-            setCopiedKey(provider);
-            setTimeout(() => setCopiedKey(null), 2000);
-        } catch (_) {}
-    };
 
     const openKeyModal = (item: AdminApiBalanceItem) => {
         setKeyModalItem(item);
@@ -272,10 +249,6 @@ export default function AdminApiCreditsPage() {
                         : null;
 
                     const isLow = balanceNum < item.lowCreditThreshold;
-                    const isRevealed = Boolean(revealedKeys[item.provider]);
-                    const keyToDisplay = isRevealed
-                        ? (item.keyFull || item.keyMasked)
-                        : item.keyMasked;
 
                     return (
                         <div
@@ -297,24 +270,6 @@ export default function AdminApiCreditsPage() {
                                             <h3 className="font-bold text-slate-900 dark:text-white text-base">
                                                 {item.displayName}
                                             </h3>
-                                            <div className="flex items-center gap-1.5 mt-0.5">
-                                                <span className="font-mono text-[11px] text-slate-500 dark:text-white/60 select-all">
-                                                    {keyToDisplay || "No key configured"}
-                                                </span>
-
-                                                {item.keyConfigured && (
-                                                    <div className="flex items-center gap-1 ml-1">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => toggleRevealKey(item.provider)}
-                                                            className="p-1 text-slate-400 hover:text-slate-700 dark:text-white/40 dark:hover:text-white rounded hover:bg-slate-100 dark:hover:bg-white/10 cursor-pointer"
-                                                            title={isRevealed ? "Hide API key" : "View full API key"}
-                                                        >
-                                                            {isRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
                                         </div>
                                     </div>
                                     <div>{getStatusBadge(item.status, item.keyConfigured)}</div>
