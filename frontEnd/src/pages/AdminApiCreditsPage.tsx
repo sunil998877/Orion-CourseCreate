@@ -280,13 +280,7 @@ export default function AdminApiCreditsPage() {
                                         <span className="text-[11px] font-medium text-slate-500 dark:text-white/50">
                                             Current Available Balance
                                         </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => openEditModal(item)}
-                                            className="inline-flex items-center gap-1 text-[11px] font-bold text-lime-600 hover:text-lime-700 dark:text-lime-400 dark:hover:underline cursor-pointer"
-                                        >
-                                            <Edit3 className="h-3 w-3" /> Edit Balance
-                                        </button>
+
                                     </div>
 
                                     <div className="mt-1.5 flex items-baseline gap-2">

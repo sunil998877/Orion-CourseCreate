@@ -12,6 +12,7 @@ import type { PreviewLesson, PreviewModule } from '../utils/courseTypes';
 import { isStepComplete } from '../utils/courseValidation';
 import { handleCreditApiFailure, handleCreditThrowable } from '../utils/creditErrors';
 import { containerVariants, itemVariants, stepVariants } from './courseCreatorAnimations';
+import { useCredits } from './CreditsContext';
 export const CourseCreatorContext = createContext<any>(null);
 export const useCourseCreator = () => {
     const context = useContext(CourseCreatorContext);
@@ -26,6 +27,7 @@ export const CourseCreatorProvider: React.FC<{
     const [step, setStep] = useState(1);
     const [showValidation, setShowValidation] = useState(false);
     const { courseData, updateCourseData, resetCourseData } = useCourseData();
+    const { refreshWallet } = useCredits();
     const [formStatus] = useState<'draft' | 'editing' | 'preview' | 'outcomes' | 'submitting' | 'success'>('editing');
     const [savedCourseId, setSavedCourseId] = useState<string | null>(null);
     const [isGeneratingSlides, setIsGeneratingSlides] = useState(false);
@@ -1503,6 +1505,8 @@ export const CourseCreatorProvider: React.FC<{
                     }
                 }
                 toast.success('Course launched and saved.');
+                // Refresh sidebar credit balance after credits were spent
+                refreshWallet().catch(() => {/* non-critical */});
                 // Fire the "Course Created" notification only after everything succeeded
                 fetch(`${API_BASE}/notifications/course-launched`, {
                     method: 'POST',
@@ -1690,6 +1694,8 @@ export const CourseCreatorProvider: React.FC<{
             else {
                 toast.success('Slides generated successfully!');
                 setIsGeneratingSlides(false);
+                // Refresh sidebar credit balance after Gamma slide credits were spent
+                refreshWallet().catch(() => {/* non-critical */});
             }
         }
         catch (error) {

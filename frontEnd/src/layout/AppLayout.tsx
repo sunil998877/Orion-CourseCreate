@@ -132,7 +132,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0b1220] via-[#0a0f1a] to-black text-white">
+    <div id="app-shell" className="min-h-screen bg-gradient-to-br from-[#0b1220] via-[#0a0f1a] to-black text-white">
       <Header
         onOpenMobileMenu={() => setMobileOpen(true)}
         userInfo={userInfo}

@@ -42,6 +42,28 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
                     order_id: order.id,
                     prefill: { name: username, email },
                     theme: { color: '#84cc16' },
+                    config: {
+                        display: {
+                            blocks: {
+                                upi: {
+                                    name: 'Pay via UPI',
+                                    instruments: [
+                                        { method: 'upi', flows: ['qr', 'collect', 'intent'] },
+                                    ],
+                                },
+                                other: {
+                                    name: 'Other Payment Methods',
+                                    instruments: [
+                                        { method: 'card' },
+                                        { method: 'netbanking' },
+                                        { method: 'wallet' },
+                                    ],
+                                },
+                            },
+                            sequence: ['block.upi', 'block.other'],
+                            preferences: { show_default_blocks: false },
+                        },
+                    },
                     handler: async (response: {
                         razorpay_order_id: string;
                         razorpay_payment_id: string;

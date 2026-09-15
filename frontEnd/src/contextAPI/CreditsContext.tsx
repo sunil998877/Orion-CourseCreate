@@ -96,6 +96,16 @@ export const CreditsProvider: React.FC<{ children: React.ReactNode }> = ({ child
     fetchWalletData();
   }, [fetchWalletData]);
 
+  // Poll every 60 s so the sidebar balance stays in sync during long generation jobs
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (localStorage.getItem('token')) {
+        fetchWalletData();
+      }
+    }, 60_000);
+    return () => clearInterval(id);
+  }, [fetchWalletData]);
+
   const isZeroBalance = useMemo(() => credits.remaining <= 0, [credits.remaining]);
 
   const usagePercentage = useMemo(() => {

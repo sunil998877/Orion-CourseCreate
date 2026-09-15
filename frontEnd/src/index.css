@@ -54,6 +54,114 @@ html[data-theme="light"] #admin-shell [class*="dark:divide-white/"] {
   border-color: #f1f5f9 !important;
 }
 
+/* ── Main app light mode — dim slate palette ─────────────────────────── */
+
+/* Page shell */
+html[data-theme="light"] #app-shell {
+  background-color: #1a2332 !important;
+  background-image: none !important;
+  color: #e2e8f0 !important;
+}
+
+/* Body */
+html[data-theme="light"] body {
+  background-color: #1a2332 !important;
+}
+
+/* ── Cards & panels ─────────────────────────────────────────────────── */
+html[data-theme="light"] #app-shell section,
+html[data-theme="light"] #app-shell [class*="bg-[#0e1522]"],
+html[data-theme="light"] #app-shell [class*="bg-[#0b1220]"],
+html[data-theme="light"] #app-shell [class*="bg-[#09090b]"],
+html[data-theme="light"] #app-shell [class*="bg-[#0a0f1a]"],
+html[data-theme="light"] #app-shell [class*="bg-[#101720]"],
+html[data-theme="light"] #app-shell [class*="bg-gray-900"],
+html[data-theme="light"] #app-shell [class*="bg-gray-800"],
+html[data-theme="light"] #app-shell [class*="from-[#0b1220]"],
+html[data-theme="light"] #app-shell [class*="via-[#0a0f1a]"] {
+  background-color: #1e2d3d !important;
+  background-image: none !important;
+}
+
+html[data-theme="light"] #app-shell [class*="bg-black/"],
+html[data-theme="light"] #app-shell [class*="bg-white/\[0.03\]"],
+html[data-theme="light"] #app-shell [class*="bg-white/\[0.06\]"],
+html[data-theme="light"] #app-shell [class*="bg-white/5"],
+html[data-theme="light"] #app-shell [class*="bg-white/10"] {
+  background-color: #243447 !important;
+  background-image: none !important;
+}
+
+html[data-theme="light"] #app-shell [class*="bg-gray-800/"],
+html[data-theme="light"] #app-shell [class*="bg-gray-700/"] {
+  background-color: #243040 !important;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+html[data-theme="light"] #app-shell aside {
+  background-color: #16212e !important;
+  border-right-color: rgba(255,255,255,0.07) !important;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+html[data-theme="light"] #app-shell header {
+  background-color: #16212e !important;
+  border-bottom-color: rgba(255,255,255,0.07) !important;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.25) !important;
+}
+
+/* ── Borders ─────────────────────────────────────────────────────────── */
+html[data-theme="light"] #app-shell [class*="border-white/"],
+html[data-theme="light"] #app-shell [class*="border-gray-800"],
+html[data-theme="light"] #app-shell [class*="border-gray-700"],
+html[data-theme="light"] #app-shell [class*="border-gray-600"] {
+  border-color: rgba(255,255,255,0.09) !important;
+}
+
+/* ── Text ────────────────────────────────────────────────────────────── */
+html[data-theme="light"] #app-shell .text-white,
+html[data-theme="light"] #app-shell [class*="text-white"]:not([class*="text-white/"]) {
+  color: #e2e8f0 !important;
+}
+html[data-theme="light"] #app-shell [class*="text-white/50"],
+html[data-theme="light"] #app-shell [class*="text-white/40"],
+html[data-theme="light"] #app-shell [class*="text-white/60"] {
+  color: #94a3b8 !important;
+}
+html[data-theme="light"] #app-shell [class*="text-white/30"],
+html[data-theme="light"] #app-shell [class*="text-white/20"] {
+  color: #64748b !important;
+}
+html[data-theme="light"] #app-shell [class*="text-gray-400"],
+html[data-theme="light"] #app-shell [class*="text-gray-500"] {
+  color: #94a3b8 !important;
+}
+html[data-theme="light"] #app-shell [class*="text-gray-300"] {
+  color: #cbd5e1 !important;
+}
+
+/* ── Tailwind dark: utility overrides ───────────────────────────────── */
+html[data-theme="light"] #app-shell [class*="dark:bg-white/"] {
+  background-color: #1e2d3d !important;
+}
+html[data-theme="light"] #app-shell [class*="dark:text-white"] {
+  color: #e2e8f0 !important;
+}
+html[data-theme="light"] #app-shell [class*="dark:border-white/"] {
+  border-color: rgba(255,255,255,0.09) !important;
+}
+
+/* ── Credits tracker widget ──────────────────────────────────────────── */
+html[data-theme="light"] #app-shell [class*="bg-black/20"] {
+  background-color: #16212e !important;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────── */
+html[data-theme="light"] #app-shell ::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.15);
+}
+
+
 html {
   scroll-behavior: smooth;
 }
