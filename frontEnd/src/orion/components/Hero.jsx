@@ -11,7 +11,7 @@ const Hero = () => {
     <>
       <HeroMobile />
       <section className="relative min-h-screen hidden md:flex items-center justify-center bg-gradient-to-b from-[#0A0A0A] via-[#101010] to-[#0A0A0A] overflow-hidden md:py-32">
-        <div className="w-full h-[500px] lg:h-[650px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0">
+        <div className="w-full h-[500px] lg:h-[650px] absolute top-1/2 left-1/2 z-0" style={{ transform: 'translateX(-50%) translateY(calc(-50% + 30px))' }}>
           <Orb
             hoverIntensity={0.5}
             rotateOnHover={true}

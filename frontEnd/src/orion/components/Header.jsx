@@ -90,12 +90,12 @@ const Header = () => {
           isScrolled ? '-translate-y-full' : 'translate-y-0'
         }`}
       >
-        <div className="mx-auto flex w-full max-w-[1400px] items-center justify-between gap-4 px-6 py-0 md:py-0.5">
-          <div className="flex shrink-0 items-center gap-2 text-xl md:text-2xl font-bold tracking-tighter text-white hover:scale-105 transition-transform duration-300 group">
+        <div className="flex w-full items-center justify-between gap-4 px-6 py-3 md:px-10 md:py-4 lg:px-12">
+          <div className="flex shrink-0 items-center gap-2.5 text-xl md:text-2xl font-bold tracking-tighter text-white hover:scale-105 transition-transform duration-300 group">
             <img
               src={orionLogo}
               alt="EVOKE logo"
-              className="h-12 w-12 md:h-[72px] md:w-[72px] rounded-full object-contain"
+              className="h-8 w-8 md:h-9 md:w-9 object-contain shrink-0"
             />
             <span
               className="relative whitespace-nowrap"
@@ -184,14 +184,14 @@ const Header = () => {
 
       
       <div
-        className={`fixed left-0 right-0 z-40 flex h-12 items-center justify-between transition-all duration-300 md:h-14 ${
+        className={`fixed left-0 right-0 w-full z-40 flex h-12 items-center justify-between transition-all duration-300 md:h-14 ${
           isScrolled
             ? 'top-0 translate-y-0 border-b border-lime-500/20 opacity-100 shadow-2xl shadow-black/50 backdrop-blur-xl'
             : 'pointer-events-none -translate-y-full opacity-0'
         }`}
-        style={{ backgroundColor: 'rgb(255 255 255 / 1%)' }}
+        style={{ backgroundColor: 'rgb(10 10 10 / 80%)' }}
       >
-        <div className="container mx-auto flex w-full items-center justify-between px-6">
+        <div className="flex w-full items-center justify-between px-4 md:px-8">
           <span className="text-sm font-extrabold text-white md:text-base">
             ORION
             <span className="ml-1 text-lime-500"> Course Creator </span>
@@ -227,10 +227,10 @@ const Header = () => {
         <div className="flex-grow">
           <a
             href="/"
-            className="mb-12 inline-flex items-center gap-2 text-2xl font-bold tracking-tighter text-white transition-transform duration-300 hover:scale-105"
+            className="mb-12 inline-flex items-center gap-2.5 text-2xl font-bold tracking-tighter text-white transition-transform duration-300 hover:scale-105"
             onClick={closeMenu}
           >
-            <img src={orionLogo} alt="EVOKE logo" className="h-12 w-12 rounded-full object-contain" />
+            <img src={orionLogo} alt="EVOKE logo" className="h-8 w-8 object-contain" />
             <span className="whitespace-nowrap">
               EVOKE <span className="text-lime-500">.</span>
             </span>

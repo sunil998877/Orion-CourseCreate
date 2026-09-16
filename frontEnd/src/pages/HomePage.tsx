@@ -104,7 +104,7 @@ const HomePage: React.FC = () => {
             </div>
 
             <div className="shrink-0 w-full md:w-auto flex justify-center md:justify-end">
-              <div className="relative w-[300px] md:w-[430px] h-[370px] md:h-[445px] flex items-end justify-center perspective-[1200px] group/scene max-md:w-[220px] max-md:h-[260px]">
+              <div className="relative w-[300px] md:w-[430px] h-[370px] md:h-[445px] flex items-end justify-center perspective-[1200px] group/scene max-md:w-[260px] max-md:h-[340px]">
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-full bg-gradient-to-t from-lime-500/10 via-emerald-500/5 to-transparent blur-3xl opacity-60 pointer-events-none mix-blend-screen"/>
                 <div className="absolute top-10 left-6 right-6 bottom-16 bg-gray-900/60 backdrop-blur-md border border-white/10 rounded-2xl -z-10 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.5)] flex flex-col gap-4 p-6 transition-all duration-700 ease-out transform-gpu group-hover/scene:rotate-y-[-5deg] group-hover/scene:rotate-x-[5deg] group-hover/scene:translate-x-2" style={{ transform: 'rotateY(-12deg) rotateX(5deg) scale(0.95)' }}>
                   <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent rounded-2xl pointer-events-none"/>
@@ -134,8 +134,8 @@ const HomePage: React.FC = () => {
                 </div>
 
                 <div className="relative z-20 w-full h-full flex items-end justify-center pointer-events-none">
-                  <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 1, duration: 0.8, ease: "easeOut" }} className="absolute top-0 z-30 animate-float-slow" style={{ right: '-36px' }}>
-                    <div className="relative bg-[#0F172A]/90 backdrop-blur-2xl border border-lime-500/30 rounded-[2rem] rounded-br-lg px-6 py-5 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(132,204,22,0.1)] max-w-[220px]">
+                  <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 1, duration: 0.8, ease: "easeOut" }} className="hidden md:block absolute top-0 z-30 animate-float-slow" style={{ right: '-36px' }}>
+                    <div className="relative bg-[#0F172A]/90 backdrop-blur-2xl border border-lime-500/30 rounded-[2rem] rounded-br-lg px-4 py-4 md:px-6 md:py-5 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(132,204,22,0.1)] max-w-[180px] md:max-w-[220px]">
                       <div className="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-lime-400 to-transparent"/>
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-2 h-2 rounded-full bg-lime-400 shadow-[0_0_10px_#a3e635] animate-pulse"/>
@@ -148,9 +148,9 @@ const HomePage: React.FC = () => {
                     </div>
                   </motion.div>
 
-                  <img src={avatarImg} alt="Orion — AI Course Architect" className="w-auto h-[110%] object-contain object-bottom drop-shadow-[0_40px_60px_rgba(0,0,0,0.8)] animate-float-medium transition-transform duration-700 group-hover/scene:scale-105" style={{
-            maskImage: 'linear-gradient(to_bottom, black 80%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to_bottom, black 80%, transparent 100%)'
+                  <img src={avatarImg} alt="Orion — AI Course Architect" className="w-auto h-[110%] max-md:h-[95%] object-contain object-bottom drop-shadow-[0_40px_60px_rgba(0,0,0,0.8)] animate-float-medium transition-transform duration-700 group-hover/scene:scale-105" style={{
+            maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)'
         }}/>
                   <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-48 h-12 bg-lime-500/20 blur-3xl rounded-full -z-10"/>
                 </div>
