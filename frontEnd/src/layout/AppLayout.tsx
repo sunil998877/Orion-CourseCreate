@@ -72,7 +72,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+    const handleUpdate = () => {
+      fetchNotifications();
+    };
+    window.addEventListener("notifications-updated", handleUpdate);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("notifications-updated", handleUpdate);
+    };
   }, [fetchNotifications]);
 
   useEffect(() => {

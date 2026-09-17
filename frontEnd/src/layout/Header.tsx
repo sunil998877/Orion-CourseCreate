@@ -6,6 +6,7 @@ export interface NotificationItem {
   _id?: string;
   title: string;
   message: string;
+  type?: 'success' | 'info' | 'warning' | 'error';
   isRead: boolean;
   createdAt: string;
 }
@@ -114,19 +115,37 @@ export default function Header({ onOpenMobileMenu, userInfo, avatarUrl, notifica
               </div>
             </div>
             <div className="max-h-64 overflow-auto">
-              {notifications.length === 0 ? (<div className="px-4 py-6 text-center text-white/80 text-sm">No notifications</div>) : (notifications.map((n, i) => (<div key={n._id || i} className={`px-4 py-3 border-b border-white/5 hover:bg-white/5 transition flex items-start gap-3 ${!n.isRead ? 'bg-white/[0.02]' : ''}`}>
-                <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${!n.isRead ? 'bg-lime-500' : 'bg-transparent'}`} />
-                <div className="flex-1">
-                  <div className="text-sm text-white font-medium">{n.title}</div>
-                  <div className="text-xs text-white/85 mt-0.5 line-clamp-2">{n.message}</div>
-                  <div className="text-[10px] text-white/60 mt-1">
-                    {new Date(n.createdAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+              {notifications.length === 0 ? (<div className="px-4 py-6 text-center text-white/80 text-sm">No notifications</div>) : (notifications.map((n, i) => {
+                const isWarning = n.type === 'warning' || n.title.toLowerCase().includes('cancel');
+                const isSuccess = n.type === 'success' || n.title.toLowerCase().includes('success');
+                const dotColor = isWarning ? 'bg-amber-400' : n.type === 'error' ? 'bg-red-400' : isSuccess ? 'bg-lime-500' : 'bg-blue-400';
+                return (
+                <div key={n._id || i} className={`px-4 py-3 border-b border-white/5 hover:bg-white/5 transition flex items-start gap-3 ${!n.isRead ? 'bg-white/[0.02]' : ''}`}>
+                  <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${!n.isRead ? dotColor : 'bg-transparent'}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className={`text-sm font-medium truncate ${isWarning ? 'text-amber-300' : 'text-white'}`}>{n.title}</span>
+                      {isWarning && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-400/10 text-amber-400 border border-amber-400/20 font-semibold shrink-0">
+                          Cancelled
+                        </span>
+                      )}
+                      {isSuccess && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-lime-400/10 text-lime-400 border border-lime-400/20 font-semibold shrink-0">
+                          Success
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-white/85 mt-0.5 line-clamp-2">{n.message}</div>
+                    <div className="text-[10px] text-white/60 mt-1">
+                      {new Date(n.createdAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </div>
                   </div>
                 </div>
-              </div>)))}
+              );}))}
             </div>
           </div>)}
         </div>

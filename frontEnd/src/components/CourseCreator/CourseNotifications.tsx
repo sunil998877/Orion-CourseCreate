@@ -56,18 +56,37 @@ const CourseNotifications: React.FC = () => {
                                         <span className="text-sm text-white/60 font-medium">No new notifications</span>
                                     </div>
                                 ) : (
-                                    notifications.map((n: any, i: any) => (
-                                        <div
-                                            key={i}
-                                            className={`px-4 py-4 border-b border-white/5 hover:bg-white/[0.03] transition-colors relative group ${!n.isRead ? 'bg-lime-500/[0.02]' : ''}`}
-                                        >
-                                            {!n.isRead && <div className="absolute left-0 top-0 bottom-0 w-1 bg-lime-400" />}
-                                            <p className="text-sm text-white font-medium leading-relaxed">{n.message}</p>
-                                            <p className="text-[10px] text-white/50 mt-2 font-bold uppercase tracking-wider">
-                                                {new Date(n.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                            </p>
-                                        </div>
-                                    ))
+                                     notifications.map((n: any, i: any) => {
+                                         const isWarning = n.type === 'warning' || (n.title && n.title.toLowerCase().includes('cancel'));
+                                         const isSuccess = n.type === 'success' || (n.title && n.title.toLowerCase().includes('success'));
+                                         const barColor = isWarning ? 'bg-amber-400' : n.type === 'error' ? 'bg-red-400' : isSuccess ? 'bg-lime-400' : 'bg-blue-400';
+                                         return (
+                                         <div
+                                             key={i}
+                                             className={`px-4 py-4 border-b border-white/5 hover:bg-white/[0.03] transition-colors relative group ${!n.isRead ? 'bg-lime-500/[0.02]' : ''}`}
+                                         >
+                                             {!n.isRead && <div className={`absolute left-0 top-0 bottom-0 w-1 ${barColor}`} />}
+                                             <div className="flex items-center justify-between gap-2 mb-1">
+                                                 <span className={`text-xs font-semibold ${isWarning ? 'text-amber-300' : 'text-white'}`}>
+                                                     {n.title || 'Notification'}
+                                                 </span>
+                                                 {isWarning && (
+                                                     <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-400/10 text-amber-400 border border-amber-400/20 font-bold shrink-0">
+                                                         Cancelled
+                                                     </span>
+                                                 )}
+                                                 {isSuccess && (
+                                                     <span className="text-[9px] px-1.5 py-0.5 rounded bg-lime-400/10 text-lime-400 border border-lime-400/20 font-bold shrink-0">
+                                                         Success
+                                                     </span>
+                                                 )}
+                                             </div>
+                                             <p className="text-xs text-white/80 font-normal leading-relaxed">{n.message}</p>
+                                             <p className="text-[10px] text-white/40 mt-2 font-medium">
+                                                 {new Date(n.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                             </p>
+                                         </div>
+                                     );})
                                 )}
                             </div>
                         </motion.div>

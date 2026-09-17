@@ -1,9 +1,10 @@
 import express from 'express';
 import authenticateJWT from '../middlewares/authMiddleware.js';
-import { getNotifications, markNotificationsRead, markSingleNotificationRead, deleteNotifications, getActivityAnalytics } from '../controllers/notificationController.js';
+import { getNotifications, markNotificationsRead, markSingleNotificationRead, deleteNotifications, getActivityAnalytics, createNotification } from '../controllers/notificationController.js';
 import { courseLaunchedNotification } from '../controllers/notification/courseLaunched.Controller.js';
 const router = express.Router();
 router.get('/notifications', authenticateJWT, getNotifications);
+router.post('/notifications', authenticateJWT, createNotification);
 router.put('/notifications/read', authenticateJWT, markNotificationsRead);
 router.put('/notifications/:id/read', authenticateJWT, markSingleNotificationRead);
 router.delete('/notifications', authenticateJWT, deleteNotifications);

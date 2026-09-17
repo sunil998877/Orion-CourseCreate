@@ -72,6 +72,7 @@ export const CourseCreatorProvider: React.FC<{
     const [downloadingModuleId, setDownloadingModuleId] = useState<number | null>(null);
     const [isLaunchingCourse, setIsLaunchingCourse] = useState(false);
     const [isExitingArchitect, setIsExitingArchitect] = useState(false);
+    const [isContinuing, setIsContinuing] = useState(false);
     const [showScrollArrow, setShowScrollArrow] = useState(false);
     const [showScrollArrowModules, setShowScrollArrowModules] = useState(false);
     const [showGenerateWarning, setShowGenerateWarning] = useState(false);
@@ -155,7 +156,12 @@ export const CourseCreatorProvider: React.FC<{
     useEffect(() => {
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 30000);
-        return () => clearInterval(interval);
+        const handleUpdate = () => fetchNotifications();
+        window.addEventListener('notifications-updated', handleUpdate);
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('notifications-updated', handleUpdate);
+        };
     }, []);
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -390,7 +396,12 @@ export const CourseCreatorProvider: React.FC<{
                 }
                 const missingSlides = previewModules.some(m => !orionUrlByModule[m.id]);
                 if (missingSlides) {
-                    await triggerBatchSlideGeneration();
+                    setIsContinuing(true);
+                    try {
+                        await triggerBatchSlideGeneration();
+                    } finally {
+                        setIsContinuing(false);
+                    }
                     return;
                 }
             }
@@ -747,6 +758,7 @@ export const CourseCreatorProvider: React.FC<{
             navigate('/login');
             return;
         }
+        setIsContinuing(true);
         let courseId = savedCourseId || courseData.courseId;
         if (!courseId) {
             try {
@@ -769,6 +781,7 @@ export const CourseCreatorProvider: React.FC<{
             catch (err) {
                 toast.error('Could not create course. Please try again.');
                 setIsBatchGenerating(false);
+                setIsContinuing(false);
                 return;
             }
         }
@@ -781,6 +794,7 @@ export const CourseCreatorProvider: React.FC<{
             gammaTheme: themeByModule[m.id] || 'aurora'
         }));
         if (modulesToGenerate.length === 0) {
+            setIsContinuing(false);
             setStep(5);
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
@@ -855,6 +869,7 @@ export const CourseCreatorProvider: React.FC<{
             setIsBatchGenerating(false);
             setBatchGeneratingModuleId(null);
             setBatchSelectedModuleIdForPreview(null);
+            setIsContinuing(false);
             setStep(5);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -1889,6 +1904,8 @@ export const CourseCreatorProvider: React.FC<{
             isLaunchingCourse,
             handleExitArchitect,
             isExitingArchitect,
+            isContinuing,
+            setIsContinuing,
             handleGenerateContent,
             isStepComplete,
             handleStepClick,

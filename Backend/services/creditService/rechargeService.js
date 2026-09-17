@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Wallet from "../../models/credits/wallet.js";
 import CreditTransaction from "../../models/credits/creditTransaction.js";
+import User from "../../models/userModel.js";
 export const processRecharge = async ({ userId, amount, packageId, referenceId }) => {
     const session = await mongoose.startSession();
     let result;
@@ -27,12 +28,23 @@ export const processRecharge = async ({ userId, amount, packageId, referenceId }
                     referenceId: referenceId || packageId || null,
                 },
             ], { session });
+
+            const notification = {
+                title: "Recharge Successful",
+                message: `Successfully recharged ${credits.toLocaleString()} AI credits to your wallet.`,
+                type: "success",
+                isRead: false,
+                createdAt: new Date(),
+            };
+            await User.findByIdAndUpdate(userId, { $push: { notifications: notification } }).session(session);
+
             result = {
                 recharge_type: "TOP_UP",
                 balance_before: balanceBefore,
                 credits_added: credits,
                 balance_after: wallet.balance,
                 reference_id: referenceId || packageId || null,
+                notification,
             };
         });
     }

@@ -1,17 +1,45 @@
 import React from 'react';
 import { ArrowLeft, Calendar, RefreshCw, Sparkles, Zap } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import PageTransition from '../components/PageTransition';
 import { useCredits } from '../contextAPI/CreditsContext';
 import AddCreditsContent from '../components/credits/AddCreditsContent';
 import UsageHistory from '../components/credits/UsageHistory';
 import { CREDIT_COSTS } from '../types/credits.types';
+import { createNotification, triggerNotificationsRefresh } from '../services/notificationService';
+
 const Skeleton: React.FC<{
     className?: string;
 }> = ({ className = '' }) => (<div className={`animate-pulse rounded-lg bg-white/10 ${className}`}/>);
 const AddCreditsPage: React.FC = () => {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { credits, transactions, usagePercentage, loading, error, refreshWallet, } = useCredits();
+
+    React.useEffect(() => {
+        if (searchParams.get('cancelled') === 'true') {
+            const type = searchParams.get('type') || 'payment';
+            const isPlan = type.toLowerCase().includes('plan');
+            const isRecharge = type.toLowerCase().includes('recharge');
+            const title = isPlan ? 'Plan Subscription Cancelled' : isRecharge ? 'Recharge Cancelled' : 'Payment Cancelled';
+            const message = isPlan
+                ? 'Plan subscription checkout was cancelled.'
+                : isRecharge
+                ? 'Credit recharge checkout was cancelled.'
+                : 'The payment process was cancelled.';
+
+            toast.warning(`${title}: ${message}`);
+            const token = localStorage.getItem('token');
+            if (token) {
+                createNotification(token, { title, message, type: 'warning' }).catch(console.error);
+                triggerNotificationsRefresh();
+            }
+            searchParams.delete('cancelled');
+            searchParams.delete('type');
+            setSearchParams(searchParams, { replace: true });
+        }
+    }, [searchParams, setSearchParams]);
     return (<PageTransition>
       <div className="min-h-screen text-white selection:bg-lime-500/30">
         <div className="space-y-8 pb-20">

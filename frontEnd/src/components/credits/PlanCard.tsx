@@ -5,8 +5,9 @@ type PlanCardProps = {
     plan: PlanData;
     isCurrentPlan?: boolean;
     onSelectPlan?: (plan: PlanData) => void;
+    onCancelPlan?: (plan: PlanData) => void;
 };
-const PlanCard: React.FC<PlanCardProps> = ({ plan, isCurrentPlan = false, onSelectPlan, }) => {
+const PlanCard: React.FC<PlanCardProps> = ({ plan, isCurrentPlan = false, onSelectPlan, onCancelPlan }) => {
     const isPro = plan.name.toLowerCase() === 'pro';
     const isTeam = plan.name.toLowerCase() === 'team';
     const Icon = isTeam ? Users : isPro ? Sparkles : Shield;
@@ -77,13 +78,34 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, isCurrentPlan = false, onSele
         </div>
       </div>
 
-      <button type="button" disabled={isCurrentPlan} onClick={() => onSelectPlan?.(plan)} className={`mt-6 w-full rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${isCurrentPlan
-            ? 'border-white/10 bg-white/5 text-white/40 cursor-default'
-            : isPro
-                ? 'border-lime-400 bg-lime-400 text-black hover:bg-lime-300 shadow-[0_0_20px_rgba(132,204,22,0.2)]'
-                : 'border-white/10 bg-white/5 text-white hover:border-lime-400/30 hover:bg-lime-400/10 hover:text-lime-400'}`}>
-        {isCurrentPlan ? 'Current Plan' : 'Select Plan'}
-      </button>
+      {isCurrentPlan ? (
+        <div className="mt-6 space-y-2">
+          <div className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 text-center text-sm font-semibold text-white/50">
+            Current Plan
+          </div>
+          {plan.priceInr > 0 && onCancelPlan && (
+            <button
+              type="button"
+              onClick={() => onCancelPlan(plan)}
+              className="w-full rounded-xl border border-red-500/25 bg-red-500/10 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/20 hover:border-red-500/40 transition flex items-center justify-center gap-1.5"
+            >
+              Cancel Plan Subscription
+            </button>
+          )}
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => onSelectPlan?.(plan)}
+          className={`mt-6 w-full rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+            isPro
+              ? 'border-lime-400 bg-lime-400 text-black hover:bg-lime-300 shadow-[0_0_20px_rgba(132,204,22,0.2)]'
+              : 'border-white/10 bg-white/5 text-white hover:border-lime-400/30 hover:bg-lime-400/10 hover:text-lime-400'
+          }`}
+        >
+          Select Plan
+        </button>
+      )}
     </div>);
 };
 export default PlanCard;

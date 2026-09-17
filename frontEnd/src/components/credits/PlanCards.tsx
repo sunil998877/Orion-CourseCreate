@@ -5,6 +5,7 @@ import { getPlans } from '../../services/walletService';
 import { useCredits } from '../../contextAPI/CreditsContext';
 type PlanCardsProps = {
     onSelectPlan?: (plan: PlanData) => void;
+    onCancelPlan?: (plan: PlanData) => void;
 };
 const DEFAULT_PLANS: PlanData[] = [
     {
@@ -26,7 +27,7 @@ const DEFAULT_PLANS: PlanData[] = [
         rolloverAllowed: true,
     },
 ];
-const PlanCards: React.FC<PlanCardsProps> = ({ onSelectPlan }) => {
+const PlanCards: React.FC<PlanCardsProps> = ({ onSelectPlan, onCancelPlan }) => {
     const { credits } = useCredits();
     const [plans, setPlans] = useState<PlanData[]>(DEFAULT_PLANS);
     const [loading, setLoading] = useState<boolean>(true);
@@ -69,7 +70,7 @@ const PlanCards: React.FC<PlanCardsProps> = ({ onSelectPlan }) => {
       {loading ? (<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (<div key={i} className="h-80 animate-pulse rounded-2xl bg-white/5 border border-white/10"/>))}
         </div>) : (<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {plans.map((plan) => (<PlanCard key={plan.name} plan={plan} isCurrentPlan={plan.name.toLowerCase() === currentPlanName} onSelectPlan={onSelectPlan}/>))}
+          {plans.map((plan) => (<PlanCard key={plan.name} plan={plan} isCurrentPlan={plan.name.toLowerCase() === currentPlanName} onSelectPlan={onSelectPlan} onCancelPlan={onCancelPlan}/>))}
         </div>)}
     </div>);
 };

@@ -2,19 +2,31 @@ import React, { useState } from 'react';
 import { CheckCircle2, CreditCard, Loader2, ShieldCheck, X } from 'lucide-react';
 import type { CreditPackage } from '../../types/credits.types';
 import { useCredits } from '../../contextAPI/CreditsContext';
+import { toast } from 'react-toastify';
+import { triggerNotificationsRefresh } from '../../services/notificationService';
 import { createRazorpayOrder, getRazorpayConfig, loadRazorpayScript, verifyRazorpayRecharge, } from '../../services/razorpayService';
 type CreditsPurchaseProps = {
     pkg: CreditPackage | null;
     onClose: () => void;
     onSuccess?: (creditsAdded: number) => void;
+    onCancel?: (details: { credits: number; price: number; label: string }) => void;
 };
 type PaymentStage = 'summary' | 'processing' | 'verifying' | 'success' | 'error';
-const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSuccess }) => {
+const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSuccess, onCancel }) => {
     const { refreshWallet } = useCredits();
     const [stage, setStage] = useState<PaymentStage>('summary');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     if (!pkg)
         return null;
+
+    const handleCancel = () => {
+        onCancel?.({
+            credits: pkg.credits,
+            price: pkg.price,
+            label: pkg.label,
+        });
+        onClose();
+    };
     const handleConfirmPayment = async () => {
         try {
             setErrorMessage(null);
@@ -85,7 +97,10 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
                         }
                     },
                     modal: {
-                        ondismiss: () => reject(new Error('Payment cancelled')),
+                        ondismiss: () => {
+                            handleCancel();
+                            reject(new Error('Payment cancelled'));
+                        },
                     },
                 });
                 razorpay.on('payment.failed', (resp: any) => {
@@ -94,6 +109,8 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
                 razorpay.open();
             });
             setStage('success');
+            toast.success(`Recharge Successful! +${pkg.credits.toLocaleString()} credits added to your wallet.`);
+            triggerNotificationsRefresh();
             onSuccess?.(pkg.credits);
             setTimeout(() => onClose(), 1800);
         }
@@ -104,7 +121,7 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
     };
     return (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm animate-fadeIn">
       <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-gray-950 p-6 md:p-8 shadow-2xl">
-        {stage !== 'processing' && stage !== 'verifying' && (<button type="button" onClick={onClose} className="absolute right-4 top-4 rounded-full p-2 text-white/40 hover:bg-white/10 hover:text-white transition">
+        {stage !== 'processing' && stage !== 'verifying' && (<button type="button" onClick={handleCancel} className="absolute right-4 top-4 rounded-full p-2 text-white/40 hover:bg-white/10 hover:text-white transition">
             <X className="h-4 w-4"/>
           </button>)}
 
@@ -151,7 +168,7 @@ const CreditsPurchase: React.FC<CreditsPurchaseProps> = ({ pkg, onClose, onSucce
             </div>
 
             <div className="flex gap-3">
-              <button type="button" onClick={onClose} className="w-1/3 rounded-xl border border-white/10 bg-white/5 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 transition">
+              <button type="button" onClick={handleCancel} className="w-1/3 rounded-xl border border-white/10 bg-white/5 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 transition">
                 Cancel
               </button>
               <button type="button" onClick={handleConfirmPayment} className="w-2/3 rounded-xl border border-lime-400 bg-lime-400 py-2.5 text-sm font-bold text-black hover:bg-lime-300 transition shadow-[0_0_20px_rgba(132,204,22,0.2)]">

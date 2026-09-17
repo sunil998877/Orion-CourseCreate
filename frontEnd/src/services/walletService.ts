@@ -1,7 +1,7 @@
 import { API_BASE } from '../utils/api';
 import type { PlanData } from '../types/credits.types';
 export * from './rechargeService';
-export { getPlans, subscribeToPlan, createPlanStripeSession, type PlanSubscribePayload, type PlanSubscribeData, type StripePlanSessionPayload, } from './planService';
+export { getPlans, subscribeToPlan, createPlanStripeSession, cancelPlanSubscription, type PlanSubscribePayload, type PlanSubscribeData, type StripePlanSessionPayload, } from './planService';
 const authHeaders = (token: string) => ({
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,

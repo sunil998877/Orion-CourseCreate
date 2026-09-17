@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Wallet from "../../models/credits/wallet.js";
 import Plan from "../../models/credits/plain.js";
 import CreditTransaction from "../../models/credits/creditTransaction.js";
+import User from "../../models/userModel.js";
 import { DEFAULT_CREDIT_PLANS } from "../../config/creditPlans.js";
 function getFirstOfNextMonth() {
     const now = new Date();
@@ -88,6 +89,15 @@ export const processPlanSubscription = async ({ userId, planId, planName, refere
                     },
                 },
             ], { session });
+            const notification = {
+                title: "Plan Activated Successfully",
+                message: `You are now subscribed to the ${targetPlan.name} plan with ${monthlyAllotment.toLocaleString()} monthly credits.`,
+                type: "success",
+                isRead: false,
+                createdAt: new Date(),
+            };
+            await User.findByIdAndUpdate(userId, { $push: { notifications: notification } }).session(session);
+
             result = {
                 recharge_type: "PLAN_UPGRADE",
                 plan: {
@@ -103,6 +113,7 @@ export const processPlanSubscription = async ({ userId, planId, planName, refere
                 renews_on: wallet.renewsOn ? wallet.renewsOn.toISOString().split("T")[0] : null,
                 reference_id: referenceId || null,
                 rollover_allowed: rolloverAllowed,
+                notification,
             };
         });
     }
@@ -256,4 +267,69 @@ export const createPlanStripeSession = async ({ userId, planId, planName, succes
         },
         mode: "simulated_stripe",
     };
+};
+
+export const cancelPlanSubscription = async ({ userId }) => {
+    const session = await mongoose.startSession();
+    let result;
+    try {
+        await session.withTransaction(async () => {
+            let wallet = await Wallet.findOne({ user: userId }).populate("plan").session(session);
+            if (!wallet) {
+                throw new Error("Wallet not found for this user");
+            }
+            let freePlan = await Plan.findOne({ name: /^free$/i }).session(session);
+            if (!freePlan) {
+                freePlan = await Plan.findOne({ priceInINR: 0 }).session(session);
+            }
+            if (!freePlan) {
+                const plans = await Plan.insertMany(DEFAULT_CREDIT_PLANS, { session });
+                freePlan = plans[0];
+            }
+
+            const previousPlanName = wallet.plan?.name || "Current";
+            const balanceBefore = Math.round(wallet.balance);
+
+            wallet.plan = freePlan._id;
+            await wallet.save({ session });
+
+            await CreditTransaction.create([
+                {
+                    wallet: wallet._id,
+                    type: "PLAN_RESET",
+                    status: "COMPLETED",
+                    amount: 0,
+                    action: null,
+                    referenceId: `cancel_sub_${Date.now()}`,
+                    reason: `Cancelled ${previousPlanName} plan subscription (reverted to Free plan)`,
+                    providerUsageMeta: {
+                        previousPlan: previousPlanName,
+                        newPlan: freePlan.name,
+                        balance: balanceBefore,
+                    },
+                },
+            ], { session });
+
+            const notification = {
+                title: "Plan Subscription Cancelled",
+                message: `Your ${previousPlanName} plan subscription has been cancelled. Your account has been reverted to the Free plan.`,
+                type: "warning",
+                isRead: false,
+                createdAt: new Date(),
+            };
+            await User.findByIdAndUpdate(userId, { $push: { notifications: notification } }).session(session);
+
+            result = {
+                success: true,
+                previousPlan: previousPlanName,
+                currentPlan: freePlan.name,
+                balance: wallet.balance,
+                renewsOn: wallet.renewsOn ? wallet.renewsOn.toISOString().split("T")[0] : null,
+                notification,
+            };
+        });
+    } finally {
+        await session.endSession();
+    }
+    return result;
 };

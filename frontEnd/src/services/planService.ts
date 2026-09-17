@@ -70,3 +70,13 @@ export const createPlanStripeSession = async (token: string, payload: StripePlan
         throw new Error(data.message || 'Failed to create Stripe session for plan subscription');
     return data.data as StripeSessionResponse;
 };
+export const cancelPlanSubscription = async (token: string): Promise<any> => {
+    const res = await fetch(`${API_BASE}/wallet/plans/cancel/`, {
+        method: 'POST',
+        headers: authHeaders(token),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok)
+        throw new Error(data.message || 'Failed to cancel plan subscription');
+    return data.data;
+};
