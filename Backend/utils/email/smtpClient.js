@@ -1,5 +1,10 @@
+import dns from 'dns';
 import nodemailer from 'nodemailer';
 import { assertSmtpConfig, envVal, mailFrom, smtpPortOrder } from './env.js';
+
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 const getResendFromHeader = () => {
   const custom = envVal('EMAIL_FROM');

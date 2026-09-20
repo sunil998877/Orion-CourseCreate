@@ -1,4 +1,10 @@
 import 'dotenv/config';
+import dns from 'dns';
+
+if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+}
+
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -138,12 +144,9 @@ if (!process.env.VERCEL) {
         await connectDB();
         app.listen(PORT, async () => {
             console.log(`🚀 Server running on port ${PORT}`);
-            try {
-                await verifySmtpConnection();
-            }
-            catch (err) {
-                console.error('SMTP verification failed:', err);
-            }
+            verifySmtpConnection().catch((err) => {
+                console.warn('SMTP verification notice:', err?.message || err);
+            });
             try {
                 const { cleanupStaleReservations } = await import('./services/creditService/cleanupService.js');
                 const { renewAllDueSubscriptions } = await import('./services/creditService/planService.js');
