@@ -9,7 +9,7 @@ if (dns.setDefaultResultOrder) {
 const getResendFromHeader = () => {
   const custom = envVal('EMAIL_FROM');
   const user = envVal('SMTP_USER');
-  const candidate = custom || user || 'help@evokeaisolutions.com';
+  const candidate = custom || user || 'nova@evokeaisolutions.com';
   if (candidate.includes('<') && candidate.includes('>')) {
     return candidate;
   }
