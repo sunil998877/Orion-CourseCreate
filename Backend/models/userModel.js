@@ -20,7 +20,20 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: function() {
+            return !this.googleId;
+        }
+    },
+    googleId: {
+        type: String,
+        default: null,
+        sparse: true,
+        index: true
+    },
+    authProvider: {
+        type: String,
+        enum: ['local', 'google'],
+        default: 'local'
     },
     hasCourse: {
         type: Boolean,

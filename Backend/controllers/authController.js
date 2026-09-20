@@ -8,3 +8,5 @@ export * from './auth/changePassword.Controller.js';
 export * from './auth/getUserProfile.Controller.js';
 export * from './auth/updateAvatar.Controller.js';
 export * from './auth/logout.Controller.js';
+export * from './auth/googleLogin.Controller.js';
+

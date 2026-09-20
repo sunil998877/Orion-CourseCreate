@@ -7,6 +7,7 @@ import HeroImage from '../assests/avatar.png';
 import { useNavigate } from 'react-router-dom';
 import PageTransition from '../components/PageTransition';
 import { API_BASE } from '../utils/api';
+import GoogleAuthButton from '../components/GoogleAuthButton';
 function App() {
     const [formData, setFormData] = useState({
         email: '',
@@ -227,10 +228,21 @@ function App() {
                     <img src={HeroImage} alt="Avatar" className="max-w-[300px] max-h-[300px] md:max-w-[220px] md:max-h-[220px] max-md:max-w-[160px] max-md:max-h-[160px] w-auto h-auto rounded-xl object-contain"/>
                   </div>
                   <form onSubmit={handleSubmit} className="space-y-5 p-6 md:w-3/5 w-full">
-                    <div className="space-y-1">
+                    <div className="space-y-1 text-center">
                       <h2 className="text-3xl font-bold text-white max-md:text-2xl">Welcome Back</h2>
                       <p className="text-sm text-white/70">Sign in to continue to your account.</p>
                     </div>
+
+                    <div className="w-full pt-1">
+                      <GoogleAuthButton text="Continue with Google" />
+                    </div>
+
+                    <div className="relative my-2 flex items-center justify-center">
+                      <div className="w-full border-t border-white/10"></div>
+                      <span className="bg-black px-3 text-xs uppercase tracking-wider text-white/40">or</span>
+                      <div className="w-full border-t border-white/10"></div>
+                    </div>
+
                     {errors.general && (<div className="rounded-md bg-red-500/20 p-4 border border-red-500/50">
                         <div className="flex">
                           <div className="text-sm text-red-200">{errors.general}</div>

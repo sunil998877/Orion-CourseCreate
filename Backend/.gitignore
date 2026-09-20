@@ -28,3 +28,7 @@ dist-ssr
 public/ebooks/
 public/audio/
 .qodo/
+
+.env
+.env.*
+!.env.example

@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Building2, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import AvatarCropModal from '../components/AvatarCropModal';
 import HeroImage from '../assests/avatar.png';
 import AnimatedBackground from './AnimatedBg';
 import PageTransition from '../components/PageTransition';
 import { API_BASE } from '../utils/api';
+import GoogleAuthButton from '../components/GoogleAuthButton';
 function RegistrationPage() {
     const [formData, setFormData] = useState({
         username: '',
@@ -231,9 +231,19 @@ function RegistrationPage() {
                   </div>
 
                   {step === 'form' ? (<form onSubmit={handleSubmit} className="space-y-5 p-6 md:w-3/5 w-full">
-                      <div className="space-y-1">
+                      <div className="space-y-1 text-center">
                         <h2 className="text-3xl font-bold text-white max-md:text-2xl">Create Account</h2>
                         <p className="text-sm text-white/70">Start sharing your knowledge with the world.</p>
+                      </div>
+
+                      <div className="w-full pt-1">
+                        <GoogleAuthButton text="Continue with Google" />
+                      </div>
+
+                      <div className="relative my-2 flex items-center justify-center">
+                        <div className="w-full border-t border-white/10"></div>
+                        <span className="bg-black px-3 text-xs uppercase tracking-wider text-white/40">or</span>
+                        <div className="w-full border-t border-white/10"></div>
                       </div>
 
                       {errors.general && (<div className="rounded-md bg-red-500/20 p-4 border border-red-500/50">
@@ -241,20 +251,6 @@ function RegistrationPage() {
                             <div className="text-sm text-red-200">{errors.general}</div>
                           </div>
                         </div>)}
-
-
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-white/70">Profile picture</label>
-                        <div className="flex items-center gap-4">
-                          <button type="button" onClick={() => setCropOpen(true)} className="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm font-medium transition-colors">
-                            Upload avatar
-                          </button>
-                          {avatarFile && (<span className="text-sm text-white/50 truncate max-w-[150px]">Selected: {avatarFile.name}</span>)}
-                        </div>
-                      </div>
-
-                      <AvatarCropModal open={cropOpen} onClose={() => setCropOpen(false)} onCropped={handleCropped}/>
-
 
                       <div>
                         <label htmlFor="username" className="mb-1.5 block text-sm font-medium text-white">
@@ -349,7 +345,6 @@ function RegistrationPage() {
                             </span>) : ('Create Account')}
                         </button>
                       </div>
-
 
                       <div className="text-center text-sm text-white/50 mt-6">
                         <span>Already have an account?</span>
