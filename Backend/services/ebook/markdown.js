@@ -60,12 +60,52 @@ export const renderMarkdown = (text = '') => {
             continue;
         }
         if (/^[*\-] /.test(trimmed)) {
-            const items = [];
+            const rawItems = [];
             while (i < lines.length && /^[*\-] /.test(lines[i].trim())) {
-                items.push(`<li>${inlineFormat(lines[i].trim().replace(/^[*\-] /, ''))}</li>`);
+                rawItems.push(lines[i].trim().replace(/^[*\-] /, ''));
                 i++;
             }
-            html.push(`<ul class="md-ul">${items.join('')}</ul>`);
+            // Check if items follow the concept definition pattern: **Title:** Description
+            const conceptPattern = /^\*\*([^*]+?)\*\*[:\s—–]*(.*)$/;
+            const parsedConcepts = rawItems.map(item => {
+                const match = item.match(conceptPattern);
+                if (match) {
+                    return {
+                        title: match[1].trim(),
+                        description: match[2].trim()
+                    };
+                }
+                return null;
+            });
+            const allConcepts = parsedConcepts.length >= 2 && parsedConcepts.filter(Boolean).length >= Math.ceil(parsedConcepts.length * 0.75);
+            if (allConcepts) {
+                const count = parsedConcepts.length;
+                const gridClass = count === 2 ? 'concept-grid-2' : (count === 3 ? 'concept-grid-3' : (count === 4 ? 'concept-grid-4' : 'concept-grid-auto'));
+                html.push(`<div class="concept-grid ${gridClass}">`);
+                parsedConcepts.forEach((c, ci) => {
+                    if (c) {
+                        html.push(`
+                          <div class="concept-card">
+                            <div class="concept-card-head">
+                              <span class="concept-card-badge">0${ci + 1}</span>
+                              <h5 class="concept-card-title">${inlineFormat(c.title)}</h5>
+                            </div>
+                            <p class="concept-card-desc">${inlineFormat(c.description || '')}</p>
+                          </div>
+                        `);
+                    } else {
+                        html.push(`
+                          <div class="concept-card">
+                            <p class="concept-card-desc">${inlineFormat(rawItems[ci])}</p>
+                          </div>
+                        `);
+                    }
+                });
+                html.push('</div>');
+            } else {
+                const listItems = rawItems.map(it => `<li>${inlineFormat(it)}</li>`);
+                html.push(`<ul class="md-ul">${listItems.join('')}</ul>`);
+            }
             continue;
         }
         if (/^\d+\.\s/.test(trimmed)) {

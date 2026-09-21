@@ -9,10 +9,12 @@ type Args = {
     setCourseData: Dispatch<SetStateAction<Course>>;
     setCourses: Dispatch<SetStateAction<Course[]>>;
     publisherName: string;
+    userEmail?: string;
     setShowPublisherModal: Dispatch<SetStateAction<boolean>>;
     setPublisherName: Dispatch<SetStateAction<string>>;
+    setUserEmail?: Dispatch<SetStateAction<string>>;
 };
-export const useCourseGeneration = ({ courseData, setCourseData, setCourses, publisherName, setShowPublisherModal, setPublisherName }: Args) => {
+export const useCourseGeneration = ({ courseData, setCourseData, setCourses, publisherName, userEmail = '', setShowPublisherModal, setPublisherName, setUserEmail }: Args) => {
     const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
     const [audioProgress, setAudioProgress] = useState(0);
     const [audioError, setAudioError] = useState<string | null>(null);
@@ -102,7 +104,7 @@ export const useCourseGeneration = ({ courseData, setCourseData, setCourses, pub
             const token = localStorage.getItem('token');
             const resp = await fetch(`${API_BASE}/courses/${courseId}/generate-ebook`, {
                 method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ publisherName })
+                body: JSON.stringify({ publisherName, userName: publisherName, userEmail })
             });
             if (!resp.ok) {
                 const err = await resp.json().catch(() => ({}));

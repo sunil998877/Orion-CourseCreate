@@ -4,10 +4,12 @@ export const PublisherModal: React.FC<{
     open: boolean;
     publisherName: string;
     setPublisherName: (v: string) => void;
+    userEmail?: string;
+    setUserEmail?: (v: string) => void;
     loading: boolean;
     onClose: () => void;
     onGenerate: () => void;
-}> = ({ open, publisherName, setPublisherName, loading, onClose, onGenerate }) => !open ? null :
+}> = ({ open, publisherName, setPublisherName, userEmail = '', setUserEmail, loading, onClose, onGenerate }) => !open ? null :
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]">
   <div className="bg-[#111827] border border-white/10 rounded-2xl p-8 w-full max-w-md text-white shadow-2xl">
     <div className="flex items-center gap-3 mb-6">
@@ -23,28 +25,41 @@ export const PublisherModal: React.FC<{
         </p>
       </div>
     </div>
-    <div className="space-y-4 mb-8">
-      <label htmlFor="publisher" className="block text-sm font-medium text-white/60 mb-2">
-        Publisher Name
-      </label>
-      <input id="publisher" type="text" value={publisherName} onChange={e => setPublisherName(e.target.value)} placeholder="Enter publisher name..." className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-lime-500/50" autoFocus/>
-        <p className="mt-2 text-[10px] text-white/30 italic">
+    <div className="space-y-4 mb-6">
+      <div>
+        <label htmlFor="publisher" className="block text-sm font-medium text-white/70 mb-1.5">
+          Publisher / Author Name <span className="text-lime-400">*</span>
+        </label>
+        <input id="publisher" type="text" value={publisherName} onChange={e => setPublisherName(e.target.value)} placeholder="Enter author or publisher name..." className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-lime-500/50 text-sm" autoFocus/>
+        <p className="mt-1 text-[11px] text-white/40 italic">
           This name will appear on the cover and copyright section of your eBook.
         </p>
       </div>
-      <div className="flex justify-end gap-3">
-        <button type="button" onClick={onClose} className="px-6 py-2.5 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 font-bold text-sm">
-          Cancel
-        </button>
-        <button type="button" onClick={onGenerate} disabled={!publisherName.trim() || loading} className="px-6 py-2.5 rounded-xl bg-lime-500 hover:bg-lime-400 text-black font-black disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-          {loading ?
-            <Loader2 className="w-4 h-4 animate-spin"/>
-            :
-                <Zap className="w-4 h-4"/>}
-          <span>
-            Generate
-          </span>
-        </button>
-      </div>
+      {setUserEmail && (
+        <div>
+          <label htmlFor="userEmailModal" className="block text-sm font-medium text-white/70 mb-1.5">
+            User / Author Email <span className="text-lime-400">*</span>
+          </label>
+          <input id="userEmailModal" type="email" value={userEmail} onChange={e => setUserEmail(e.target.value)} placeholder="Enter email address..." className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-lime-500/50 text-sm"/>
+          <p className="mt-1 text-[11px] text-white/40 italic">
+            This email will be recorded with your eBook generation and stored in the database.
+          </p>
+        </div>
+      )}
     </div>
-  </div>;
+    <div className="flex justify-end gap-3">
+      <button type="button" onClick={onClose} className="px-6 py-2.5 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 font-bold text-sm">
+        Cancel
+      </button>
+      <button type="button" onClick={onGenerate} disabled={!publisherName.trim() || (Boolean(setUserEmail) && (!userEmail.trim() || !userEmail.includes('@'))) || loading} className="px-6 py-2.5 rounded-xl bg-lime-500 hover:bg-lime-400 text-black font-black disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+        {loading ?
+          <Loader2 className="w-4 h-4 animate-spin"/>
+          :
+              <Zap className="w-4 h-4"/>}
+        <span>
+          Generate
+        </span>
+      </button>
+    </div>
+  </div>
+</div>;

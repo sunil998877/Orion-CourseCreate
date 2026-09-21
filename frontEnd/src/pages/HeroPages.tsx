@@ -73,7 +73,8 @@ export const HeroPage: React.FC = () => {
     const [showPodcastPlayer, setShowPodcastPlayer] = useState(false);
     const [showPodcastTranscript, setShowPodcastTranscript] = useState(false);
     const [showPublisherModal, setShowPublisherModal] = useState(false);
-    const [publisherName, setPublisherName] = useState('');
+    const [publisherName, setPublisherName] = useState(() => localStorage.getItem('username') || '');
+    const [userEmail, setUserEmail] = useState(() => localStorage.getItem('email') || '');
     const [showPodcastModal, setShowPodcastModal] = useState(false);
     const [showAudioModal, setShowAudioModal] = useState(false);
     useEffect(() => {
@@ -106,8 +107,10 @@ export const HeroPage: React.FC = () => {
         setCourseData,
         setCourses,
         publisherName,
+        userEmail,
         setShowPublisherModal,
         setPublisherName,
+        setUserEmail,
     });
     const audioPlayer = useAudioPlayer({
         audioUrl: courseData.audioUrl,
@@ -192,7 +195,11 @@ export const HeroPage: React.FC = () => {
               </button>
               <div className="flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] items-start">
                 <div className="w-full xl:flex-[0_0_66.6%]">
-                  <CourseDetails course={courseData} generation={generation} audioPlayer={audioPlayer} podcastPlayer={podcastPlayer} showAudioPlayer={showAudioPlayer} setShowAudioPlayer={setShowAudioPlayer} showTranscript={showTranscript} setShowTranscript={setShowTranscript} showPodcastPlayer={showPodcastPlayer} setShowPodcastPlayer={setShowPodcastPlayer} showPodcastTranscript={showPodcastTranscript} setShowPodcastTranscript={setShowPodcastTranscript} onGenerateEbook={generation.handleGenerateEbook} onDownloadEbook={() => downloads.downloadEbook(courseData.ebookUrl, courseData.title)} onGenerateAudio={() => setShowAudioModal(true)} onGeneratePodcast={() => setShowPodcastModal(true)} onOpenPublisher={() => setShowPublisherModal(true)}/>
+                  <CourseDetails course={courseData} generation={generation} audioPlayer={audioPlayer} podcastPlayer={podcastPlayer} showAudioPlayer={showAudioPlayer} setShowAudioPlayer={setShowAudioPlayer} showTranscript={showTranscript} setShowTranscript={setShowTranscript} showPodcastPlayer={showPodcastPlayer} setShowPodcastPlayer={setShowPodcastPlayer} showPodcastTranscript={showPodcastTranscript} setShowPodcastTranscript={setShowPodcastTranscript} onGenerateEbook={generation.handleGenerateEbook} onDownloadEbook={() => downloads.downloadEbook(courseData.ebookUrl, courseData.title)} onGenerateAudio={() => setShowAudioModal(true)} onGeneratePodcast={() => setShowPodcastModal(true)} onOpenPublisher={() => {
+                    if (!publisherName) setPublisherName(localStorage.getItem('username') || '');
+                    if (!userEmail) setUserEmail(localStorage.getItem('email') || '');
+                    setShowPublisherModal(true);
+                  }}/>
                   <section className="mt-16">
                     <div className="bg-black/50 border border-white/10 rounded-2xl p-6 shadow-lg ring-1 ring-lime-400/10 max-md:p-3">
                       <ModuleGen />
@@ -258,14 +265,39 @@ export const HeroPage: React.FC = () => {
                   <p className="text-white/40 text-xs font-medium uppercase tracking-wider">eBook Branding</p>
                 </div>
               </div>
-              <div className="space-y-4 mb-8">
+              <div className="space-y-4 mb-6">
                 <div>
-                  <label htmlFor="publisher" className="block text-sm font-medium text-white/60 mb-2">
-                    Publisher Name
+                  <label htmlFor="publisher" className="block text-sm font-medium text-white/70 mb-1.5">
+                    Publisher / Author Name <span className="text-lime-400">*</span>
                   </label>
-                  <input id="publisher" type="text" value={publisherName} onChange={(e) => setPublisherName(e.target.value)} placeholder="Enter publisher name..." className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-lime-500/50 transition-all" autoFocus/>
-                  <p className="mt-2 text-[10px] text-white/30 italic">
+                  <input
+                    id="publisher"
+                    type="text"
+                    value={publisherName}
+                    onChange={(e) => setPublisherName(e.target.value)}
+                    placeholder="Enter author or publisher name..."
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-lime-500/50 transition-all text-sm"
+                    autoFocus
+                  />
+                  <p className="mt-1 text-[11px] text-white/40 italic">
                     This name will appear on the cover and copyright section of your eBook.
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="userEmail" className="block text-sm font-medium text-white/70 mb-1.5">
+                    User / Author Email <span className="text-lime-400">*</span>
+                  </label>
+                  <input
+                    id="userEmail"
+                    type="email"
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    placeholder="Enter email address..."
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-lime-500/50 transition-all text-sm"
+                  />
+                  <p className="mt-1 text-[11px] text-white/40 italic">
+                    This email will be recorded with your eBook generation and stored in the database.
                   </p>
                 </div>
               </div>
@@ -273,7 +305,12 @@ export const HeroPage: React.FC = () => {
                 <button type="button" onClick={() => setShowPublisherModal(false)} className="px-6 py-2.5 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all font-bold text-sm">
                   Cancel
                 </button>
-                <button type="button" onClick={generation.handleGenerateEbook} disabled={!publisherName.trim() || generation.isGeneratingEbook} className="px-6 py-2.5 rounded-xl bg-lime-500 hover:bg-lime-400 text-black font-black transition-all shadow-lg shadow-lime-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={generation.handleGenerateEbook}
+                  disabled={!publisherName.trim() || !userEmail.trim() || !userEmail.includes('@') || generation.isGeneratingEbook}
+                  className="px-6 py-2.5 rounded-xl bg-lime-500 hover:bg-lime-400 text-black font-black transition-all shadow-lg shadow-lime-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
                   {generation.isGeneratingEbook ? (<Loader2 className="w-4 h-4 animate-spin"/>) : (<Zap className="w-4 h-4"/>)}
                   <span>Generate</span>
                 </button>

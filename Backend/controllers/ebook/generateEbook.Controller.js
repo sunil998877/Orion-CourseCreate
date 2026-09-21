@@ -1,4 +1,6 @@
 import Course from '../../models/courseModel.js';
+import EbookGeneration from '../../models/ebookGenerationModel.js';
+import User from '../../models/userModel.js';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
@@ -11,7 +13,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'dummy-key' });
 export const generateEbook = async (req, res) => {
-    const { publisherName } = req.body || {};
+    const { publisherName, userName, userEmail } = req.body || {};
+    let authorName = (userName || publisherName || '').trim();
+    let authorEmail = (userEmail || '').trim();
+
+    if (!authorName || !authorEmail) {
+        try {
+            const currentUser = await User.findById(req.user.id).select('username email');
+            if (currentUser) {
+                if (!authorName) authorName = currentUser.username || '';
+                if (!authorEmail) authorEmail = currentUser.email || '';
+            }
+        } catch (uErr) {
+            console.warn('Could not fetch user details for ebook generation:', uErr?.message);
+        }
+    }
+    if (!authorName) authorName = 'ORION by EVOKE AI';
+
     let logoBase64 = '';
     try {
         const logoPath = path.join(__dirname, '..', '..', '..', 'frontEnd', 'src', 'assets', 'logo5.png');
@@ -44,7 +62,27 @@ export const generateEbook = async (req, res) => {
             return res.status(400).json({ message: 'No modules found for this course. Generate modules first.' });
         }
         course.ebookStatus = 'generating';
+        course.ebookPublisherName = authorName;
+        course.ebookUserName = authorName;
+        course.ebookUserEmail = authorEmail;
+        course.ebookGeneratedAt = new Date();
         await course.save();
+
+        var ebookGenRecord = null;
+        try {
+            ebookGenRecord = await EbookGeneration.create({
+                courseId: course.courseId,
+                courseObjectId: course._id,
+                userId: req.user.id,
+                courseTitle: course.title || 'Untitled Course',
+                userName: authorName,
+                userEmail: authorEmail,
+                publisherName: authorName,
+                status: 'generating'
+            });
+        } catch (recErr) {
+            console.warn('Could not record EbookGeneration entry:', recErr?.message);
+        }
         const modulesForPrompt = modules.map((m) => ({
             moduleNumber: m.moduleNumber,
             Title: m.Title,
@@ -135,55 +173,160 @@ Return ONLY a valid JSON object following this structure:
 ### INPUT DATA (${modules.length} Modules):
 ${JSON.stringify(modulesForPrompt)}
 `;
+
+        const buildStructuredFallbackNarrative = (course, modules, authorName) => {
+            const courseTitle = course.title || 'Course eBook';
+            return {
+                title: courseTitle,
+                subtitle: course.description || `A Comprehensive Guide to ${courseTitle}`,
+                introduction: `Welcome to **${courseTitle}**. This publication provides a structured, rigorous, and practical examination of core concepts, real-world implementations, and essential best practices. Designed for ${course.audience || 'students and practitioners'}, every chapter breaks down complex subjects into digestible learning outcomes, actionable step-by-step guides, hands-on exercises, and self-assessment quizzes.\n\nAs you advance through these chapters, focus on applying the concepts to practical scenarios, validating your understanding against the knowledge checks, and leveraging the recommended references for continued mastery.`,
+                chapters: modules.map((m, idx) => {
+                    const chNum = Number(m.moduleNumber) || (idx + 1);
+                    const title = m.Title || `Chapter ${chNum}`;
+                    const teaching = Array.isArray(m.TeachingContent) ? m.TeachingContent : [];
+                    let mdContent = `## 1. Chapter Overview\n\nIn this chapter, we delve into the core mechanisms and design principles of **${title}**. Mastering these concepts provides the essential foundation required to build resilient, production-ready solutions.\n\n`;
+                    teaching.forEach(tc => {
+                        mdContent += `### ${tc.Topics || 'Core Topic'}\n\n`;
+                        if (Array.isArray(tc.ContentPoints) && tc.ContentPoints.length) {
+                            mdContent += tc.ContentPoints.map(p => `- ${p}`).join('\n') + '\n\n';
+                        }
+                        if (tc.StandardsReference) {
+                            mdContent += `> **Standard Reference**: *${tc.StandardsReference}*\n\n`;
+                        }
+                    });
+
+                    const caseStudy = m.CaseStudy?.CaseStudyDescription ? {
+                        title: `${title} Case Study`,
+                        context: `Applying ${title} under production conditions.`,
+                        challenge: m.CaseStudy.CaseStudyDescription,
+                        solution: `Implementation of standard architectural patterns and structured verification.`,
+                        outcome: `Successfully deployed with enhanced performance, resilience, and maintainability.`
+                    } : null;
+
+                    const quizzes = Array.isArray(m.Quizzes) ? m.Quizzes : [];
+                    const interviewQuestions = [];
+                    quizzes.forEach(q => {
+                        if (Array.isArray(q.Questions)) {
+                            q.Questions.forEach((ques, qi) => {
+                                interviewQuestions.push({
+                                    question: ques,
+                                    answer: (Array.isArray(q.Answers) && q.Answers[qi]) || 'Refer to the chapter core concepts and principles.'
+                                });
+                            });
+                        }
+                    });
+
+                    return {
+                        chapter_number: chNum,
+                        chapter_title: title,
+                        summary: `This chapter covers the fundamental architecture, operational patterns, and key methodologies for ${title}.`,
+                        hook: `Developing mastery of ${title} empowers you to construct reliable and scalable systems with efficiency.`,
+                        content: mdContent,
+                        implementation_guide: [
+                            `Configure your development environment and verify baseline prerequisites for ${title}.`,
+                            `Follow the sequential implementation workflow described in this chapter.`,
+                            `Test each component against edge cases and target metrics.`,
+                            `Incorporate changes into your continuous integration workflow.`
+                        ],
+                        common_mistakes: [
+                            `Omitting boundary validation and error handling in early iterations.`,
+                            `Introducing unnecessary dependencies before core logic is stabilized.`,
+                            `Bypassing recommended standards and documentation.`
+                        ],
+                        practical_exercises: [
+                            `Exercise 1: Create an isolated prototype demonstrating the core principles of ${title}.`,
+                            `Exercise 2: Refactor an existing workflow to integrate the best practices highlighted in this chapter.`
+                        ],
+                        mini_project: {
+                            title: `${title} Implementation Project`,
+                            description: `Design, build, and validate a complete modular workflow using ${title}.`,
+                            tasks: [
+                                `Draft architectural requirements and interface contracts.`,
+                                `Build and document the implementation.`,
+                                `Validate against the chapter checklist and test suite.`
+                            ]
+                        },
+                        checklist: [
+                            `Understood all core definitions and architectural flows.`,
+                            `Completed hands-on practical exercises.`,
+                            `Verified implementation against common pitfalls.`
+                        ],
+                        interview_questions: interviewQuestions.length ? interviewQuestions : [
+                            {
+                                question: `Why is ${title} fundamental to modern systems?`,
+                                answer: `It provides standardized, scalable patterns that minimize runtime errors and enhance maintainability.`
+                            }
+                        ],
+                        takeaways: [
+                            `${title} is critical for establishing resilient, scalable engineering practices.`,
+                            `Consistent application of architectural patterns prevents production regressions.`,
+                            `Continuous self-assessment through exercises cements long-term mastery.`
+                        ],
+                        tips: [
+                            `Always verify your assumptions with automated tests.`,
+                            `Keep implementations modular and well-documented.`
+                        ],
+                        case_study: caseStudy
+                    };
+                }),
+                faq: [
+                    {
+                        question: `What is the recommended approach to complete this course eBook?`,
+                        answer: `Study each chapter sequentially, work through the practical exercises, and review the knowledge checks before proceeding.`
+                    },
+                    {
+                        question: `Are these patterns aligned with industry standards?`,
+                        answer: `Yes, all chapters emphasize modern industry-tested conventions and production methodologies.`
+                    }
+                ],
+                glossary: modules.map(m => ({
+                    term: m.Title || 'Key Concept',
+                    definition: `Core module topic focusing on ${m.Objectives?.[0] || 'essential architectural proficiencies'}.`
+                })),
+                conclusion: `Congratulations on finishing this comprehensive course eBook! You have built a robust theoretical and practical foundation across all curriculum topics. Continue applying these patterns in your projects, and share your insights with the community.`,
+                call_to_action: `Build a complete capstone project incorporating these concepts, publish your code, and take your mastery to the next level!`
+            };
+        };
+
         let ebookNarrative = null;
         try {
-            if (!process.env.OPENAI_API_KEY) {
-                throw new Error('OPENAI_API_KEY missing');
-            }
-            const assistantId = process.env.OPENAI_EBOOK_ASSISTANT_ID;
-            if (assistantId) {
-                const thread = await openai.beta.threads.create();
-                await openai.beta.threads.messages.create(thread.id, {
-                    role: 'user',
-                    content: ebookPrompt
-                });
-                const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
-                    assistant_id: assistantId
-                });
-                if (run.status === 'completed') {
-                    const messages = await openai.beta.threads.messages.list(thread.id);
-                    const lastMessage = messages.data[0];
-                    if (lastMessage.role === 'assistant') {
-                        const content = lastMessage.content[0].text.value;
-                        const jsonStr = content.replace(/```json\n?|```/g, '').trim();
-                        ebookNarrative = JSON.parse(jsonStr);
-                    }
-                }
-                else {
-                    throw new Error(`Assistant run failed with status: ${run.status}`);
-                }
-            }
-            else {
+            if (process.env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY.includes('dummy')) {
+                console.log('Generating structured eBook narrative using OpenAI GPT-4o JSON mode...');
                 const completion = await openai.chat.completions.create({
                     model: 'gpt-4o',
                     messages: [
-                        { role: 'system', content: 'You are an expert instructional designer and professional ebook author.' },
+                        { role: 'system', content: 'You are an elite instructional designer and professional author. You generate publication-grade, beautifully structured eBooks in valid JSON following the requested schema.' },
                         { role: 'user', content: ebookPrompt }
                     ],
-                    temperature: 0.5,
+                    temperature: 0.4,
                     response_format: { type: 'json_object' }
                 });
-                ebookNarrative = completion?.choices?.[0]?.message?.content
-                    ? JSON.parse(completion.choices[0].message.content)
-                    : null;
+                const rawContent = completion?.choices?.[0]?.message?.content || '';
+                if (rawContent) {
+                    const parsed = JSON.parse(rawContent);
+                    if (parsed && Array.isArray(parsed.chapters) && parsed.chapters.length) {
+                        ebookNarrative = parsed;
+                        console.log(`✅ Successfully generated AI eBook narrative with ${ebookNarrative.chapters.length} chapters.`);
+                    }
+                }
             }
         }
         catch (aiErr) {
-            console.error('Ebook AI generation failed, falling back to static HTML:', aiErr?.message || aiErr);
+            console.warn('Notice: OpenAI dynamic generation encountered an issue, using structured curriculum narrative fallback:', aiErr?.message || aiErr);
         }
-        const html = ebookNarrative
-            ? await buildEbookHtmlFromNarrative(course, ebookNarrative, modules, publisherName)
-            : buildEbookHtml(course, modules, publisherName);
+
+        if (!ebookNarrative) {
+            console.log('Synthesizing structured narrative from course modules...');
+            ebookNarrative = buildStructuredFallbackNarrative(course, modules, authorName);
+        }
+
+        let html;
+        try {
+            html = await buildEbookHtmlFromNarrative(course, ebookNarrative, modules, authorName, authorEmail);
+        } catch (narrativeErr) {
+            console.warn('⚠️ buildEbookHtmlFromNarrative warning, using structured classic template:', narrativeErr?.message || narrativeErr);
+            html = buildEbookHtml(course, modules, authorName, authorEmail);
+        }
         const getBrowserLaunchOptions = async () => {
             const customExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH || process.env.CHROME_PATH;
             if (customExecutablePath && fs.existsSync(customExecutablePath)) {
@@ -275,14 +418,14 @@ ${JSON.stringify(modulesForPrompt)}
                 displayHeaderFooter: true,
                 headerTemplate: '<span></span>',
                 footerTemplate: `
-          <div style="font-size: 10px; width: 100%; display: flex; justify-content: space-between; align-items: center; font-family: 'Inter', sans-serif; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 5px; margin: 0 14mm;">
+          <div style="font-size: 9px; width: 100%; display: flex; justify-content: space-between; align-items: center; font-family: 'Inter', sans-serif; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 4px; margin: 0 14mm;">
             <div style="display: flex; align-items: center; gap: 6px;">
-              ${logoBase64 ? `<img src="data:image/png;base64,${logoBase64}" style="height: 14px; width: auto; opacity: 0.8; vertical-align: middle; margin-right: 4px;" />` : ''}
-              <span style="font-weight: 500; vertical-align: middle;">ORION by EVOKE AI</span>
+              ${logoBase64 ? `<img src="data:image/png;base64,${logoBase64}" style="height: 12px; width: auto; opacity: 0.8; vertical-align: middle; margin-right: 4px;" />` : ''}
+              <span style="font-weight: 600; vertical-align: middle;">ORION by EVOKE AI</span>
             </div>
-            <div style="font-weight: 500;">Page No. <span class="pageNumber"></span></div>
+            <div style="font-weight: 500;">Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>
           </div>`,
-                margin: { top: '20mm', right: '14mm', bottom: '25mm', left: '14mm' }
+                margin: { top: '16mm', right: '14mm', bottom: '20mm', left: '14mm' }
             });
             const pdfBuffer = Buffer.from(rawPdf);
             if (!pdfBuffer || pdfBuffer.length === 0) {
@@ -321,6 +464,15 @@ ${JSON.stringify(modulesForPrompt)}
                 }).join('\n\n');
             }
             await course.save();
+            if (ebookGenRecord) {
+                try {
+                    ebookGenRecord.status = 'completed';
+                    ebookGenRecord.ebookUrl = ebookUrl;
+                    await ebookGenRecord.save();
+                } catch (recErr) {
+                    console.warn('Could not update EbookGeneration record status to completed:', recErr?.message);
+                }
+            }
             res.json({ ebookUrl, ebookStatus: course.ebookStatus });
         }
         finally {
@@ -329,6 +481,15 @@ ${JSON.stringify(modulesForPrompt)}
     }
     catch (error) {
         console.error('❌ Error generating ebook:', error?.message || error);
+        if (typeof ebookGenRecord !== 'undefined' && ebookGenRecord) {
+            try {
+                ebookGenRecord.status = 'failed';
+                ebookGenRecord.error = error?.message || 'Unknown generation error';
+                await ebookGenRecord.save();
+            } catch (recErr) {
+                console.warn('Could not update EbookGeneration record status to failed:', recErr?.message);
+            }
+        }
         try {
             const course = await Course.findOne({ userId: req.user.id, courseId: String(req.params.courseId || '').trim() });
             if (course) {

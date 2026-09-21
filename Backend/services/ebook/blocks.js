@@ -25,34 +25,49 @@ export const renderTips = (items = []) => {
     </div>
   `;
 };
+export const renderCompanionPair = (leftHtml = '', rightHtml = '') => {
+    const leftTrim = String(leftHtml || '').trim();
+    const rightTrim = String(rightHtml || '').trim();
+    if (!leftTrim && !rightTrim) return '';
+    if (leftTrim && !rightTrim) return leftTrim;
+    if (!leftTrim && rightTrim) return rightTrim;
+    return `
+    <div class="companion-grid">
+      <div class="companion-col">${leftTrim}</div>
+      <div class="companion-col">${rightTrim}</div>
+    </div>
+  `;
+};
 export const renderFaq = (items = []) => {
     if (!Array.isArray(items) || !items.length)
         return '';
     return `
-    <section class="faq-section page-break" id="faq">
-      <h3>Frequently Asked Questions</h3>
-      ${items.map((faq) => `
-        <div class="faq-item">
-          <p class="faq-q">Q: ${escapeHtml(faq?.question || '')}</p>
-          <p class="faq-a">A: ${escapeHtml(faq?.answer || '')}</p>
-        </div>
-      `).join('')}
-    </section>
+    <div class="faq-content">
+      <div class="faq-grid">
+        ${items.map((faq) => `
+          <div class="faq-card">
+            <p class="faq-q"><strong>Q:</strong> ${escapeHtml(faq?.question || '')}</p>
+            <p class="faq-a">${escapeHtml(faq?.answer || '')}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>
   `;
 };
 export const renderGlossary = (items = []) => {
     if (!Array.isArray(items) || !items.length)
         return '';
     return `
-    <section class="glossary-section page-break" id="glossary">
-      <h3>Glossary</h3>
-      <dl>
+    <div class="glossary-content">
+      <div class="glossary-grid">
         ${items.map((g) => `
-          <dt><strong>${escapeHtml(g?.term || '')}</strong></dt>
-          <dd>${escapeHtml(g?.definition || '')}</dd>
+          <div class="glossary-card">
+            <div class="glossary-term">${escapeHtml(g?.term || '')}</div>
+            <div class="glossary-def">${escapeHtml(g?.definition || '')}</div>
+          </div>
         `).join('')}
-      </dl>
-    </section>
+      </div>
+    </div>
   `;
 };
 export const renderQuizBlock = (quizzes = []) => {
@@ -227,13 +242,15 @@ export const renderInterviewQuestions = (questions = []) => {
         return '';
     return `
     <div class="interview-section">
-      <h3 style="font-family: var(--font-sans); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--navy); margin-bottom: 20px;">Industry Interview Prep</h3>
-      ${questions.map(q => `
-        <div class="interview-item">
-          <p class="interview-q">Q: ${escapeHtml(q.question)}</p>
-          <p class="interview-a"><strong>Expert Answer:</strong> ${escapeHtml(q.answer)}</p>
-        </div>
-      `).join('')}
+      <h3 style="font-family: var(--font-sans); font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--navy); margin-bottom: 14px;">Industry Interview Prep</h3>
+      <div class="interview-grid">
+        ${questions.map((q, qi) => `
+          <div class="interview-card">
+            <p class="interview-q"><strong>Q${qi + 1}:</strong> ${escapeHtml(q.question)}</p>
+            <p class="interview-a"><strong>Expert Answer:</strong> ${escapeHtml(q.answer)}</p>
+          </div>
+        `).join('')}
+      </div>
     </div>
   `;
 };
