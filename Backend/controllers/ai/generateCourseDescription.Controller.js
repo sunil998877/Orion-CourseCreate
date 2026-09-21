@@ -68,8 +68,6 @@ IMPORTANT: Output ONLY the description text. Do NOT include any labels, headers,
                 message: "AI returned empty description"
             });
         }
-
-        // Clean any markdown headings, bold labels or prefixes returned by the model
         description = description.replace(/^(?:#{1,6}\s*)?(?:\*{1,2})?(?:Course\s+Title|Title):?(?:\*{1,2})?\s*[^\n]+\n?/gi, '');
         description = description.replace(/^(?:#{1,6}\s*)?(?:\*{1,2})?(?:Course\s+Description|Description|Course\s+Overview|Overview):?(?:\*{1,2})?\s*/gi, '');
         description = description.replace(/^["']\s*|\s*["']$/g, '');

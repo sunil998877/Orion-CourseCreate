@@ -28,11 +28,9 @@ export const CancellationPopupModal: React.FC<CancellationPopupModalProps> = ({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md animate-fadeIn">
             <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-amber-500/30 bg-[#0c1017] p-6 md:p-8 shadow-2xl">
-                {/* Background glow */}
                 <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-amber-500/15 blur-[60px] pointer-events-none" />
                 <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-orange-500/10 blur-[60px] pointer-events-none" />
 
-                {/* Close button */}
                 <button
                     type="button"
                     onClick={onClose}
@@ -43,7 +41,6 @@ export const CancellationPopupModal: React.FC<CancellationPopupModalProps> = ({
                 </button>
 
                 <div className="space-y-6">
-                    {/* Header Icon + Titles */}
                     <div className="flex items-center gap-4">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
                             <AlertCircle className="h-6 w-6" />
@@ -58,7 +55,6 @@ export const CancellationPopupModal: React.FC<CancellationPopupModalProps> = ({
                         </div>
                     </div>
 
-                    {/* Message Box */}
                     <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-gray-300 leading-relaxed">
                         <p>{cancellation.message}</p>
                         {cancellation.details && (
@@ -68,7 +64,6 @@ export const CancellationPopupModal: React.FC<CancellationPopupModalProps> = ({
                         )}
                     </div>
 
-                    {/* Notification indicator */}
                     <div className="flex items-start gap-3 rounded-2xl border border-lime-500/20 bg-lime-500/[0.05] p-3 text-xs text-lime-300">
                         <Bell className="h-4 w-4 shrink-0 mt-0.5 text-lime-400" />
                         <span>
@@ -76,7 +71,6 @@ export const CancellationPopupModal: React.FC<CancellationPopupModalProps> = ({
                         </span>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex gap-3 pt-2">
                         <button
                             type="button"

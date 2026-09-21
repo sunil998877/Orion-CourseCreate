@@ -27,7 +27,6 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   const primaryClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
   const altClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID_ALT || '';
 
-  // Auto-reset loading state if user navigates back, restores page, or window refocuses
   useEffect(() => {
     let focusTimer: any = null;
 
@@ -37,7 +36,6 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // When tab is visible again, give 1.5s for auth callback before resetting
         if (focusTimer) clearTimeout(focusTimer);
         focusTimer = setTimeout(() => {
           setIsLoading(false);
@@ -50,8 +48,6 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pointerdown', handleReset);
 
-    // If user closed the Google popup or switched back without completing auth,
-    // reset loading after a short grace period
     const handleFocus = () => {
       if (focusTimer) clearTimeout(focusTimer);
       focusTimer = setTimeout(() => {
@@ -153,7 +149,6 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   const handleGoogleClick = (e?: React.MouseEvent) => {
     e?.preventDefault();
 
-    // If already loading or stuck from previous attempt, reset state and proceed with fresh click
     if (isLoading) {
       setIsLoading(false);
     }
@@ -169,13 +164,9 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
       return;
     }
 
-    console.log('[Google Auth] Current Browser Origin:', window.location.origin);
-    console.log('[Google Auth] Using Google Client ID:', activeClientId);
-
     setIsLoading(true);
     triggerOAuthFlow(activeClientId, false);
 
-    // Fast fallback timer (6s) so button never remains stuck spinning if popup is closed or blocked
     setTimeout(() => {
       setIsLoading((prev) => (prev ? false : prev));
     }, 6000);
@@ -188,7 +179,6 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         onClick={handleGoogleClick}
         className={`w-full relative flex items-center justify-center rounded-full bg-[#18181b] hover:bg-[#27272a] border border-white/10 hover:border-white/20 py-2.5 px-4 shadow-lg transition-all duration-200 group active:scale-[0.99] cursor-pointer ${className}`}
       >
-        {/* Left circular Google icon badge matching screenshot */}
         <div className="absolute left-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm transition-transform duration-200 group-hover:scale-105">
           <svg className="h-4 w-4" viewBox="0 0 24 24">
             <path
@@ -210,7 +200,6 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
           </svg>
         </div>
 
-        {/* Center Text */}
         <span className="text-sm font-semibold text-white tracking-wide flex items-center justify-center">
           {isLoading ? (
             <>
@@ -223,7 +212,6 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         </span>
       </button>
 
-      {/* Helpful configuration modal if Client ID is not configured in .env */}
       {showConfigModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
           <div className="relative w-full max-w-md rounded-2xl bg-zinc-950 border border-white/10 shadow-2xl p-6 text-left animate-scale-in">

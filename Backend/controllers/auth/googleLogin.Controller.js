@@ -10,7 +10,6 @@ export const googleLogin = async (req, res) => {
 
         let googleProfile = null;
 
-        // 1. If authorization code is provided, exchange for tokens using client secret
         if (code) {
             const clientId = process.env.GOOGLE_CLIENT_ID;
             const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -43,7 +42,6 @@ export const googleLogin = async (req, res) => {
             }
         }
 
-        // 2. Verify Google ID Token via Google's tokeninfo API
         if (!googleProfile && candidateToken) {
             const tokenInfoRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(candidateToken)}`);
             if (tokenInfoRes.ok) {
@@ -51,7 +49,6 @@ export const googleLogin = async (req, res) => {
             }
         }
 
-        // 3. Verify Google Access Token via Google's userinfo API
         if (!googleProfile && accessToken) {
             const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                 headers: { Authorization: `Bearer ${accessToken}` }

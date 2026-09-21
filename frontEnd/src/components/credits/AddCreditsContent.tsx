@@ -20,7 +20,6 @@ const AddCreditsContent: React.FC<Props> = ({ onPurchase }) => {
     const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
     const [selectedPlan, setSelectedPlan] = useState<PlanData | null>(null);
 
-    // Cancellation popup modal state
     const [cancellationModal, setCancellationModal] = useState<{
         isOpen: boolean;
         data: CancellationDetails | null;
@@ -29,7 +28,6 @@ const AddCreditsContent: React.FC<Props> = ({ onPurchase }) => {
         data: null,
     });
 
-    // Confirmation modal for cancelling an active plan
     const [planToCancel, setPlanToCancel] = useState<PlanData | null>(null);
     const [isCancellingActivePlan, setIsCancellingActivePlan] = useState(false);
 
@@ -55,7 +53,6 @@ const AddCreditsContent: React.FC<Props> = ({ onPurchase }) => {
         }
     };
 
-    // Cancellation of Recharge during checkout
     const handlePackagePurchaseCancel = async (details: { credits: number; price: number; label: string }) => {
         setSelectedPackage(null);
         const token = localStorage.getItem('token');
@@ -83,7 +80,6 @@ const AddCreditsContent: React.FC<Props> = ({ onPurchase }) => {
         triggerNotificationsRefresh();
     };
 
-    // Cancellation of Plan purchase/upgrade during checkout
     const handlePlanPurchaseCancel = async (details: { planName: string; price: number }) => {
         setSelectedPlan(null);
         const token = localStorage.getItem('token');
@@ -111,7 +107,6 @@ const AddCreditsContent: React.FC<Props> = ({ onPurchase }) => {
         triggerNotificationsRefresh();
     };
 
-    // Cancellation of active paid plan subscription
     const handlePromptCancelActivePlan = (plan: PlanData) => {
         setPlanToCancel(plan);
     };
@@ -159,7 +154,6 @@ const AddCreditsContent: React.FC<Props> = ({ onPurchase }) => {
                 />
             </section>
 
-            {/* Recharge checkout modal */}
             {selectedPackage && (
                 <CreditsPurchase
                     pkg={selectedPackage}
@@ -169,7 +163,6 @@ const AddCreditsContent: React.FC<Props> = ({ onPurchase }) => {
                 />
             )}
 
-            {/* Plan checkout modal */}
             {selectedPlan && (
                 <PlanPurchaseModal
                     plan={selectedPlan}
@@ -178,14 +171,12 @@ const AddCreditsContent: React.FC<Props> = ({ onPurchase }) => {
                 />
             )}
 
-            {/* General Cancellation Popup Modal */}
             <CancellationPopupModal
                 isOpen={cancellationModal.isOpen}
                 cancellation={cancellationModal.data}
                 onClose={() => setCancellationModal({ isOpen: false, data: null })}
             />
 
-            {/* Confirm Active Plan Cancellation Modal */}
             {planToCancel && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md animate-fadeIn">
                     <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-red-500/30 bg-[#0c1017] p-6 md:p-8 shadow-2xl">

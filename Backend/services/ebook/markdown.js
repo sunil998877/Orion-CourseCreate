@@ -65,7 +65,6 @@ export const renderMarkdown = (text = '') => {
                 rawItems.push(lines[i].trim().replace(/^[*\-] /, ''));
                 i++;
             }
-            // Check if items follow the concept definition pattern: **Title:** Description
             const conceptPattern = /^\*\*([^*]+?)\*\*[:\s—–]*(.*)$/;
             const parsedConcepts = rawItems.map(item => {
                 const match = item.match(conceptPattern);

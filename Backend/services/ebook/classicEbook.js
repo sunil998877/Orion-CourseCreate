@@ -108,14 +108,12 @@ export const buildEbookHtml = (course, modules, customPublisher = '', customEmai
           section { max-width: 820px; margin: 0 auto; padding: 20px 30px 40px; box-sizing: border-box; }
           .page-break { break-before: page; page-break-before: always; }
 
-          /* Cover Styles */
           .cover { height: 250mm; max-height: 255mm; background: linear-gradient(135deg, #090d16 0%, #162447 100%); color: var(--white); display: flex; flex-direction: column; justify-content: center; padding: 50px 40px; position: relative; overflow: hidden; box-sizing: border-box; page-break-after: always; break-after: page; }
           .cover h1 { font-family: var(--font-display); font-size: 42px; margin-bottom: 20px; position: relative; z-index: 2; line-height: 1.2; }
           .cover .meta { border-top: 1px solid rgba(255,255,255,0.2); margin-top: 30px; padding-top: 20px; position: relative; z-index: 2; }
           .cover p { font-family: var(--font-sans); opacity: 0.85; margin: 6px 0; }
           .cover-watermark { position: absolute; top: -30px; right: -30px; font-size: 200px; font-weight: 800; color: rgba(255,255,255,0.03); font-family: var(--font-display); }
 
-          /* Chapter Styles */
           .chapter-header { position: relative; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid var(--navy); }
           .chapter-label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
           .chapter-label-text { font-family: var(--font-sans); font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--accent); }

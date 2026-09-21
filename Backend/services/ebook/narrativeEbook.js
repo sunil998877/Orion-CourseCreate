@@ -277,7 +277,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             print-color-adjust: exact;
           }
 
-          /* Page break handling */
           .page-break {
             break-before: page;
             page-break-before: always;
@@ -285,7 +284,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
           h1, h2, h3, h4, h5, h6 { break-after: avoid; page-break-after: avoid; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
 
-          /* ==================== COVER PAGE ==================== */
           .cover {
             height: 250mm;
             max-height: 255mm;
@@ -387,7 +385,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             opacity: 0.4;
           }
 
-          /* ==================== TABLE OF CONTENTS ==================== */
           .toc-page {
             padding: 10px 0 30px;
             page-break-before: always;
@@ -440,7 +437,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             font-size: 12px;
           }
 
-          /* ==================== INTRODUCTION ==================== */
           .intro-section {
             padding: 10px 0 30px;
             page-break-before: always;
@@ -459,7 +455,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             text-align: justify;
           }
 
-          /* ==================== CHAPTERS ==================== */
           .chapter {
             padding: 10px 0 30px;
             page-break-before: always;
@@ -520,7 +515,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             line-height: 1.25;
           }
 
-          /* Chapter Summary & Hook */
           .chapter-summary-box {
             background: #f1f5f9;
             border-left: 4px solid var(--navy);
@@ -541,7 +535,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             color: #475569;
           }
 
-          /* Chapter Body Content */
           .chapter-body {
             margin-bottom: 28px;
           }
@@ -573,7 +566,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             margin-bottom: 6px;
           }
 
-          /* ==================== CALLOUT & COMPANION BOXES ==================== */
           .companion-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -872,7 +864,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             margin-bottom: 4px;
           }
 
-          /* ==================== ADAPTIVE CONCEPT GRIDS ==================== */
           .concept-grid {
             margin: 18px 0;
             break-inside: avoid;
@@ -941,7 +932,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             margin: 0;
           }
 
-          /* ==================== INTERVIEW GRID ==================== */
           .interview-section {
             margin: 20px 0;
             break-inside: avoid;
@@ -977,7 +967,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             margin: 0;
           }
 
-          /* ==================== TABLE OF CONTENTS CARDS ==================== */
           .toc-overview-box {
             padding: 12px 16px;
             background: #f8fafc;
@@ -1049,7 +1038,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             line-height: 1.5;
           }
 
-          /* ==================== CONSOLIDATED BACK-MATTER ==================== */
           .back-matter-section {
             padding: 20px 0;
             page-break-before: always;
@@ -1197,7 +1185,6 @@ export const buildEbookHtmlFromNarrative = async (course, ebookNarrative, module
             margin: 0;
           }
 
-          /* Prevent orphan headings */
           h1, h2, h3, h4, h5, h6 {
             break-after: avoid;
             page-break-after: avoid;
