@@ -25,6 +25,15 @@ export const clearNotifications = async (token: string) => {
         throw new Error('Failed to clear notifications');
     return res;
 };
+export const deleteSingleNotification = async (token: string, id: string) => {
+    const res = await fetch(`${API_BASE}/notifications/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok)
+        throw new Error('Failed to delete notification');
+    return res.json();
+};
 export const createNotification = async (
     token: string,
     notification: { title: string; message?: string; type?: 'success' | 'info' | 'warning' | 'error' }

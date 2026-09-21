@@ -153,6 +153,28 @@ export const CourseCreatorProvider: React.FC<{
             toast.error("Failed to clear notifications");
         }
     };
+    const removeSingleNotification = async (id: string) => {
+        const token = localStorage.getItem('token');
+        if (!token || !id)
+            return;
+        try {
+            setNotifications((prev) => prev.filter((n: any) => n._id !== id));
+            const res = await fetch(`${API_BASE}/notifications/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                window.dispatchEvent(new CustomEvent('notifications-updated'));
+            } else {
+                fetchNotifications();
+            }
+        }
+        catch (e) {
+            console.error(e);
+            toast.error("Failed to remove notification");
+            fetchNotifications();
+        }
+    };
     useEffect(() => {
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 30000);
@@ -1881,6 +1903,7 @@ export const CourseCreatorProvider: React.FC<{
             fetchNotifications,
             markAllRead,
             removeAllNotifications,
+            removeSingleNotification,
             handleLogout,
             handleGuidanceScroll,
             handleModulesScroll,

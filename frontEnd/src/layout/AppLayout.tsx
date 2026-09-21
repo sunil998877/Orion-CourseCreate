@@ -69,6 +69,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const removeSingleNotification = async (id: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token || !id) return;
+      setNotifications((prev) => prev.filter((n) => n._id !== id));
+      await fetch(`${API_BASE}/notifications/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      window.dispatchEvent(new CustomEvent("notifications-updated"));
+    } catch (e) {
+      console.error("Failed to delete notification:", e);
+      fetchNotifications();
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
@@ -150,6 +166,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         onLogout={handleLogout}
         onMarkAllRead={markAllRead}
         onRemoveAllNotifications={removeAllNotifications}
+        onRemoveSingleNotification={removeSingleNotification}
         onFetchNotifications={fetchNotifications}
       />
 

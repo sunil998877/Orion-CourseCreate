@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Bell, Menu, User, Camera, Shield, LogOut } from 'lucide-react';
+import { Search, Bell, Menu, User, Camera, Shield, LogOut, Trash2, X } from 'lucide-react';
 import logo5 from '../assests/logo5.png';
 export interface NotificationItem {
   _id?: string;
@@ -24,9 +24,22 @@ interface HeaderProps {
   onLogout: () => void;
   onMarkAllRead: () => void;
   onRemoveAllNotifications: () => void;
+  onRemoveSingleNotification?: (id: string) => void;
   onFetchNotifications: () => void;
 }
-export default function Header({ onOpenMobileMenu, userInfo, avatarUrl, notifications, onOpenAvatarModal, onOpenChangePasswordModal, onLogout, onMarkAllRead, onRemoveAllNotifications, onFetchNotifications, }: HeaderProps) {
+export default function Header({
+  onOpenMobileMenu,
+  userInfo,
+  avatarUrl,
+  notifications,
+  onOpenAvatarModal,
+  onOpenChangePasswordModal,
+  onLogout,
+  onMarkAllRead,
+  onRemoveAllNotifications,
+  onRemoveSingleNotification,
+  onFetchNotifications,
+}: HeaderProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [notifOpen, setNotifOpen] = useState(false);
@@ -120,21 +133,40 @@ export default function Header({ onOpenMobileMenu, userInfo, avatarUrl, notifica
                 const isSuccess = n.type === 'success' || n.title.toLowerCase().includes('success');
                 const dotColor = isWarning ? 'bg-amber-400' : n.type === 'error' ? 'bg-red-400' : isSuccess ? 'bg-lime-500' : 'bg-blue-400';
                 return (
-                <div key={n._id || i} className={`px-4 py-3 border-b border-white/5 hover:bg-white/5 transition flex items-start gap-3 ${!n.isRead ? 'bg-white/[0.02]' : ''}`}>
+                <div key={n._id || i} className={`px-4 py-3 border-b border-white/5 hover:bg-white/5 transition flex items-start gap-3 group/item relative ${!n.isRead ? 'bg-white/[0.02]' : ''}`}>
                   <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${!n.isRead ? dotColor : 'bg-transparent'}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
                       <span className={`text-sm font-medium truncate ${isWarning ? 'text-amber-300' : 'text-white'}`}>{n.title}</span>
-                      {isWarning && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-400/10 text-amber-400 border border-amber-400/20 font-semibold shrink-0">
-                          Cancelled
-                        </span>
-                      )}
-                      {isSuccess && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-lime-400/10 text-lime-400 border border-lime-400/20 font-semibold shrink-0">
-                          Success
-                        </span>
-                      )}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {isWarning && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-400/10 text-amber-400 border border-amber-400/20 font-semibold shrink-0">
+                            Cancelled
+                          </span>
+                        )}
+                        {isSuccess && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-lime-400/10 text-lime-400 border border-lime-400/20 font-semibold shrink-0">
+                            Success
+                          </span>
+                        )}
+                        {onRemoveSingleNotification && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const notifId = n._id;
+                              if (notifId) {
+                                onRemoveSingleNotification(notifId);
+                              }
+                            }}
+                            className="p-1 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors opacity-80 sm:opacity-0 sm:group-hover/item:opacity-100 cursor-pointer"
+                            title="Remove notification"
+                            aria-label="Remove notification"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="text-xs text-white/85 mt-0.5 line-clamp-2">{n.message}</div>
                     <div className="text-[10px] text-white/60 mt-1">
