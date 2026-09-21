@@ -27,7 +27,49 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   const primaryClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
   const altClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID_ALT || '';
 
+  // Auto-reset loading state if user navigates back, restores page, or window refocuses
+  useEffect(() => {
+    let focusTimer: any = null;
 
+    const handleReset = () => {
+      setIsLoading(false);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // When tab is visible again, give 1.5s for auth callback before resetting
+        if (focusTimer) clearTimeout(focusTimer);
+        focusTimer = setTimeout(() => {
+          setIsLoading(false);
+        }, 1500);
+      }
+    };
+
+    window.addEventListener('pageshow', handleReset);
+    window.addEventListener('popstate', handleReset);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pointerdown', handleReset);
+
+    // If user closed the Google popup or switched back without completing auth,
+    // reset loading after a short grace period
+    const handleFocus = () => {
+      if (focusTimer) clearTimeout(focusTimer);
+      focusTimer = setTimeout(() => {
+        setIsLoading(false);
+      }, 1500);
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      if (focusTimer) clearTimeout(focusTimer);
+      window.removeEventListener('pageshow', handleReset);
+      window.removeEventListener('popstate', handleReset);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pointerdown', handleReset);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
 
   const handleLoginSuccess = async (authPayload: { accessToken?: string; credential?: string; token?: string }) => {
     setIsLoading(true);
@@ -70,6 +112,10 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
       const client = window.google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope: 'email profile openid',
+        error_callback: (error: any) => {
+          console.warn('Google OAuth error_callback:', error);
+          setIsLoading(false);
+        },
         callback: (response: any) => {
           if (response.error) {
             console.warn(`Google OAuth error for ${clientId}:`, response);
@@ -104,7 +150,14 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
     }
   };
 
-  const handleGoogleClick = () => {
+  const handleGoogleClick = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+
+    // If already loading or stuck from previous attempt, reset state and proceed with fresh click
+    if (isLoading) {
+      setIsLoading(false);
+    }
+
     const activeClientId = primaryClientId || altClientId;
     if (!activeClientId) {
       setShowConfigModal(true);
@@ -121,6 +174,11 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
 
     setIsLoading(true);
     triggerOAuthFlow(activeClientId, false);
+
+    // Fast fallback timer (6s) so button never remains stuck spinning if popup is closed or blocked
+    setTimeout(() => {
+      setIsLoading((prev) => (prev ? false : prev));
+    }, 6000);
   };
 
   return (
@@ -128,8 +186,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
       <button
         type="button"
         onClick={handleGoogleClick}
-        disabled={isLoading}
-        className={`w-full relative flex items-center justify-center rounded-full bg-[#18181b] hover:bg-[#27272a] border border-white/10 hover:border-white/20 py-2.5 px-4 shadow-lg transition-all duration-200 group active:scale-[0.99] disabled:opacity-50 ${className}`}
+        className={`w-full relative flex items-center justify-center rounded-full bg-[#18181b] hover:bg-[#27272a] border border-white/10 hover:border-white/20 py-2.5 px-4 shadow-lg transition-all duration-200 group active:scale-[0.99] cursor-pointer ${className}`}
       >
         {/* Left circular Google icon badge matching screenshot */}
         <div className="absolute left-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm transition-transform duration-200 group-hover:scale-105">

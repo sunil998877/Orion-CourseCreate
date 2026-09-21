@@ -42,41 +42,73 @@ export default function PricingSection() {
     {
       title: "Free Trial",
       tag: "Try For Free",
-      desc: "Experience ORION with one free course sample — no credit card required",
+      desc: "Experience ORION with 500 monthly credits — no credit card required",
       price: null,
       freeLabel: "Free Forever",
-      features: ["1 Sample Course Generation", "Basic Slide Deck Preview", "Standard Audiobook Sample", "PDF Export (Watermarked)"],
+      features: [
+        "500 Monthly Credits",
+        "1 Sample Course Generation",
+        "Basic Slide Deck Preview",
+        "Standard Audiobook Sample",
+        "PDF Export (Watermarked)",
+        "No Credit Rollover",
+      ],
       pain: ["Not sure if ORION fits you", "Want to try before buying"],
-      solution: ["Generate 1 complete sample", "Preview all core features", "No commitment required"],
+      solution: ["500 free credits monthly", "Preview all core features", "No commitment required"],
       button: "Try Free",
       isFree: true
     },
     {
-      title: "Starter Course",
-      desc: "Perfect for individual creators and small teams",
-      originalPrice: "₹5,999",
-      price: "₹2,999",
-      features: ["5 Course Modules", "Basic Slide Decks", "Standard Audiobooks", "PDF Ebook Export"],
-      pain: ["Limited module creation", "Basic templates only"],
-      solution: ["Create up to 5 modules", "Professional slide decks", "Generate audiobooks"],
+      title: "Pro",
+      tag: "Recommended",
+      isRecommended: true,
+      desc: "For power creators and educators needing high capacity",
+      originalPrice: "₹1,999",
+      price: "₹999",
+      features: [
+        "3,000 Monthly Credits",
+        "Unlimited Course Modules",
+        "Pro Slide Decks (Split-Screen)",
+        "High-Fidelity Audiobooks",
+        "PDF + EPUB Export",
+        "Credit Rollover Allowed",
+        "All AI Generation Tools",
+      ],
+      pain: ["Need more monthly credits", "Want professional features"],
+      solution: ["3,000 credits renewed monthly", "Rollover unused credits", "Full AI course generation"],
       button: "Get Started"
     },
     {
-      title: "Advanced Course",
-      desc: "For growing businesses needing more features",
-      originalPrice: "₹9,999",
-      price: "₹5,999",
-      features: ["Unlimited Modules", "Pro Slide Decks (Split-Screen)", "High-Fidelity Audiobooks", "PDF + EPUB Export", "Priority Support"],
-      pain: ["Need more modules", "Want professional features"],
-      solution: ["Unlimited module creation", "Pro split-screen slides", "Premium audiobook quality", "Multiple export formats"],
+      title: "Team",
+      desc: "For growing businesses, teams, and high-volume creators",
+      originalPrice: "₹4,999",
+      price: "₹2,499",
+      features: [
+        "10,000 Monthly Credits",
+        "Team & Multi-Seat Workflows",
+        "Unlimited Course Generation",
+        "Pro Slide Decks & Audiobooks",
+        "PDF + EPUB Export",
+        "Credit Rollover Allowed",
+        "Priority Support",
+      ],
+      pain: ["High-volume course production", "Team & organization scale"],
+      solution: ["10,000 credits renewed monthly", "Collaborative team workflows", "Unused credits rollover"],
       button: "Get Started"
     },
     {
       title: "Enterprise",
       desc: "Full-scale course creation for organizations",
-      features: ["Everything in Advanced", "Custom Development", "API Access", "Dedicated Account Manager", "On-Premise Deployment"],
+      features: [
+        "Custom Monthly Credits",
+        "Everything in Team",
+        "Custom Development & AI Models",
+        "Full API & Webhook Access",
+        "Dedicated Account Manager",
+        "On-Premise Deployment & SLA",
+      ],
       pain: ["Need custom solutions", "Large organization requirements"],
-      solution: ["Full customization", "API integrations", "Dedicated support team", "Enterprise-grade security"],
+      solution: ["Tailored credit allotment", "Custom API integrations", "Dedicated 24/7 support team", "Enterprise-grade security"],
       button: "Contact Sales"
     },
   ];
@@ -103,12 +135,22 @@ export default function PricingSection() {
             key={i}
             whileHover={{ scale: 1.03, borderColor: '#84cc16' }}
             transition={{ type: "spring", stiffness: 200 }}
-            className="min-w-[260px] flex-1 max-w-[300px] shadow-xl rounded-2xl p-6 border bg-[#121212] border-[#2A2A2A] flex flex-col"
+            className={`min-w-[260px] flex-1 max-w-[300px] shadow-xl rounded-2xl p-6 border flex flex-col transition-all ${
+              card.isRecommended
+                ? 'bg-[#121212] border-lime-500/40 shadow-[0_0_30px_rgba(132,204,22,0.12)]'
+                : 'bg-[#121212] border-[#2A2A2A]'
+            }`}
           >
             
             <div>
-              {card.isFree && (
-                <span className="inline-block mb-2 px-3 py-0.5 text-xs font-bold rounded-full bg-lime-500/20 text-lime-400 border border-lime-500/40">
+              {card.tag && (
+                <span
+                  className={`inline-block mb-2 px-3 py-0.5 text-xs font-bold rounded-full ${
+                    card.isRecommended
+                      ? 'bg-lime-400 text-black font-extrabold shadow-sm'
+                      : 'bg-lime-500/20 text-lime-400 border border-lime-500/40'
+                  }`}
+                >
                   {card.tag}
                 </span>
               )}
@@ -314,7 +356,7 @@ export default function PricingSection() {
                     {selectedPlan?.price ? (
                       <p className="text-lime-500 text-lg font-bold">{selectedPlan?.price}<span className="text-sm text-gray-400">/month</span></p>
                     ) : (
-                      <p className="text-lime-500 font-semibold">Contact Us</p>
+                      <p className="text-lime-500 font-semibold">{selectedPlan?.isFree ? 'Free (500 Credits / month)' : 'Contact Us'}</p>
                     )}
                   </div>
                 </div>

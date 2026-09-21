@@ -31,12 +31,15 @@ export const useCourseDownloads = () => ({
         console.error(e);
         toast.error('Download failed. Please try again.');
     } },
-    downloadEbook: async (url?: string, title?: string) => { if (!url)
-        return; try {
-        await downloadBlob(url, `${(title || 'course-ebook').replace(/\s+/g, '-').toLowerCase()}.pdf`);
-    }
-    catch (e) {
-        console.error(e);
-        toast.error('Failed to download ebook');
-    } },
+    downloadEbook: async (url?: string, title?: string) => {
+        if (!url) return;
+        try {
+            await downloadBlob(url, `${(title || 'course-ebook').replace(/\s+/g, '-').toLowerCase()}.pdf`);
+            toast.success('Ebook downloaded successfully!');
+        }
+        catch (e) {
+            console.error(e);
+            toast.error('Failed to download ebook');
+        }
+    },
 });

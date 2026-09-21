@@ -1,24 +1,59 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BookOpen, BookText, Headphones, Loader2, Sparkles } from 'lucide-react';
 import type { Course } from '../../types/Course.types';
-export const CourseActions: React.FC<any> = ({ course, isGeneratingEbook, isGeneratingAudio, isGeneratingPodcast, showTranscript, showAudioPlayer, showPodcastTranscript, showPodcastPlayer, onGenerateEbook, onDownloadEbook, onGenerateAudio, onGeneratePodcast, onToggleTranscript, onToggleAudio, onTogglePodcastTranscript, onTogglePodcast }) => <div className="flex flex-wrap items-center justify-end gap-3 max-md:justify-stretch max-md:[&>button]:w-full max-md:[&>button]:justify-center">
-  {course.ebookUrl ?
-        <button onClick={onDownloadEbook} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold border border-emerald-400/30 text-emerald-300 hover:text-white hover:bg-emerald-500/20">
-    <BookText className="w-5 h-5"/>
-    <span>
-      Download Ebook
-    </span>
-  </button>
-        :
-            <button onClick={onGenerateEbook} disabled={isGeneratingEbook} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold border border-emerald-400/30 text-emerald-300 hover:text-white hover:bg-emerald-500/20 disabled:opacity-50">
-    {isGeneratingEbook ?
-                    <Loader2 className="w-5 h-5 animate-spin"/>
-                    :
-                        <BookText className="w-5 h-5"/>}
-    <span>
-      {isGeneratingEbook ? 'Generating Ebook...' : 'Generate Ebook'}
-    </span>
-  </button>}
+export const CourseActions: React.FC<any> = ({ course, isGeneratingEbook, isGeneratingAudio, isGeneratingPodcast, showTranscript, showAudioPlayer, showPodcastTranscript, showPodcastPlayer, onGenerateEbook, onDownloadEbook, onGenerateAudio, onGeneratePodcast, onToggleTranscript, onToggleAudio, onTogglePodcastTranscript, onTogglePodcast }) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    try {
+      if (onDownloadEbook) {
+        await Promise.all([
+          Promise.resolve(onDownloadEbook()),
+          new Promise((resolve) => setTimeout(resolve, 800)),
+        ]);
+      }
+    } catch (err) {
+      console.error('Error downloading ebook:', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center justify-end gap-3 max-md:justify-stretch max-md:[&>button]:w-full max-md:[&>button]:justify-center">
+      {course.ebookUrl ? (
+        <button
+          onClick={handleDownload}
+          disabled={isDownloading}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold border border-emerald-400/30 text-emerald-300 hover:text-white hover:bg-emerald-500/20 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+        >
+          {isDownloading ? (
+            <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
+          ) : (
+            <BookText className="w-5 h-5" />
+          )}
+          <span>
+            {isDownloading ? 'Please wait...' : 'Download Ebook'}
+          </span>
+        </button>
+      ) : (
+        <button
+          onClick={onGenerateEbook}
+          disabled={isGeneratingEbook}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold border border-emerald-400/30 text-emerald-300 hover:text-white hover:bg-emerald-500/20 disabled:opacity-50"
+        >
+          {isGeneratingEbook ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <BookText className="w-5 h-5" />
+          )}
+          <span>
+            {isGeneratingEbook ? 'Generating Ebook...' : 'Generate Ebook'}
+          </span>
+        </button>
+      )}
   {course.audioUrl ?
         <>
     <button onClick={onToggleTranscript} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold border ${showTranscript ? 'bg-white/10 border-white/20 text-white' : 'border-white/10 text-white/60 hover:text-white'}`}>
@@ -69,4 +104,7 @@ export const CourseActions: React.FC<any> = ({ course, isGeneratingEbook, isGene
       {isGeneratingPodcast ? 'Generating...' : 'Generate Podcast'}
     </span>
   </button>}
-</div>;
+    </div>
+  );
+};
+

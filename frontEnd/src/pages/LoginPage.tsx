@@ -82,6 +82,18 @@ function App() {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    useEffect(() => {
+        const handleReset = () => {
+            setIsLoading(false);
+        };
+        window.addEventListener('pageshow', handleReset);
+        window.addEventListener('popstate', handleReset);
+        return () => {
+            window.removeEventListener('pageshow', handleReset);
+            window.removeEventListener('popstate', handleReset);
+        };
+    }, []);
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateForm()) {
