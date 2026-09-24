@@ -68,6 +68,7 @@ export const HeroPage: React.FC = () => {
     const [courses, setCourses] = useState<Course[]>([]);
     const [toDelete, setToDelete] = useState<Course | null>(null);
     const [showDelete, setShowDelete] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [showAudioPlayer, setShowAudioPlayer] = useState(false);
     const [showTranscript, setShowTranscript] = useState(false);
     const [showPodcastPlayer, setShowPodcastPlayer] = useState(false);
@@ -147,8 +148,9 @@ export const HeroPage: React.FC = () => {
     };
     const confirmDelete = async () => {
         const courseId = toDelete?._id;
-        if (!courseId)
+        if (!courseId || isDeleting)
             return;
+        setIsDeleting(true);
         try {
             const token = localStorage.getItem('token');
             if (!token)
@@ -174,6 +176,7 @@ export const HeroPage: React.FC = () => {
             toast.error('Failed to delete course');
         }
         finally {
+            setIsDeleting(false);
             setShowDelete(false);
             setToDelete(null);
         }
@@ -241,14 +244,16 @@ export const HeroPage: React.FC = () => {
                 {toDelete?.title ? `Delete "${toDelete.title}"?` : 'Delete this course?'}
               </p>
               <div className="flex justify-end gap-3">
-                <button type="button" onClick={() => {
+                <button type="button" disabled={isDeleting} onClick={() => {
+                if (isDeleting)
+                    return;
                 setShowDelete(false);
                 setToDelete(null);
-            }} className="px-4 py-2 rounded-md border border-white/20 text-white/80 hover:bg-white/10">
+            }} className="px-4 py-2 rounded-md border border-white/20 text-white/80 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed">
                   Cancel
                 </button>
-                <button type="button" onClick={confirmDelete} className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-500 text-white">
-                  Delete
+                <button type="button" disabled={isDeleting} onClick={confirmDelete} className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-500 text-white disabled:opacity-70 disabled:cursor-not-allowed min-w-[7.5rem]">
+                  {isDeleting ? 'Please wait...' : 'Delete'}
                 </button>
               </div>
             </div>
