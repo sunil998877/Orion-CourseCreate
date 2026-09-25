@@ -29,6 +29,33 @@ const moduleSchema = new mongoose.Schema({
     gammaUrl: { type: String, default: null },
     gammaGenerationId: { type: String, default: null },
     status: { type: String, enum: ['idle', 'generating', 'completed', 'failed'], default: 'idle' },
+    heygenModuleStatus: {
+        type: String,
+        enum: ['idle', 'generating', 'completed', 'failed'],
+        default: 'idle',
+    },
+    heygenModuleError: { type: String, default: null },
+    heygenModuleScriptHash: { type: String, default: null },
+    heygenModuleVideoId: { type: String, default: null },
+    heygenModuleVideoUrl: { type: String, default: null },
+    heygenModuleGeneratedAt: { type: Date, default: null },
+    heygenSlideVideos: [{
+        slideNumber: Number,
+        title: String,
+        script: String,
+        scriptHash: String,
+        bullets: [String],
+        content: String,
+        videoId: String,
+        videoUrl: String,
+        status: {
+            type: String,
+            enum: ['idle', 'generating', 'completed', 'failed'],
+            default: 'idle',
+        },
+        error: String,
+        duration: Number,
+    }],
     createdAt: { type: Date, default: Date.now }
 }, { _id: false });
 const courseSchema = new mongoose.Schema({
@@ -62,6 +89,16 @@ const courseSchema = new mongoose.Schema({
     podcastTranscript: { type: String, default: null },
     podcastScript: [mongoose.Schema.Types.Mixed],
     podcastStatus: { type: String, enum: ['idle', 'generating', 'completed', 'failed'], default: 'idle' },
+    heygenVideoId: { type: String, default: null },
+    heygenVideoUrl: { type: String, default: null },
+    heygenScript: { type: String, default: null },
+    heygenStatus: {
+        type: String,
+        enum: ['idle', 'generating', 'completed', 'failed'],
+        default: 'idle',
+    },
+    heygenError: { type: String, default: null },
+    heygenGeneratedAt: { type: Date, default: null },
     modules: [moduleSchema],
     createdAt: { type: Date, default: Date.now }
 });

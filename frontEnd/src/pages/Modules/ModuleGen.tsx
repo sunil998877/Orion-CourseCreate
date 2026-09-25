@@ -3,8 +3,9 @@ import { API_BASE } from '../../utils/api';
 import { useCourseData } from '../../contextAPI/courseAPI';
 import { ModuleViewer } from './ModuleViewer';
 import { SlideContent } from './SlideContent';
-import { CheckCircle, Book, Download, Loader2, FileText } from 'lucide-react';
+import { CheckCircle, Book, Download, Loader2, FileText, Video } from 'lucide-react';
 import { TranscriptModal } from './ModuleTranscriptModal';
+import { ModuleAvatarVideoModal } from './ModuleAvatarVideoModal';
 import { cleanTitle, type ModuleState } from './moduleTypes';
 export type { ModuleState };
 export { cleanTitle };
@@ -17,6 +18,7 @@ const ModuleGen = () => {
     const [loadingDeckId, setLoadingDeckId] = useState<number | null>(null);
     const [loadingScriptId, setLoadingScriptId] = useState<number | null>(null);
     const [selectedTranscriptMod, setSelectedTranscriptMod] = useState<ModuleState | null>(null);
+    const [avatarVideoMod, setAvatarVideoMod] = useState<ModuleState | null>(null);
     const moduleCredits = useMemo(() => {
         const n = modules.length;
         if (n === 0)
@@ -211,6 +213,29 @@ const ModuleGen = () => {
             showOrion
         });
     };
+    const openAvatarVideo = async (mod: ModuleState) => {
+        setLoadingDeckId(mod.id);
+        try {
+            const token = localStorage.getItem('token');
+            const resp = await fetch(`${API_BASE}/module-contents?courseId=${courseData?.courseId}&moduleNumber=${mod.id}`, { headers: { Authorization: `Bearer ${token}` } });
+            if (resp.ok) {
+                const docs = await resp.json();
+                const latestModule = Array.isArray(docs) && docs.length ? docs[0] : docs;
+                const content = (latestModule?.Title || latestModule?.title) ? latestModule : null;
+                setAvatarVideoMod({
+                    ...mod,
+                    Content: content || mod.Content,
+                    orionUrl: latestModule?.gammaUrl || mod.orionUrl,
+                });
+                return;
+            }
+        }
+        catch { }
+        finally {
+            setLoadingDeckId(null);
+        }
+        setAvatarVideoMod(mod);
+    };
     const handleChat = async (prompt: string, moduleData: ModuleState, history: {
         role: 'user' | 'assistant';
         content: string;
@@ -293,6 +318,11 @@ const ModuleGen = () => {
 
                             <div className="flex flex-col gap-3">
                                 <div className="flex flex-wrap gap-4">
+                                    {mod.isGenerated && !mod.orionUrl && (
+                                        <button onClick={() => openAvatarVideo(mod)} disabled={loadingDeckId === mod.id} className="group/btn flex items-center px-5 py-3 text-lime-400 hover:text-white hover:bg-lime-500/10 rounded-2xl border border-lime-500/10 hover:border-lime-500/40 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 shadow-[0_10px_30px_-10px_rgba(132,204,22,0.1)] disabled:opacity-50">
+                                            {loadingDeckId === mod.id ? <><Loader2 size={14} className="mr-3 animate-spin"/> Please wait...</> : <><Video size={14} className="mr-3 group-hover/btn:scale-110 transition-transform"/> Course Video</>}
+                                        </button>
+                                    )}
                                     {mod.orionUrl && (<>
                                             <button onClick={() => openSlidesPreview(mod, true)} disabled={loadingDeckId === mod.id} className="group/btn flex items-center px-5 py-3 text-white/60 hover:text-white hover:bg-white/10 rounded-2xl border border-white/5 hover:border-white/20 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 shadow-lg bg-white/[0.02] disabled:opacity-50 disabled:cursor-not-allowed">
                                                 {loadingDeckId === mod.id ? (
@@ -335,6 +365,9 @@ const ModuleGen = () => {
                                                     <><FileText size={14} className="mr-3 group-hover/btn:-translate-y-0.5 transition-transform"/> Voice Script</>
                                                 )}
                                             </button>
+                                            <button onClick={() => openAvatarVideo(mod)} disabled={loadingDeckId === mod.id} className="group/btn flex items-center px-5 py-3 text-lime-400 hover:text-white hover:bg-lime-500/10 rounded-2xl border border-lime-500/10 hover:border-lime-500/40 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 shadow-[0_10px_30px_-10px_rgba(132,204,22,0.1)] disabled:opacity-50">
+                                                {loadingDeckId === mod.id ? <><Loader2 size={14} className="mr-3 animate-spin"/> Please wait...</> : <><Video size={14} className="mr-3 group-hover/btn:scale-110 transition-transform"/> Course Video</>}
+                                            </button>
                                             <button onClick={() => downloadOrionPPTX(mod)} disabled={downloadingModuleId === mod.id} className="group/btn flex items-center px-5 py-3 text-lime-400 hover:text-white hover:bg-lime-500/10 rounded-2xl border border-lime-500/10 hover:border-lime-500/40 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_10px_30px_-10px_rgba(132,204,22,0.1)]">
                                                 {downloadingModuleId === mod.id ? (<>
                                                         <Loader2 size={14} className="mr-3 animate-spin"/> ...
@@ -351,6 +384,16 @@ const ModuleGen = () => {
             </div>
 
             {selectedTranscriptMod && (<TranscriptModal mod={selectedTranscriptMod} onClose={() => setSelectedTranscriptMod(null)}/>)}
+
+            {avatarVideoMod && courseData?.courseId && (
+                <ModuleAvatarVideoModal
+                    courseId={String(courseData.courseId)}
+                    moduleNumber={avatarVideoMod.id}
+                    moduleTitle={cleanTitle(avatarVideoMod.Content?.Title || avatarVideoMod.Module || '')}
+                    gammaUrl={avatarVideoMod.orionUrl || null}
+                    onClose={() => setAvatarVideoMod(null)}
+                />
+            )}
 
             {selectedModule && (<ModuleViewer moduleData={selectedModule} onClose={() => setSelectedModule(null)} onRefine={(prompt, history) => handleChat(prompt, selectedModule, history)} isRegenerating={modules.find(m => m.id === selectedModule.id)?.isGenerating} credit={moduleCredits[selectedModule.id]} duration={`${courseData?.duration?.value || 0} ${courseData?.duration?.unit || 'hours'}`}/>)}
 

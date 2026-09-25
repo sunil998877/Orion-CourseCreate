@@ -114,6 +114,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             localStorage.setItem("avatar", user.avatar);
           }
         }
+
       } catch (error) {
         console.error("Failed to fetch user profile:", error);
       }

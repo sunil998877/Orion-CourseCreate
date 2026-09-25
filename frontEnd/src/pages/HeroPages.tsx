@@ -16,6 +16,7 @@ import { CourseDetails } from '../components/HeroPage/CourseDetails';
 import { OrionGuidance } from '../components/HeroPage/OrienGuidance';
 import GeneratePodcastModal from '../components/HeroPage/GeneratePodcastModal';
 import GenerateAudioModal from '../components/HeroPage/GenerateAudioModal';
+
 type Course = {
     _id?: string;
     title: string;
@@ -47,6 +48,28 @@ type Course = {
         gammaUrl?: string;
     }[];
 };
+
+const COURSES_CACHE_KEY = 'orion_user_courses_cache';
+
+function readCachedCourses(): Course[] {
+    try {
+        const raw = sessionStorage.getItem(COURSES_CACHE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
+function writeCachedCourses(list: Course[]) {
+    try {
+        sessionStorage.setItem(COURSES_CACHE_KEY, JSON.stringify(list));
+    } catch {
+        /* ignore quota errors */
+    }
+}
+
 const emptyCourse: Course = {
     title: '',
     description: '',
@@ -65,7 +88,11 @@ export const HeroPage: React.FC = () => {
     const isSearching = Boolean(searchParams.get('q'));
     const { updateCourseData } = useCourseData();
     const [courseData, setCourseData] = useState<Course>(emptyCourse);
-    const [courses, setCourses] = useState<Course[]>([]);
+    const [courses, setCourses] = useState<Course[]>(() => (isSearching ? [] : readCachedCourses()));
+    const [coursesLoading, setCoursesLoading] = useState(() => {
+        if (isSearching) return true;
+        return readCachedCourses().length === 0;
+    });
     const [toDelete, setToDelete] = useState<Course | null>(null);
     const [showDelete, setShowDelete] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -79,29 +106,46 @@ export const HeroPage: React.FC = () => {
     const [showPodcastModal, setShowPodcastModal] = useState(false);
     const [showAudioModal, setShowAudioModal] = useState(false);
     useEffect(() => {
+        let cancelled = false;
         const fetchCourses = async () => {
             const token = localStorage.getItem('token');
-            if (!token)
+            const q = searchParams.get('q');
+            const hasCache = !q && readCachedCourses().length > 0;
+            if (!hasCache) setCoursesLoading(true);
+            if (!token) {
+                if (!cancelled) {
+                    setCourses([]);
+                    setCoursesLoading(false);
+                }
                 return;
+            }
             try {
-                const q = searchParams.get('q');
                 const url = q
                     ? `${API_BASE}/courses/search?q=${encodeURIComponent(q)}`
                     : `${API_BASE}/courses/get-user-courses`;
                 const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
                 if (!resp.ok) {
                     console.error('Fetch courses failed:', resp.status, resp.statusText);
+                    if (!cancelled) setCoursesLoading(false);
                     return;
                 }
                 const data = await resp.json();
-                const fetched = (Array.isArray(data) ? data : []).filter((c: Course) => c.modules?.length && c.modules.every((m) => m.gammaUrl));
+                const fetched = (Array.isArray(data) ? data : []).filter(
+                    (c: Course) => c.modules?.length && c.modules.every((m) => m.gammaUrl)
+                );
+                if (cancelled) return;
                 setCourses(fetched);
-            }
-            catch (err) {
+                if (!q) writeCachedCourses(fetched);
+            } catch (err) {
                 console.error('Fetch error:', err);
+            } finally {
+                if (!cancelled) setCoursesLoading(false);
             }
         };
         fetchCourses();
+        return () => {
+            cancelled = true;
+        };
     }, [searchParams]);
     const generation = useCourseGeneration({
         courseData,
@@ -163,7 +207,11 @@ export const HeroPage: React.FC = () => {
                 throw new Error('Delete failed');
             const data = await resp.json();
             if (data?.deleted || data?.success) {
-                setCourses((prev) => prev.filter((c) => c._id !== courseId));
+                setCourses((prev) => {
+                    const next = prev.filter((c) => c._id !== courseId);
+                    writeCachedCourses(next);
+                    return next;
+                });
                 if (courseData._id === courseId) {
                     setView('list');
                     setCourseData(emptyCourse);
@@ -188,11 +236,13 @@ export const HeroPage: React.FC = () => {
     return (<PageTransition>
       <div className="relative min-h-screen overflow-auto">
         <main className="px-6 py-8 max-md:px-0 max-md:py-2">
-          {view === 'list' ? (<CourseList courses={courses} isSearching={isSearching} onCourseClick={handleCourseClick} onDelete={(c: Course) => {
+          {view === 'list' ? (<CourseList courses={courses} loading={coursesLoading} isSearching={isSearching} onCourseClick={handleCourseClick} onDelete={(c: Course) => {
                 setToDelete(c);
                 setShowDelete(true);
             }} onCreateNew={handleCreateNew}/>) : (<div className="animate-fadeIn">
-              <button type="button" onClick={() => setView('list')} className="flex items-center gap-2 text-white/60 hover:text-white mb-6">
+              <button type="button" onClick={() => {
+                setView('list');
+              }} className="flex items-center gap-2 text-white/60 hover:text-white mb-6">
                 <ArrowLeft className="w-4 h-4"/>
                 Back to Dashboard
               </button>

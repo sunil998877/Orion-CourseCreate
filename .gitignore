@@ -1,0 +1,16 @@
+node_modules/
+**/node_modules/
+dist/
+build/
+.env
+*.log
+.DS_Store
+Backend/public/gamma-slides/**
+!Backend/public/gamma-slides/.gitkeep
+Backend/Backend/
+*.mp4
+demo_module_video/
+
+tools/ffmpeg/
+tools/ffmpeg.zip
+tools/ffmpeg_tmp/
