@@ -62,6 +62,25 @@ function formatTime(totalSec: number) {
   return `${m}:${r.toString().padStart(2, '0')}`;
 }
 
+function liveCaptionFromOffset(text: string, offset: number, windowSize = 8) {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!clean) return '';
+  const words = clean.split(' ');
+  let count = 0;
+  let wordIdx = 0;
+  for (let i = 0; i < words.length; i++) {
+    if (offset <= count + words[i].length) {
+      wordIdx = i;
+      break;
+    }
+    count += words[i].length + 1;
+    wordIdx = i;
+  }
+  const end = Math.min(words.length, wordIdx + 1);
+  const start = Math.max(0, end - windowSize);
+  return words.slice(start, end).join(' ');
+}
+
 const LIP_LOOP_START = 0.18;
 const LIP_LOOP_END = 0.92;
 
@@ -119,7 +138,9 @@ export function ModuleAvatarVideoModal({
   const utteranceIdRef = useRef(0);
   const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const speakTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const speechProgressRef = useRef({ slide: 0, offset: 0, text: '' });
   const [speechError, setSpeechError] = useState<string | null>(null);
+  const [captionLine, setCaptionLine] = useState('');
 
   useEffect(() => {
     isSpeakingRef.current = isSpeaking;
@@ -321,6 +342,7 @@ export function ModuleAvatarVideoModal({
       /* ignore */
     }
     setIsSpeaking(false);
+    setCaptionLine('');
     const vid = avatarVideoRef.current;
     if (vid) {
       if (lipTickRef.current) {
@@ -338,8 +360,7 @@ export function ModuleAvatarVideoModal({
 
   useEffect(() => {
     mutedRef.current = muted;
-    if (muted) stopSpeech();
-  }, [muted, stopSpeech]);
+  }, [muted]);
 
   // Prefetch browser voices (Chrome returns [] until voiceschanged)
   useEffect(() => {
@@ -535,7 +556,7 @@ export function ModuleAvatarVideoModal({
   };
 
   const speakSlide = useCallback(
-    (index: number, opts?: { fromUserGesture?: boolean }) => {
+    (index: number, opts?: { fromUserGesture?: boolean; startOffset?: number }) => {
       utteranceIdRef.current += 1;
       const speakId = utteranceIdRef.current;
       if (speakTimeoutRef.current) {
@@ -564,10 +585,10 @@ export function ModuleAvatarVideoModal({
       }
 
       const slide = slides[index];
-      const text = (slide?.script || slide?.content || slide?.title || '')
+      const fullText = (slide?.script || slide?.content || slide?.title || '')
         .replace(/\s+/g, ' ')
         .trim();
-      if (!text) {
+      if (!fullText) {
         setIsSpeaking(false);
         setAvatarLips(false);
         return;
@@ -578,14 +599,28 @@ export function ModuleAvatarVideoModal({
         return;
       }
 
+      const startOffset = Math.max(0, Math.min(fullText.length, opts?.startOffset || 0));
+      const text =
+        startOffset > 0
+          ? fullText.slice(startOffset).replace(/^\s+/, '') || fullText
+          : fullText;
+      const baseOffset = startOffset > 0 && text !== fullText ? fullText.length - text.length : startOffset;
+
+      speechProgressRef.current = { slide: index, offset: baseOffset, text: fullText };
+      setCaptionLine(baseOffset > 0 ? liveCaptionFromOffset(fullText, baseOffset) : '');
+
       const chunks = splitSpeechChunks(text);
       let chunkIndex = 0;
+      let chunkBase = baseOffset;
+      let lastBoundaryAt = Date.now();
 
       const finishSlideSpeech = () => {
         if (utteranceIdRef.current !== speakId) return;
         setIsSpeaking(false);
         setAvatarLips(false);
         activeUtteranceRef.current = null;
+        setCaptionLine('');
+        speechProgressRef.current = { slide: index, offset: fullText.length, text: fullText };
 
         if (!playingRef.current) return;
         const next = index + 1;
@@ -594,6 +629,7 @@ export function ModuleAvatarVideoModal({
           slideIndexRef.current = next;
           setElapsedInSlide(0);
           elapsedRef.current = 0;
+          speechProgressRef.current = { slide: next, offset: 0, text: '' };
           speakTimeoutRef.current = setTimeout(() => {
             if (!playingRef.current || mutedRef.current) return;
             speakSlide(next);
@@ -612,6 +648,7 @@ export function ModuleAvatarVideoModal({
         }
 
         const chunkText = chunks[chunkIndex];
+        const thisChunkBase = chunkBase;
         const utter = new SpeechSynthesisUtterance(chunkText);
         activeUtteranceRef.current = utter;
         const rate = Math.min(1.6, Math.max(0.75, speedRef.current));
@@ -627,17 +664,33 @@ export function ModuleAvatarVideoModal({
           setIsSpeaking(true);
           setSpeechError(null);
           setAvatarLips(true, rate);
+          setCaptionLine(liveCaptionFromOffset(fullText, thisChunkBase));
         };
 
         utter.onboundary = (event) => {
           if (utteranceIdRef.current !== speakId) return;
           if (event.name === 'word') {
+            lastBoundaryAt = Date.now();
+            const nextOffset = thisChunkBase + (event.charIndex || 0);
+            speechProgressRef.current = {
+              slide: index,
+              offset: nextOffset,
+              text: fullText,
+            };
+            setCaptionLine(liveCaptionFromOffset(fullText, Math.max(0, nextOffset - 12)));
             pulseLipsForWord();
           }
         };
 
         utter.onend = () => {
           if (utteranceIdRef.current !== speakId) return;
+          chunkBase += chunkText.length + 1;
+          speechProgressRef.current = {
+            slide: index,
+            offset: Math.min(fullText.length, chunkBase),
+            text: fullText,
+          };
+          setCaptionLine(liveCaptionFromOffset(fullText, Math.min(fullText.length, chunkBase)));
           chunkIndex += 1;
           speakNextChunk();
         };
@@ -653,6 +706,7 @@ export function ModuleAvatarVideoModal({
             setAvatarLips(false);
             return;
           }
+          chunkBase += chunkText.length + 1;
           chunkIndex += 1;
           speakNextChunk();
         };
@@ -662,6 +716,42 @@ export function ModuleAvatarVideoModal({
           window.speechSynthesis.speak(utter);
           setIsSpeaking(true);
           setAvatarLips(true, rate);
+
+          const wordsInChunk = chunkText.split(/\s+/).filter(Boolean).length;
+          const approxMs = Math.max(2400, (wordsInChunk / 1.5) * 1000) / rate;
+          const tickEvery = Math.max(420, approxMs / Math.max(1, wordsInChunk));
+          let tickWord = 0;
+          const captionFallback = window.setInterval(() => {
+            if (utteranceIdRef.current !== speakId || mutedRef.current) {
+              window.clearInterval(captionFallback);
+              return;
+            }
+            if (Date.now() - lastBoundaryAt < 700) return;
+            tickWord += 1;
+            if (tickWord >= wordsInChunk) {
+              window.clearInterval(captionFallback);
+              return;
+            }
+            const approxOffset =
+              thisChunkBase + Math.floor((chunkText.length * tickWord) / wordsInChunk);
+            speechProgressRef.current = {
+              slide: index,
+              offset: approxOffset,
+              text: fullText,
+            };
+            setCaptionLine(liveCaptionFromOffset(fullText, Math.max(0, approxOffset - 12)));
+          }, tickEvery);
+
+          const prevOnEnd = utter.onend;
+          utter.onend = (ev) => {
+            window.clearInterval(captionFallback);
+            if (typeof prevOnEnd === 'function') prevOnEnd.call(utter, ev);
+          };
+          const prevOnError = utter.onerror;
+          utter.onerror = (ev) => {
+            window.clearInterval(captionFallback);
+            if (typeof prevOnError === 'function') prevOnError.call(utter, ev);
+          };
         } catch (err) {
           console.warn('speak() failed:', err);
           setSpeechError('Could not start browser voice.');
@@ -689,6 +779,43 @@ export function ModuleAvatarVideoModal({
     },
     [slides, pickVoice, setAvatarLips, pulseLipsForWord]
   );
+
+  const toggleMute = () => {
+    const nextMuted = !mutedRef.current;
+    mutedRef.current = nextMuted;
+    setMuted(nextMuted);
+
+    if (nextMuted) {
+      if (speakTimeoutRef.current) {
+        clearTimeout(speakTimeoutRef.current);
+        speakTimeoutRef.current = null;
+      }
+      activeUtteranceRef.current = null;
+      try {
+        window.speechSynthesis?.cancel();
+      } catch {
+        /* ignore */
+      }
+      setIsSpeaking(false);
+      setAvatarLips(false);
+      setCaptionLine('');
+      return;
+    }
+
+    if (playingRef.current && slides.length) {
+      const progress = speechProgressRef.current;
+      const sameSlide = progress.slide === slideIndexRef.current;
+      let offset = 0;
+      if (sameSlide && progress.text && progress.offset > 0 && progress.offset < progress.text.length) {
+        offset = progress.offset;
+        const prevSpace = progress.text.lastIndexOf(' ', offset);
+        if (prevSpace >= 0 && offset - prevSpace < 48) {
+          offset = prevSpace + 1;
+        }
+      }
+      speakSlide(slideIndexRef.current, { fromUserGesture: true, startOffset: offset });
+    }
+  };
 
   const applyPlaybackSpeed = (next: number) => {
     speedRef.current = next;
@@ -1010,6 +1137,14 @@ export function ModuleAvatarVideoModal({
                 }`}
                 onClick={(e) => e.stopPropagation()}
               >
+                {captionsOn && captionLine && (
+                  <div className="pointer-events-none mb-3 flex w-full justify-center px-2">
+                    <div className="max-w-3xl rounded bg-black/75 px-4 py-2 text-center text-sm font-medium leading-snug text-white md:text-[15px]">
+                      {captionLine}
+                    </div>
+                  </div>
+                )}
+
                 <div
                   role="slider"
                   aria-valuemin={0}
@@ -1030,12 +1165,6 @@ export function ModuleAvatarVideoModal({
                   />
                 </div>
 
-                {captionsOn && current && (
-                  <div className="mb-3 max-w-3xl rounded-xl bg-black/70 px-3 py-2 text-sm text-white/90 backdrop-blur">
-                    {current.script || current.content || current.title}
-                  </div>
-                )}
-
                 {speechError && (
                   <div className="mb-3 max-w-3xl rounded-xl border border-amber-500/40 bg-amber-500/15 px-3 py-2 text-sm text-amber-100">
                     {speechError}
@@ -1043,7 +1172,6 @@ export function ModuleAvatarVideoModal({
                 )}
 
                 <div className="flex w-full flex-wrap items-center gap-2.5">
-                  {/* Play */}
                   <button
                     type="button"
                     onClick={togglePlay}
@@ -1058,7 +1186,6 @@ export function ModuleAvatarVideoModal({
                     )}
                   </button>
 
-                  {/* Previous / Next slide */}
                   <div className="flex h-11 items-center gap-0.5 rounded-2xl bg-[#2a2a2a]/95 px-1.5 text-white backdrop-blur">
                     <button
                       type="button"
@@ -1080,7 +1207,6 @@ export function ModuleAvatarVideoModal({
                     </button>
                   </div>
 
-                  {/* Skip + time */}
                   <div className="flex h-11 items-center gap-1 rounded-2xl bg-[#2a2a2a]/95 px-2.5 text-white backdrop-blur">
                     <button
                       type="button"
@@ -1107,7 +1233,6 @@ export function ModuleAvatarVideoModal({
                     </span>
                   </div>
 
-                  {/* Chapters */}
                   <div className="relative">
                     <button
                       ref={chaptersBtnRef}
@@ -1120,11 +1245,10 @@ export function ModuleAvatarVideoModal({
                     </button>
                   </div>
 
-                  {/* Volume · CC · speed · settings · fullscreen */}
                   <div className="ml-auto flex h-11 items-center gap-0.5 rounded-2xl bg-[#2a2a2a]/95 px-1.5 text-white backdrop-blur">
                     <button
                       type="button"
-                      onClick={() => setMuted((m) => !m)}
+                      onClick={toggleMute}
                       className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
                       aria-label={muted ? 'Unmute' : 'Mute'}
                     >
@@ -1133,12 +1257,17 @@ export function ModuleAvatarVideoModal({
                     <button
                       type="button"
                       onClick={() => setCaptionsOn((c) => !c)}
-                      className={`flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10 ${
-                        captionsOn ? 'text-white' : 'text-white/90'
+                      className={`relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10 ${
+                        captionsOn ? 'text-lime-400' : 'text-white/90'
                       }`}
-                      aria-label="Captions"
+                      aria-label={captionsOn ? 'Captions on' : 'Captions off'}
+                      aria-pressed={captionsOn}
+                      title={captionsOn ? 'Captions: On' : 'Captions: Off'}
                     >
                       <Captions size={18} />
+                      {captionsOn && (
+                        <span className="absolute bottom-1 left-1/2 h-0.5 w-3.5 -translate-x-1/2 rounded-full bg-lime-400" />
+                      )}
                     </button>
                     <button
                       type="button"
