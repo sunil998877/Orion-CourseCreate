@@ -3,3 +3,7 @@ export { getHeyGenVideoStatus } from './heygen/getHeyGenVideoStatus.Controller.j
 export { getHeyGenConfigStatus } from './heygen/getHeyGenConfigStatus.Controller.js';
 export { generateModuleHeyGenVideo } from './heygen/generateModuleHeyGenVideo.Controller.js';
 export { getModuleHeyGenVideoStatus } from './heygen/getModuleHeyGenVideoStatus.Controller.js';
+export { getHeyGenAvatars } from './heygen/getHeyGenAvatars.Controller.js';
+export { selectHeyGenAvatar } from './heygen/selectHeyGenAvatar.Controller.js';
+export { proxyHeyGenMedia } from './heygen/proxyHeyGenMedia.Controller.js';
+export { speakSlideNarration } from './heygen/speakSlideNarration.Controller.js';

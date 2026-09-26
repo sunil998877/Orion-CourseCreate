@@ -99,6 +99,10 @@ const courseSchema = new mongoose.Schema({
     },
     heygenError: { type: String, default: null },
     heygenGeneratedAt: { type: Date, default: null },
+    avatarId: { type: String, default: 'Abigail_expressive_2024112501' },
+    avatarName: { type: String, default: 'Abigail (Professional Instructor)' },
+    avatarImageUrl: { type: String, default: 'https://files2.heygen.ai/avatar/v3/1ad51ab9fee24ae88af067206e14a1d8_44250/preview_target.webp' },
+    avatarVideoUrl: { type: String, default: 'https://files2.heygen.ai/avatar/v3/1ad51ab9fee24ae88af067206e14a1d8_44250/preview_video_target.mp4' },
     modules: [moduleSchema],
     createdAt: { type: Date, default: Date.now }
 });

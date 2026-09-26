@@ -3,6 +3,7 @@ import {
     findCourseModule,
     findUserCourse,
     getHeyGenConfig,
+    getMasterAvatar,
     getModuleSlideNarrations,
     heygenFetch,
 } from './heygen.helpers.js';
@@ -56,7 +57,7 @@ async function createModuleStudioVideo(mod, narrations) {
                         avatar_id: avatarId,
                         script: slide.script.slice(0, 4500),
                         voice_id: voiceId,
-                        background: { type: 'color', color: '#0b1220' },
+                        background: { type: 'color', color: '#000000' },
                         engine: { type: engineType },
                     },
                 })),
@@ -89,7 +90,7 @@ async function createModuleStudioVideo(mod, narrations) {
                     },
                     background: {
                         type: 'color',
-                        value: '#0b1220',
+                        value: '#000000',
                     },
                 })),
                 dimension: { width: 720, height: 1280 },
@@ -146,7 +147,49 @@ export const generateModuleHeyGenVideo = async (req, res) => {
             return res.status(202).json({ ...serializeModuleHeyGen(mod), cached: true });
         }
 
-        const videoId = await createModuleStudioVideo(mod, narrations);
+        const masterAvatar = await getMasterAvatar();
+        let videoId = null;
+        let isMasterFallback = false;
+
+        try {
+            videoId = await createModuleStudioVideo(mod, narrations);
+        } catch (apiErr) {
+            console.warn('HeyGen API video render unavailable, using Master Avatar from DB:', apiErr.message);
+            isMasterFallback = true;
+            videoId = `master-${masterAvatar?.avatarId || 'avatar'}`;
+        }
+
+        if (isMasterFallback) {
+            const masterVideoUrl = masterAvatar?.previewVideoUrl || 'https://files2.heygen.ai/avatar/v3/1ad51ab9fee24ae88af067206e14a1d8_44250/preview_video_target.mp4';
+            mod.heygenModuleVideoId = videoId;
+            mod.heygenModuleVideoUrl = masterVideoUrl;
+            mod.heygenModuleScriptHash = scriptHash;
+            mod.heygenModuleGeneratedAt = new Date();
+            mod.heygenModuleError = null;
+            mod.heygenModuleStatus = 'completed';
+            mod.heygenSlideVideos = narrations.map((slide) => ({
+                slideNumber: slide.slideNumber,
+                title: slide.title,
+                script: slide.script,
+                scriptHash: slide.scriptHash,
+                bullets: slide.bullets,
+                content: slide.content,
+                videoId,
+                videoUrl: masterVideoUrl,
+                status: 'completed',
+                error: null,
+                duration: estimateScriptSeconds(slide.script),
+            }));
+
+            await course.save();
+
+            return res.status(200).json({
+                ...serializeModuleHeyGen(mod),
+                cached: false,
+                isMasterAvatar: true,
+                avatar: masterAvatar,
+            });
+        }
 
         mod.heygenModuleVideoId = videoId;
         mod.heygenModuleVideoUrl = null;

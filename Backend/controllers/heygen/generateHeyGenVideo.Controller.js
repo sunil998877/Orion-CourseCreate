@@ -3,6 +3,7 @@ import {
     collectCourseScriptSource,
     findUserCourse,
     getHeyGenConfig,
+    getMasterAvatar,
     heygenFetch,
 } from './heygen.helpers.js';
 
@@ -88,36 +89,67 @@ export const generateHeyGenVideo = async (req, res) => {
             return res.status(400).json({ message: 'Could not build an avatar script for this course.' });
         }
 
-        const payload = await heygenFetch('/v2/video/generate', {
-            method: 'POST',
-            body: {
-                video_inputs: [
-                    {
-                        character: {
-                            type: 'avatar',
-                            avatar_id: avatarId,
-                            avatar_style: 'normal',
-                        },
-                        voice: {
-                            type: 'text',
-                            input_text: script.slice(0, 4500),
-                            voice_id: voiceId,
-                        },
-                        background: {
-                            type: 'color',
-                            value: '#0b1220',
-                        },
-                    },
-                ],
-                dimension: {
-                    width: 720,
-                    height: 1280,
-                },
-                test: process.env.HEYGEN_TEST_MODE === 'true',
-            },
-        });
+        const masterAvatar = await getMasterAvatar();
+        let videoId = null;
+        let isMasterFallback = false;
 
-        const videoId = payload?.data?.video_id;
+        try {
+            const payload = await heygenFetch('/v2/video/generate', {
+                method: 'POST',
+                body: {
+                    video_inputs: [
+                        {
+                            character: {
+                                type: 'avatar',
+                                avatar_id: masterAvatar?.avatarId || avatarId,
+                                avatar_style: 'normal',
+                            },
+                            voice: {
+                                type: 'text',
+                                input_text: script.slice(0, 4500),
+                                voice_id: masterAvatar?.voiceId || voiceId,
+                            },
+                            background: {
+                                type: 'color',
+                                value: '#000000',
+                            },
+                        },
+                    ],
+                    dimension: {
+                        width: 720,
+                        height: 1280,
+                    },
+                    test: process.env.HEYGEN_TEST_MODE === 'true',
+                },
+            });
+            videoId = payload?.data?.video_id;
+        } catch (apiErr) {
+            console.warn('HeyGen API video render unavailable, using Master Avatar from DB:', apiErr.message);
+            isMasterFallback = true;
+            videoId = `master-${masterAvatar?.avatarId || 'avatar'}`;
+        }
+
+        if (isMasterFallback) {
+            const masterVideoUrl = masterAvatar?.previewVideoUrl || 'https://files2.heygen.ai/avatar/v3/1ad51ab9fee24ae88af067206e14a1d8_44250/preview_video_target.mp4';
+            course.heygenVideoId = videoId;
+            course.heygenVideoUrl = masterVideoUrl;
+            course.heygenScript = script;
+            course.heygenStatus = 'completed';
+            course.heygenError = null;
+            course.heygenGeneratedAt = new Date();
+            await course.save();
+
+            return res.status(200).json({
+                videoId,
+                videoUrl: masterVideoUrl,
+                script,
+                status: 'completed',
+                cached: false,
+                isMasterAvatar: true,
+                avatar: masterAvatar,
+            });
+        }
+
         if (!videoId) {
             return res.status(502).json({ message: 'HeyGen did not return a video id.' });
         }

@@ -1,8 +1,94 @@
 import crypto from 'crypto';
 import mongoose from 'mongoose';
 import Course from '../../models/courseModel.js';
+import Avatar from '../../models/avatarModel.js';
 
 const HEYGEN_API_BASE = 'https://api.heygen.com';
+
+export const CURATED_AVATARS = [
+    {
+        avatarId: 'Abigail_expressive_2024112501',
+        avatarName: 'Abigail (Professional Instructor)',
+        gender: 'female',
+        previewImageUrl: 'https://files2.heygen.ai/avatar/v3/1ad51ab9fee24ae88af067206e14a1d8_44250/preview_target.webp',
+        previewVideoUrl: 'https://files2.heygen.ai/avatar/v3/1ad51ab9fee24ae88af067206e14a1d8_44250/preview_video_target.mp4',
+        voiceId: '1bd001e7e50f421d891986aad5158bc8',
+    },
+    {
+        avatarId: 'Albert_public_1',
+        avatarName: 'Albert (Senior Lecturer)',
+        gender: 'male',
+        previewImageUrl: 'https://files2.heygen.ai/avatar/v3/57a701a3f0af49e6bda8cf47f1f7c7df_62550/preview_target.webp',
+        previewVideoUrl: 'https://files2.heygen.ai/avatar/v3/57a701a3f0af49e6bda8cf47f1f7c7df_62550/preview_video_target.mp4',
+        voiceId: '1bd001e7e50f421d891986aad5158bc8',
+    },
+    {
+        avatarId: 'Adrian_public_2_20240312',
+        avatarName: 'Adrian (Corporate Trainer)',
+        gender: 'male',
+        previewImageUrl: 'https://files2.heygen.ai/avatar/v3/25ef6c86b1e946969d9a684870c47dfe_14947/preview_talk_1.webp',
+        previewVideoUrl: 'https://files2.heygen.ai/avatar/v3/25ef6c86b1e946969d9a684870c47dfe_14947/preview_video_talk_1.mp4',
+        voiceId: '1bd001e7e50f421d891986aad5158bc8',
+    },
+    {
+        avatarId: 'Annie_expressive_public',
+        avatarName: 'Annie (Tech Speaker)',
+        gender: 'female',
+        previewImageUrl: 'https://files2.heygen.ai/avatar/v3/5d5a9a07c612460d882861e0e8931564_54040/preview_target.webp',
+        previewVideoUrl: 'https://files2.heygen.ai/avatar/v3/5d5a9a07c612460d882861e0e8931564_54040/preview_video_target.mp4',
+        voiceId: '1bd001e7e50f421d891986aad5158bc8',
+    },
+    {
+        avatarId: 'Annie_expressive6_public',
+        avatarName: 'Annie (Modern Presenter)',
+        gender: 'female',
+        previewImageUrl: 'https://files2.heygen.ai/avatar/v3/a643fb413d7e460ea257d0f4c15d0179_56150/preview_target.webp',
+        previewVideoUrl: 'https://files2.heygen.ai/avatar/v3/a643fb413d7e460ea257d0f4c15d0179_56150/preview_video_target.mp4',
+        voiceId: '1bd001e7e50f421d891986aad5158bc8',
+    },
+];
+
+export async function getMasterAvatar() {
+    let master = await Avatar.findOne({ isDefault: true }).lean();
+    if (!master) {
+        const fallback = CURATED_AVATARS[0];
+        try {
+            master = await Avatar.create({
+                avatarId: process.env.HEYGEN_AVATAR_ID || fallback.avatarId,
+                avatarName: fallback.avatarName,
+                previewImageUrl: fallback.previewImageUrl,
+                previewVideoUrl: fallback.previewVideoUrl,
+                voiceId: process.env.HEYGEN_VOICE_ID || fallback.voiceId,
+                gender: fallback.gender,
+                isDefault: true,
+            });
+            master = master.toObject();
+        } catch {
+            master = fallback;
+        }
+    }
+    return master;
+}
+
+export async function saveMasterAvatar(avatarData) {
+    if (!avatarData?.avatarId) throw new Error('avatarId is required');
+    await Avatar.updateMany({}, { isDefault: false });
+    const saved = await Avatar.findOneAndUpdate(
+        { avatarId: avatarData.avatarId },
+        {
+            avatarId: avatarData.avatarId,
+            avatarName: avatarData.avatarName || 'Master Course Avatar',
+            previewImageUrl: avatarData.previewImageUrl,
+            previewVideoUrl: avatarData.previewVideoUrl,
+            voiceId: avatarData.voiceId || process.env.HEYGEN_VOICE_ID || '1bd001e7e50f421d891986aad5158bc8',
+            gender: avatarData.gender || 'unknown',
+            isDefault: true,
+            metadata: avatarData.metadata || {},
+        },
+        { upsert: true, new: true }
+    );
+    return saved;
+}
 
 export function hashText(text) {
     return crypto.createHash('sha256').update(String(text || '')).digest('hex');
