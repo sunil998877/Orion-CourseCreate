@@ -106,25 +106,25 @@ const CourseStepOne: React.FC = () => {
             <div className="absolute inset-0 rounded-[2.5rem] max-md:rounded-2xl bg-gradient-to-br from-lime-500/[0.02] to-transparent pointer-events-none overflow-hidden" />
 
             <div className="flex-1 min-h-0 overflow-y-auto step-scrollbar px-2 md:px-4 relative z-10 pb-8">
-                <motion.div variants={itemVariants} className="mb-12 text-center relative z-10">
-                    <label className="mb-3 flex items-center justify-center gap-2 text-[19px] font-black uppercase tracking-[0.3em] text-lime-400 max-md:mb-3 max-md:tracking-wider">Cognitive complexity Level</label>
-                    <p className='text-gray-400 text-xs font-normal mb-6 text-[15px]'>Choose the cognitive complexity level of the course.</p>
-                    <div className="w-full max-w-2xl mx-auto grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl bg-black/40 border border-white/5 backdrop-blur-3xl shadow-2xl md:grid-cols-4 md:gap-1 md:p-2 md:rounded-[2rem]">
+                <motion.div variants={itemVariants} className="mb-12 max-md:mb-6 text-center relative z-10">
+                    <label className="mb-3 flex items-center justify-center gap-2 text-[19px] font-black uppercase tracking-[0.3em] text-lime-400 max-md:mb-2 max-md:text-base max-md:tracking-wider">Cognitive complexity Level</label>
+                    <p className='text-gray-400 text-xs font-normal mb-6 text-[15px] max-md:mb-4 max-md:text-sm'>Choose the cognitive complexity level of the course.</p>
+                    <div className="w-full max-w-2xl mx-auto grid grid-cols-2 gap-2.5 p-2 rounded-2xl bg-black/40 border border-white/5 backdrop-blur-3xl shadow-2xl md:grid-cols-4 md:gap-1 md:p-2 md:rounded-[2rem]">
                         {['Beginner', 'Intermediate', 'Advanced', 'Professional'].map(lvl => (<button key={lvl} onClick={() => {
                             updateCourseData({ level: lvl });
                             setIsCustomAudience(false);
-                        }} className={`flex items-center justify-center text-center min-w-0 w-full px-2 py-3 text-[10px] leading-tight font-black rounded-xl transition-all duration-500 uppercase tracking-wide whitespace-normal md:px-1 md:py-4 md:text-[11px] md:leading-normal md:rounded-2xl md:tracking-wider lg:text-xs lg:tracking-widest ${(courseData.level || 'Beginner') === lvl
+                        }} className={`flex h-11 items-center justify-center text-center min-w-0 w-full px-2 text-[10px] leading-tight font-black rounded-xl transition-all duration-500 uppercase tracking-wide whitespace-nowrap md:h-auto md:px-1 md:py-4 md:text-[11px] md:leading-normal md:rounded-2xl md:tracking-wider lg:text-xs lg:tracking-widest ${(courseData.level || 'Beginner') === lvl
                             ? 'bg-lime-500 text-black shadow-[0_0_30px_rgba(132,204,22,0.4)] z-10 font-black'
-                            : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`} type="button">
+                            : 'bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/5 md:bg-transparent'}`} type="button">
                             {lvl}
                         </button>))}
                     </div>
                 </motion.div>
-                <motion.div variants={itemVariants} className="mb-12 relative z-10">
+                <motion.div variants={itemVariants} className="mb-12 max-md:mb-6 relative z-10">
                     <ImportCoursePanel open={importOpen} onOpenChange={setImportOpen} />
                 </motion.div>
 
-                <motion.div variants={itemVariants} className="space-y-8">
+                <motion.div variants={itemVariants} className="space-y-8 max-md:space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 xl:gap-8">
                         <div className="group">
                             <label className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-gray-400 transition-colors group-hover:text-lime-500">Course Title <RequiredMark invalid={showValidation && !courseData.title?.trim()} /></label>

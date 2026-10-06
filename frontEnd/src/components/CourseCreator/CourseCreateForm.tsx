@@ -27,7 +27,7 @@ const CourseCreatorContent: React.FC = () => {
 
       <CourseHeader />
 
-      <main className="relative z-10 transition-all duration-700 mx-auto py-12 px-6 max-w-[1600px]">
+      <main className="relative z-10 mx-auto max-w-[1600px] px-6 pb-8 pt-12 transition-all duration-700 max-md:px-4 max-md:pb-6 max-md:pt-8">
         <StepProgress />
 
         <div className="mt-12 flex flex-col lg:flex-row gap-8 items-start">
@@ -41,7 +41,7 @@ const CourseCreatorContent: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-8 mb-4 flex flex-col items-center justify-center gap-1 opacity-80 animate-pulse">
+        <div className="mb-4 mt-8 flex flex-col items-center justify-center gap-1 opacity-80 animate-pulse max-md:mb-0 max-md:mt-6">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-amber-500" />
             <p className="text-[10px] sm:text-xs text-amber-500 uppercase tracking-widest font-black text-center">
@@ -87,8 +87,6 @@ const CourseCreatorContent: React.FC = () => {
 
       <BatchGenerationOverlay />
       <ModulePreview />
-
-      <footer className="relative z-10 py-8 px-6 text-center text-gray-600 text-xs border-t border-gray-900 mt-20" />
 
       <CourseDescriptionModal />
     </div>

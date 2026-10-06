@@ -405,11 +405,17 @@ const ImportCoursePanel: React.FC<{ open?: boolean; onOpenChange?: (open: boolea
     const ready = mode === 'file' ? Boolean(file) : mode === 'url' ? /^https?:\/\//i.test(url.trim()) : text.trim().length > 0;
 
     return (
-        <div data-import-panel className="rounded-2xl border border-white/10 bg-black/30 p-5">
+        <div data-import-panel className="rounded-2xl border border-white/10 bg-black/30 p-5 max-md:p-3.5">
             <button type="button" data-expand-toggle onClick={() => setOpen((value) => !value)} className="flex w-full items-center justify-between gap-3 text-left">
-                <div>
-                    <p className="text-sm font-semibold uppercase tracking-wider text-gray-300">Import course</p>
-                    <p className="mt-1 text-xs text-gray-500">
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2 md:block">
+                        <p className="text-sm font-semibold uppercase tracking-wider text-gray-300">Import course</p>
+                        <span className="flex shrink-0 items-center gap-2 md:hidden">
+                            <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400">Optional</span>
+                            <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`} />
+                        </span>
+                    </div>
+                    <p className="mt-1 text-xs leading-relaxed text-gray-500">
                         Orion can also read a file, a link, or pasted notes. Skip this section if you don't want to import any file{' '}
                         <span
                             role="button"
@@ -424,14 +430,14 @@ const ImportCoursePanel: React.FC<{ open?: boolean; onOpenChange?: (open: boolea
                                     setOpen(false);
                                 }
                             }}
-                            className="group relative inline-block cursor-pointer font-semibold text-lime-400 select-none pb-0.5"
+                            className="group relative inline cursor-pointer font-semibold text-lime-400 select-none pb-0.5"
                         >
                             skip
                             <span className="absolute bottom-0 left-1/2 h-[2px] w-0 -translate-x-1/2 bg-lime-400 transition-all duration-300 ease-out group-hover:w-full" />
                         </span>
                     </p>
                 </div>
-                <span className="flex shrink-0 items-center gap-2">
+                <span className="hidden shrink-0 items-center gap-2 md:flex">
                     <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400">Optional</span>
                     <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`} />
                 </span>
