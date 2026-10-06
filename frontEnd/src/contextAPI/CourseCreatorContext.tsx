@@ -474,6 +474,18 @@ export const CourseCreatorProvider: React.FC<{
                     toast.warn("Please generate modules before continuing.");
                     return;
                 }
+                const forge = courseData.courseForge || {};
+                const scriptReady = Boolean(forge.narrationApproved);
+                const workbookReady = Boolean(forge.workbook || forge.workbookApproved);
+                const assessmentApproved = Boolean(forge.assessmentApproved);
+                if (!scriptReady || !workbookReady || !assessmentApproved) {
+                    const missing: string[] = [];
+                    if (!scriptReady) missing.push('Trainer script');
+                    if (!workbookReady) missing.push('E-workbook');
+                    if (!assessmentApproved) missing.push('Assessment');
+                    toast.warn(`Please create and approve all Orion Production steps (${missing.join(', ')}) before continuing.`);
+                    return;
+                }
                 const missingSlides = previewModules.some(m => !orionUrlByModule[m.id]);
                 if (missingSlides) {
                     setIsContinuing(true);
@@ -860,7 +872,7 @@ export const CourseCreatorProvider: React.FC<{
             if (data?.assessment) {
                 const completeAssessment = ensure20AssessmentQuestions(data.assessment, courseData, previewModules);
                 patchForge({ assessment: completeAssessment, assessmentApproved: false });
-                toast.success('20 assessment questions are ready for review.');
+                toast.success(`${completeAssessment.items.length} assessment questions ready for review (20 per module).`);
             }
         }
         finally {
@@ -2143,8 +2155,14 @@ export const CourseCreatorProvider: React.FC<{
             }
             case 3:
                 return true;
-            case 4:
-                return previewModules.length > 0 && Object.keys(orionUrlByModule).length === previewModules.length;
+            case 4: {
+                const forge = courseData?.courseForge || {};
+                const scriptReady = Boolean(forge.narrationApproved);
+                const workbookReady = Boolean(forge.workbook || forge.workbookApproved);
+                const assessmentApproved = Boolean(forge.assessmentApproved);
+                const forgeComplete = scriptReady && workbookReady && assessmentApproved;
+                return previewModules.length > 0 && forgeComplete && Object.keys(orionUrlByModule).length === previewModules.length;
+            }
             default:
                 return true;
         }

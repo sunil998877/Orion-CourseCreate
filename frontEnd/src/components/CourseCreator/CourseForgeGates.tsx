@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Check, ChevronDown, Edit3, Loader2, RotateCcw, Sparkles, X } from 'lucide-react';
+import { Check, ChevronDown, Edit3, Loader2, RotateCcw, Sparkles, X, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useCourseCreator } from '../../contextAPI/CourseCreatorContext';
 import { API_BASE } from '../../utils/api';
 import { toast } from 'react-toastify';
@@ -150,7 +150,18 @@ const CourseForgeGates: React.FC<{ stage: 'build' | 'review'; open?: boolean; on
         <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03]">
             <button type="button" data-expand-toggle onClick={toggle} className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left">
                 <span>
-                    <span className="block text-sm font-semibold uppercase tracking-wider text-lime-400">Orion production</span>
+                    <span className="flex items-center gap-2.5">
+                        <span className="text-sm font-semibold uppercase tracking-wider text-lime-400">Orion production</span>
+                        {approvedCount < steps.length ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 border border-amber-500/40 text-amber-300 animate-pulse">
+                                {steps.length - approvedCount} Pending
+                            </span>
+                        ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-lime-500/20 border border-lime-500/40 text-lime-400">
+                                Approved
+                            </span>
+                        )}
+                    </span>
                     <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-gray-500">{steps.length} steps to create and approve · {approvedCount} approved</span>
                 </span>
                 <ChevronDown className={`h-5 w-5 shrink-0 text-gray-500 transition-transform ${expanded ? 'rotate-180' : ''}`} />
@@ -162,15 +173,21 @@ const CourseForgeGates: React.FC<{ stage: 'build' | 'review'; open?: boolean; on
                         const openPanel = () => {
                             if (onToggle) onToggle();
                             else setLocalOpen(true);
-                            actionButton?.onClick();
+                            if (actionButton) {
+                                actionButton.onClick();
+                            } else if (item.state !== 'Approved') {
+                                toast.info(`Please complete previous steps in order before ${item.label}.`);
+                            }
                         };
                         return (
                             <li key={item.label} className="flex items-center justify-between gap-3 text-sm">
                                 <span className="text-gray-200">{item.label}</span>
                                 {item.state === 'Approved' ? (
-                                    <span className="text-xs font-bold uppercase tracking-wider text-lime-400">Approved</span>
+                                    <span className="text-xs font-bold uppercase tracking-wider text-lime-400 flex items-center gap-1">
+                                        <CheckCircle2 size={13} className="text-lime-400 inline" /> Approved
+                                    </span>
                                 ) : (
-                                    <button type="button" onClick={openPanel} className={`text-xs font-bold uppercase tracking-wider ${item.state === 'Ready to approve' ? 'text-amber-300' : actionButton ? 'text-lime-400' : 'text-gray-500'}`}>
+                                    <button type="button" onClick={openPanel} className={`text-xs font-bold uppercase tracking-wider transition-all px-2.5 py-0.5 rounded-lg border ${item.state === 'Ready to approve' ? 'bg-amber-500/20 border-amber-500/40 text-amber-300 hover:bg-amber-500/30' : actionButton ? 'bg-lime-500/10 border-lime-500/30 text-lime-400 hover:bg-lime-500/20' : 'border-transparent text-gray-500 hover:text-gray-400'}`}>
                                         {item.state}
                                     </button>
                                 )}

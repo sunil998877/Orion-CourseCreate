@@ -6,19 +6,46 @@ import { GAMMA_THEMES } from '../../utils/themes';
 import ThemeModal from './ThemeModal';
 import ModuleList from './ModuleList';
 import CourseForgeGates from './CourseForgeGates';
-import { ChevronRight, ChevronLeft, Zap, Sparkles, AlertTriangle, Construction, Lightbulb, RefreshCw, Layers, Rocket, Loader2 } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { ChevronRight, ChevronLeft, Zap, Sparkles, AlertTriangle, Construction, Lightbulb, RefreshCw, Layers, Rocket, Loader2, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
+
 const CourseStepFour: React.FC = () => {
     const { courseData, isBlueprinting, hasBlueprint, previewModules, blueprintingProgress, setThemeByModule, showGenerateWarning, setShowGenerateWarning, goToNextStep, goToPrevStep, generateOrionPreview, stepVariants, containerVariants, itemVariants, isContinuing, isBatchGenerating } = useCourseCreator();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [productionOpen, setProductionOpen] = useState(() => {
         try {
-            return JSON.parse(sessionStorage.getItem('orion_creator_session') || '{}').productionOpen === true;
+            const saved = JSON.parse(sessionStorage.getItem('orion_creator_session') || '{}').productionOpen;
+            if (typeof saved === 'boolean') return saved;
+            return true;
         }
         catch {
-            return false;
+            return true;
         }
     });
     const [openModuleId, setOpenModuleId] = useState<number | null>(null);
+
+    // Compute Orion Production steps for the Blueprint stage
+    const forge = courseData?.courseForge || {};
+    const scriptReady = Boolean(forge.narrationApproved);
+    const workbookReady = Boolean(forge.workbook || forge.workbookApproved);
+    const assessmentApproved = Boolean(forge.assessmentApproved);
+
+    const pendingSteps: string[] = [];
+    if (!scriptReady) pendingSteps.push('Trainer script');
+    if (!workbookReady) pendingSteps.push('E-workbook');
+    if (!assessmentApproved) pendingSteps.push('Assessment');
+
+    const isProductionComplete = pendingSteps.length === 0;
+
+    // Trigger notification when jumping to this step with pending steps
+    const alertedRef = useRef(false);
+    useEffect(() => {
+        if (hasBlueprint && !isProductionComplete && !alertedRef.current) {
+            alertedRef.current = true;
+            toast.info("⚡ Action required: Complete and approve all Orion Production steps before continuing.");
+        }
+    }, [hasBlueprint, isProductionComplete]);
+
     useEffect(() => {
         try {
             const current = JSON.parse(sessionStorage.getItem('orion_creator_session') || '{}');
@@ -28,6 +55,7 @@ const CourseStepFour: React.FC = () => {
 
         }
     }, [productionOpen]);
+
     const selectModule = (id: number) => {
         setOpenModuleId((current) => current === id ? null : id);
         setProductionOpen(true);
@@ -65,6 +93,11 @@ const CourseStepFour: React.FC = () => {
 
     const handleContinue = async () => {
         if (isLoading) return;
+        if (!isProductionComplete) {
+            toast.warn(`Please create and approve all Orion Production steps (${pendingSteps.join(', ')}) before continuing.`);
+            setProductionOpen(true);
+            return;
+        }
         try {
             setIsSubmitting(true);
             await goToNextStep();
@@ -187,28 +220,138 @@ const CourseStepFour: React.FC = () => {
                 </div>
 
                 <div className="flex-1 min-h-0 overflow-y-auto step-scrollbar pr-2 relative z-10 pb-4">
+                    {!isProductionComplete ? (
+                        <motion.div
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mb-5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent p-4 sm:p-4.5 backdrop-blur-xl relative overflow-hidden shadow-lg shadow-amber-500/5"
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-start gap-3.5">
+                                    <div className="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 shrink-0 mt-0.5">
+                                        <AlertCircle className="w-5 h-5 animate-pulse" />
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2.5 flex-wrap">
+                                            <h4 className="text-sm font-bold text-amber-300 uppercase tracking-wider">
+                                                Action Required · Complete Orion Production
+                                            </h4>
+                                            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300">
+                                                {pendingSteps.length} {pendingSteps.length === 1 ? 'Step' : 'Steps'} Pending
+                                            </span>
+                                        </div>
+                                        <p className="text-gray-300 text-xs mt-1.5 leading-relaxed max-w-2xl">
+                                            You must create and approve <span className="text-white font-bold">{pendingSteps.join(', ')}</span> in the Orion Production section below. The <span className="text-lime-400 font-bold">'Looks Good, Continue'</span> button remains locked until all steps are approved.
+                                        </p>
+                                        <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                            {['Trainer script', 'E-workbook', 'Assessment'].map((stepName) => {
+                                                const isDone = !pendingSteps.includes(stepName);
+                                                return (
+                                                    <div
+                                                        key={stepName}
+                                                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${
+                                                            isDone
+                                                                ? 'bg-lime-500/10 border-lime-500/30 text-lime-400'
+                                                                : 'bg-black/40 border-amber-500/30 text-amber-200'
+                                                        }`}
+                                                    >
+                                                        {isDone ? (
+                                                            <CheckCircle2 size={13} className="text-lime-400" />
+                                                        ) : (
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                                                        )}
+                                                        <span>{stepName}</span>
+                                                        <span className="text-[10px] opacity-75 font-normal">
+                                                            {isDone ? '(Approved)' : '(Pending)'}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setProductionOpen((prev) => !prev)}
+                                    className="shrink-0 px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-xs font-bold transition-all whitespace-nowrap self-start"
+                                >
+                                    {productionOpen ? 'Hide Steps' : 'Open Steps'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mb-5 rounded-2xl border border-lime-500/30 bg-gradient-to-r from-lime-500/15 via-emerald-500/5 to-transparent p-4 sm:p-4.5 backdrop-blur-xl relative overflow-hidden shadow-lg shadow-lime-500/5"
+                        >
+                            <div className="flex items-center gap-3.5">
+                                <div className="p-2.5 rounded-xl bg-lime-500/20 border border-lime-500/30 text-lime-400 shrink-0">
+                                    <CheckCircle2 className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h4 className="text-sm font-bold text-lime-300 uppercase tracking-wider">
+                                            All Orion Production Steps Approved
+                                        </h4>
+                                        <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-lime-500/20 border border-lime-500/40 text-lime-300">
+                                            ✓ Ready
+                                        </span>
+                                    </div>
+                                    <p className="text-gray-300 text-xs mt-1 leading-relaxed">
+                                        Trainer script, E-workbook, and Assessment are finalized. You can now proceed to batch slide generation!
+                                    </p>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
                     <CourseForgeGates stage="build" open={productionOpen} onToggle={() => setProductionOpen((value) => !value)} />
                     <ThemeModal />
                     <ModuleList openModuleId={openModuleId} onSelectModule={selectModule}>
-                        <motion.button
-                            whileHover={{ scale: isLoading ? 1 : 1.05 }}
-                            whileTap={{ scale: isLoading ? 1 : 0.95 }}
-                            onClick={handleContinue}
-                            disabled={isLoading}
-                            className="flex items-center gap-2 bg-lime-500 hover:bg-lime-400 text-black px-8 py-3 rounded-xl font-black shadow-lg shadow-lime-500/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed max-md:w-full max-md:justify-center"
-                            type="button"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    Please wait...
-                                </>
-                            ) : (
-                                <>
-                                    Looks Good, Continue <ChevronRight size={20} />
-                                </>
-                            )}
-                        </motion.button>
+                        {!isProductionComplete ? (
+                            <div className="flex flex-col items-end max-md:items-stretch gap-2">
+                                <motion.button
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => {
+                                        toast.warn(`Please create and approve all Orion Production steps (${pendingSteps.join(', ')}) before continuing.`);
+                                        setProductionOpen(true);
+                                    }}
+                                    disabled={isLoading}
+                                    className="flex items-center gap-2.5 bg-gray-800/80 hover:bg-gray-800 border border-amber-500/30 hover:border-amber-500/50 text-gray-300 hover:text-white px-8 py-3.5 rounded-xl font-bold shadow-lg shadow-black/40 transition-all cursor-not-allowed max-md:w-full max-md:justify-center group"
+                                    type="button"
+                                    title={`Locked: ${pendingSteps.join(', ')} required`}
+                                >
+                                    <Lock size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                                    <span>Looks Good, Continue</span>
+                                    <ChevronRight size={18} className="text-gray-500 group-hover:text-gray-400" />
+                                </motion.button>
+                                <div className="flex items-center gap-1.5 text-[11px] text-amber-400 font-semibold bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-lg">
+                                    <AlertTriangle size={13} className="text-amber-400 shrink-0 animate-pulse" />
+                                    <span>Locked · Complete Orion Production ({pendingSteps.length} remaining)</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <motion.button
+                                whileHover={{ scale: isLoading ? 1 : 1.05 }}
+                                whileTap={{ scale: isLoading ? 1 : 0.95 }}
+                                onClick={handleContinue}
+                                disabled={isLoading}
+                                className="flex items-center gap-2 bg-lime-500 hover:bg-lime-400 text-black px-8 py-3.5 rounded-xl font-black shadow-lg shadow-lime-500/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed max-md:w-full max-md:justify-center"
+                                type="button"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Please wait...
+                                    </>
+                                ) : (
+                                    <>
+                                        Looks Good, Continue <ChevronRight size={20} />
+                                    </>
+                                )}
+                            </motion.button>
+                        )}
                     </ModuleList>
                 </div>
             </div>)}
@@ -336,8 +479,8 @@ const CourseStepFour: React.FC = () => {
                             <motion.div variants={itemVariants} className="flex gap-4 group/item">
                                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 border border-gray-700 flex items-center justify-center text-sm font-black text-lime-400 shadow-inner group-hover/item:border-lime-500/50 transition-colors">5</div>
                                 <div>
-                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Continue to Batch Slide Generation</h5>
-                                    <p className="text-gray-400 text-xs leading-relaxed">Click <span className="text-lime-400 font-bold">'Looks Good, Continue'</span> to trigger batch slide generation across all modules simultaneously and proceed to the final review.</p>
+                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Orion Production & Batch Slide Generation</h5>
+                                    <p className="text-gray-400 text-xs leading-relaxed">Create and approve all Orion Production steps (Trainer script, E-workbook, Assessment) to unlock <span className="text-lime-400 font-bold">'Looks Good, Continue'</span> and trigger batch slide generation across all modules simultaneously.</p>
                                 </div>
                             </motion.div>
                         </motion.div>

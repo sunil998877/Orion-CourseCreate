@@ -263,7 +263,11 @@ modules preserves any approved module names and includes timing.
 runningCase separates fictional facts from real facts.
 Return JSON only.`;
 
-export const buildAssessmentPrompt = (courseData, modules) => `${COURSEFORGE_RULES}
+export const buildAssessmentPrompt = (courseData, modules) => {
+    const moduleCount = Math.max(1, (modules || []).length || Number(courseData?.module) || Number(courseData?.moduleCount) || 1);
+    const totalQuestions = moduleCount * 20;
+
+    return `${COURSEFORGE_RULES}
 
 ${formatCourseInput(courseData)}
 
@@ -278,9 +282,8 @@ ${JSON.stringify(modules || []).slice(0, 12000)}
 
 Create ONLY the assessment system.
 CRITICAL MANDATORY REQUIREMENT:
-You MUST create EXACTLY 20 scored multiple-choice assessment questions in the "items" array (item 1 through item 20, exactly 20 items) and EXACTLY 20 corresponding entries in the "blueprint" array.
-You MUST distribute the 20 questions evenly across ALL taught modules (e.g. for 5 modules, assign 4 questions per module: items 1-4 with moduleIndex 0 & moduleNumber 1, items 5-8 with moduleIndex 1 & moduleNumber 2, items 9-12 with moduleIndex 2 & moduleNumber 3, items 13-16 with moduleIndex 3 & moduleNumber 4, items 17-20 with moduleIndex 4 & moduleNumber 5).
-Every module MUST have assessment questions and at least 1 practical task.
+You MUST create EXACTLY 20 scored multiple-choice assessment questions FOR EVERY TAUGHT MODULE in the "items" array (item 1 through item ${totalQuestions}, exactly ${totalQuestions} items total: 20 MCQs for moduleIndex 0, 20 MCQs for moduleIndex 1, etc.) and EXACTLY ${totalQuestions} corresponding entries in the "blueprint" array.
+Every single module MUST have exactly 20 multiple-choice assessment questions (with matching moduleIndex and moduleNumber) and at least 1 practical task.
 
 Return JSON:
 {
@@ -296,15 +299,16 @@ Return JSON:
   "practicalTask": { "prompt": "", "rubric": [], "threshold": "80% accuracy or complete deployment", "modelResponse": "", "commonErrors": [], "remediation": "" }
 }
 Rules:
-- MUST PROVIDE EXACTLY 20 QUESTIONS in the "items" array (no fewer than 20, no more than 20).
-- MUST PROVIDE EXACTLY 20 CORRESPONDING ENTRIES in the "blueprint" array.
-- Questions MUST be distributed across ALL modules so that NO module has 0 questions.
+- MUST PROVIDE EXACTLY 20 QUESTIONS PER MODULE in the "items" array (exactly ${totalQuestions} questions total for ${moduleCount} modules).
+- MUST PROVIDE EXACTLY ${totalQuestions} CORRESPONDING ENTRIES in the "blueprint" array.
+- Every module must have 20 multiple-choice questions specifically aligned with its topics.
 - Exactly four plausible options and one best answer for each question.
 - No joke options. No "all of the above" or "none of the above" unless a real assessment reason is stated in remediation.
 - Explain every distractor in whyDistractors (3 strings for the 3 incorrect options).
 - Sample the approved outcomes across ALL modules.
 - Include a practical task for each module in practicalTasks and the course capstone practical task in practicalTask.
 - Return JSON only.`;
+};
 
 export const buildWorkbookPrompt = (courseData, moduleNumber, moduleContent) => `${COURSEFORGE_RULES}
 

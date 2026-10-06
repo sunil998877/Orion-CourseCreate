@@ -15,7 +15,7 @@ export const forgotPassword = async (req, res) => {
             });
         }
         const token = Math.floor(100000 + Math.random() * 900000).toString();
-        user.resetPasswordToken = token;
+        user.resetPasswordToken = token; 
         user.resetPasswordExpires = Date.now() + 3600000;
         await user.save();
         const frontendUrl = String(process.env.FRONTEND_URL || 'https://orion.evokeaisolutions.com').replace(/\/$/, '');

@@ -521,3 +521,4 @@ export const downloadEbook = async (req, res) => {
         res.status(500).json({ message: 'Failed to download ebook' });
     }
 };
+

@@ -531,11 +531,9 @@ const Area = ({ value, placeholder, onChange, invalid = false, errorMessage }: {
                         : 'border-gray-700 focus:ring-lime-500'
                 }`}
             />
-            {invalid ? (
+            {invalid && (
                 <p className="mt-1.5 text-xs text-red-500 font-medium">{errorMessage || 'Please fill out this field.'}</p>
-            ) : isFilled ? (
-                <p className="mt-1.5 text-xs text-lime-400 font-medium">Looks good!</p>
-            ) : null}
+            )}
         </div>
     );
 };
@@ -589,11 +587,9 @@ const LanguageSelect = ({ value, onChange, invalid = false }: { value: string[];
                 )) : <span className="text-gray-500">Select languages</span>}
             </button>
             <ChevronDown className={`pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`} />
-            {invalid ? (
+            {invalid && (
                 <p className="mt-1.5 text-xs text-red-500 font-medium">Please select at least one language.</p>
-            ) : value.length > 0 ? (
-                <p className="mt-1.5 text-xs text-lime-400 font-medium">Looks good!</p>
-            ) : null}
+            )}
             {open && createPortal(
                 <div className="fixed z-[90] overflow-hidden rounded-xl border border-gray-700 bg-[#111827] shadow-xl" style={{ top: box.top, left: box.left, width: box.width }}>
                     <div className="max-h-60 space-y-1 overflow-y-auto p-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -689,7 +685,6 @@ const Choice = ({ value, options, onChange }: { value: string; options: string[]
                 )}
             </AnimatePresence>
 
-            {selected && <p className="mt-1.5 text-xs text-lime-400 font-medium">Looks good!</p>}
         </div>
     );
 };

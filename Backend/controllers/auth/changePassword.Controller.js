@@ -10,7 +10,7 @@ export const changePassword = async (req, res) => {
         return res.status(400).json({ message: 'New password must be at least 6 characters' });
     }
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user.id); 
         if (!user)
             return res.status(404).json({ message: 'User not found' });
         const isMatch = await bcrypt.compare(currentPassword, user.password);

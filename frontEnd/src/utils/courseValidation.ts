@@ -18,9 +18,16 @@ export const isStepComplete = (step: number, courseData: any, previewModules: an
         }
         case 3:
             return true;
-        case 4:
+        case 4: {
+            const forge = courseData?.courseForge || {};
+            const scriptReady = Boolean(forge.narrationApproved);
+            const workbookReady = Boolean(forge.workbook || forge.workbookApproved);
+            const assessmentApproved = Boolean(forge.assessmentApproved);
+            const forgeComplete = scriptReady && workbookReady && assessmentApproved;
             return (previewModules.length > 0 &&
+                forgeComplete &&
                 Object.keys(orionUrlByModule).length === previewModules.length);
+        }
         default:
             return true;
     }

@@ -22,6 +22,7 @@ import { toast } from 'react-toastify';
 import { generateAssessmentPdfBlob } from '../../utils/pdfGenerator';
 import { useCredits } from '../../contextAPI/CreditsContext';
 import { handleCreditApiFailure } from '../../utils/creditErrors';
+import { ensure20AssessmentQuestions } from '../../utils/defaultAssessment';
 
 const lines = (value: unknown) => (Array.isArray(value) ? value : []);
 
@@ -58,7 +59,56 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
             toast.success('Assessment updated.');
         });
 
-    const assessment = courseData?.courseForge?.assessment || assessmentProp;
+    const rawAssessment = courseData?.courseForge?.assessment || assessmentProp;
+
+    const effectiveModuleCount = Math.max(
+        1,
+        moduleCount ||
+        (Array.isArray(courseData?.modules) && courseData.modules.length > 0 ? courseData.modules.length : 0) ||
+        (Array.isArray(courseData?.previewModules) && courseData.previewModules.length > 0 ? courseData.previewModules.length : 0) ||
+        Number(courseData?.module) ||
+        Number(courseData?.moduleCount) ||
+        1
+    );
+
+    const safeModulesForAssessment = React.useMemo(() => {
+        const fromData = (Array.isArray(courseData?.previewModules) && courseData.previewModules.length > 0)
+            ? courseData.previewModules
+            : (Array.isArray(courseData?.modules) && courseData.modules.length > 0)
+                ? courseData.modules
+                : [];
+        if (fromData.length >= effectiveModuleCount) {
+            return fromData.slice(0, effectiveModuleCount);
+        }
+        return Array.from({ length: effectiveModuleCount }, (_, idx) => {
+            if (fromData[idx]) return fromData[idx];
+            if (idx === moduleIndex && moduleTitle) {
+                return { moduleNumber: idx + 1, Title: moduleTitle };
+            }
+            return { moduleNumber: idx + 1, Title: `Module ${idx + 1}` };
+        });
+    }, [courseData?.previewModules, courseData?.modules, effectiveModuleCount, moduleIndex, moduleTitle]);
+
+    const assessment = React.useMemo(() => {
+        return ensure20AssessmentQuestions(
+            rawAssessment,
+            { ...courseData, moduleCount: effectiveModuleCount, module: effectiveModuleCount },
+            safeModulesForAssessment
+        );
+    }, [rawAssessment, courseData, effectiveModuleCount, safeModulesForAssessment]);
+
+    React.useEffect(() => {
+        if (!assessment?.items || assessment.items.length === 0) return;
+        const rawCount = Array.isArray(rawAssessment?.items) ? rawAssessment.items.length : 0;
+        if (moduleIndex === 0 && rawCount !== assessment.items.length && typeof updateCourseData === 'function') {
+            updateCourseData({
+                courseForge: {
+                    ...(courseData?.courseForge || {}),
+                    assessment,
+                },
+            });
+        }
+    }, [assessment, rawAssessment, moduleIndex, courseData, updateCourseData]);
 
     const [isOpen, setIsOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -81,15 +131,6 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
     const [viewScope, setViewScope] = useState<'module' | 'all'>('module');
 
     const allItems = lines(assessment?.items);
-    const effectiveModuleCount = Math.max(
-        1,
-        moduleCount ||
-        (Array.isArray(courseData?.modules) && courseData.modules.length > 0 ? courseData.modules.length : 0) ||
-        (Array.isArray(courseData?.previewModules) && courseData.previewModules.length > 0 ? courseData.previewModules.length : 0) ||
-        Number(courseData?.module) ||
-        Number(courseData?.moduleCount) ||
-        1
-    );
 
     const isCollapsedOnModuleZero = effectiveModuleCount > 1 && allItems.length > 0 &&
         allItems.every((it: any) => Number(it?.moduleIndex ?? 0) === 0 && Number(it?.moduleNumber ?? 1) === 1);
@@ -97,10 +138,12 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
     const getItemModuleIndex = (item: any, globalIdx: number): number => {
         if (!isCollapsedOnModuleZero) {
             if (item?.moduleIndex !== undefined && Number.isFinite(Number(item.moduleIndex))) {
-                return Number(item.moduleIndex) % effectiveModuleCount;
+                const parsed = Number(item.moduleIndex);
+                if (parsed >= 0 && parsed < effectiveModuleCount) return parsed;
             }
             if (item?.moduleNumber !== undefined && Number.isFinite(Number(item.moduleNumber))) {
-                return (Number(item.moduleNumber) - 1) % effectiveModuleCount;
+                const parsed = Number(item.moduleNumber) - 1;
+                if (parsed >= 0 && parsed < effectiveModuleCount) return parsed;
             }
         }
         return Math.min(effectiveModuleCount - 1, Math.floor((globalIdx * effectiveModuleCount) / Math.max(1, allItems.length)));
@@ -356,7 +399,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
             const pdfBlob = generateAssessmentPdfBlob({
                 courseTitle: currentCourseTitle,
                 moduleIndex: viewScope === 'all' ? 0 : moduleIndex,
-                moduleTitle: viewScope === 'all' ? 'Complete Course Assessment (20 MCQs)' : currentModuleTitle,
+                moduleTitle: viewScope === 'all' ? `Complete Course Assessment (${allItems.length} MCQs)` : `${currentModuleTitle} (${moduleItemsWithIndices.length} MCQs)`,
                 blueprint: blueprintRow,
                 items: itemsForPdf,
                 practicalTasks: modulePracticalTasks.map(({ task }) => ({
@@ -401,9 +444,9 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
             >
                 <CheckSquare size={14} className="mr-3 group-hover/btn:scale-110 transition-transform" />
                 Module Assessment MCQs
-                {totalTasksCount > 0 && (
+                {moduleItemsWithIndices.length > 0 && (
                     <span className="ml-2 px-1.5 py-0.5 rounded-full bg-lime-500/20 text-[10px] text-lime-300 font-black">
-                        {totalTasksCount}
+                        {moduleItemsWithIndices.length}
                     </span>
                 )}
             </button>
@@ -433,11 +476,11 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                             Module {moduleIndex + 1} Assessment MCQs
                                         </h3>
                                         <span className="rounded-full bg-lime-500/10 border border-lime-500/30 px-2.5 py-0.5 text-[11px] font-bold text-lime-300">
-                                            {allItems.length >= 20 ? '20 Questions' : `${allItems.length} Questions`}
+                                            {moduleItemsWithIndices.length} Questions
                                         </span>
                                     </div>
                                     <p className="mt-0.5 text-xs text-gray-400">
-                                        {moduleTitle || `Module ${moduleIndex + 1}`} · {allItems.length} assessment questions available across course.
+                                        {moduleTitle || `Module ${moduleIndex + 1}`} · {moduleItemsWithIndices.length} MCQs in this module ({allItems.length} total across course).
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-2">

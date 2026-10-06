@@ -478,47 +478,49 @@ export const generateDefault20Assessment = (courseData: any = {}, modules: any[]
     const items: AssessmentItem[] = [];
     const blueprint: AssessmentBlueprintItem[] = [];
 
-    for (let i = 0; i < 20; i++) {
-        const modIdx = Math.min(moduleCount - 1, Math.floor((i * moduleCount) / 20));
-        const mod = safeModules[modIdx] || {};
-        const modNum = Number(mod.moduleNumber) || modIdx + 1;
+    for (let m = 0; m < moduleCount; m++) {
+        const mod = safeModules[m] || {};
+        const modNum = Number(mod.moduleNumber) || m + 1;
         const modTitle = cleanText(mod.Title || mod.title || mod.Module) || `Module ${modNum}`;
-        const template = QUESTION_ARCHETYPES[i % QUESTION_ARCHETYPES.length];
 
-        const stem = template.stem(modTitle, title);
-        const options = template.optGen(modTitle);
-        const answer = options[template.correctIdx] || options[0];
+        for (let q = 0; q < 20; q++) {
+            const template = QUESTION_ARCHETYPES[q % QUESTION_ARCHETYPES.length];
+            const stem = template.stem(modTitle, title);
+            const options = template.optGen(modTitle);
+            const answer = options[template.correctIdx] || options[0];
+            const currentItemNumber = items.length + 1;
 
-        items.push({
-            itemNumber: i + 1,
-            moduleIndex: modIdx,
-            moduleNumber: modNum,
-            topic: `${modTitle}: ${template.focus}`,
-            stem,
-            options,
-            answer,
-            outcome: `Demonstrate mastery of ${template.focus.toLowerCase()} in ${modTitle}`,
-            cognitiveDemand: template.cognitive,
-            difficulty: template.difficulty,
-            whyCorrect: template.whyCorrect(title),
-            whyDistractors: template.whyDistractors,
-            misconception: template.misconception,
-            remediation: `Review ${modTitle} material on ${template.focus.toLowerCase()} and foundational implementation guidelines.`,
-            source: `${title} - ${modTitle}`
-        });
+            items.push({
+                itemNumber: currentItemNumber,
+                moduleIndex: m,
+                moduleNumber: modNum,
+                topic: `${modTitle}: ${template.focus}`,
+                stem,
+                options,
+                answer,
+                outcome: `Demonstrate mastery of ${template.focus.toLowerCase()} in ${modTitle}`,
+                cognitiveDemand: template.cognitive,
+                difficulty: template.difficulty,
+                whyCorrect: template.whyCorrect(title),
+                whyDistractors: template.whyDistractors,
+                misconception: template.misconception,
+                remediation: `Review ${modTitle} material on ${template.focus.toLowerCase()} and foundational implementation guidelines.`,
+                source: `${title} - ${modTitle}`
+            });
 
-        blueprint.push({
-            item: `Item ${i + 1}`,
-            moduleIndex: modIdx,
-            moduleNumber: modNum,
-            topic: `${modTitle}: ${template.focus}`,
-            outcome: `Demonstrate mastery of ${template.focus.toLowerCase()} in ${modTitle}`,
-            cognitiveDemand: template.cognitive,
-            type: 'Multiple Choice',
-            difficulty: template.difficulty,
-            evidence: `Correct selection of ${template.focus.toLowerCase()} best practices in scenario prompt`,
-            source: `${title} - ${modTitle}`
-        });
+            blueprint.push({
+                item: `Item ${currentItemNumber}`,
+                moduleIndex: m,
+                moduleNumber: modNum,
+                topic: `${modTitle}: ${template.focus}`,
+                outcome: `Demonstrate mastery of ${template.focus.toLowerCase()} in ${modTitle}`,
+                cognitiveDemand: template.cognitive,
+                type: 'Multiple Choice',
+                difficulty: template.difficulty,
+                evidence: `Correct selection of ${template.focus.toLowerCase()} best practices in scenario prompt`,
+                source: `${title} - ${modTitle}`
+            });
+        }
     }
 
     const practicalTasks = safeModules.map((mod, idx) => {
@@ -563,19 +565,20 @@ export const generateDefault20Assessment = (courseData: any = {}, modules: any[]
 
 export const ensure20AssessmentQuestions = (assessment: any, courseData: any = {}, modules: any[] = []): CourseAssessment => {
     const title = cleanText(courseData?.title) || 'Course Topic';
-    const detectedCount = Number(courseData?.moduleCount) ||
-        Number(courseData?.module) ||
+    const detectedCount =
         (Array.isArray(modules) && modules.length > 0 ? modules.length : 0) ||
-        (Array.isArray(courseData?.modules) && courseData.modules.length > 0 ? courseData.modules.length : 0) ||
         (Array.isArray(courseData?.previewModules) && courseData.previewModules.length > 0 ? courseData.previewModules.length : 0) ||
+        (Array.isArray(courseData?.modules) && courseData.modules.length > 0 ? courseData.modules.length : 0) ||
+        Number(courseData?.moduleCount) ||
+        Number(courseData?.module) ||
         1;
     const moduleCount = Math.max(1, detectedCount);
 
     let safeModules = Array.isArray(modules) && modules.length > 0
         ? [...modules]
-        : Array.isArray(courseData?.modules) && courseData.modules.length > 0
-            ? [...courseData.modules]
-            : (Array.isArray(courseData?.previewModules) && courseData.previewModules.length > 0 ? [...courseData.previewModules] : []);
+        : Array.isArray(courseData?.previewModules) && courseData.previewModules.length > 0
+            ? [...courseData.previewModules]
+            : (Array.isArray(courseData?.modules) && courseData.modules.length > 0 ? [...courseData.modules] : []);
 
     if (safeModules.length < moduleCount) {
         for (let m = safeModules.length + 1; m <= moduleCount; m++) {
@@ -584,6 +587,8 @@ export const ensure20AssessmentQuestions = (assessment: any, courseData: any = {
                 Title: `${title} - Module ${m}`
             });
         }
+    } else if (safeModules.length > moduleCount) {
+        safeModules = safeModules.slice(0, moduleCount);
     }
 
     const defaultAssessment = generateDefault20Assessment(courseData, safeModules);
@@ -597,9 +602,14 @@ export const ensure20AssessmentQuestions = (assessment: any, courseData: any = {
     const isCollapsed = moduleCount > 1 && rawItems.length > 0 &&
         rawItems.every((it: any) => Number(it?.moduleIndex ?? 0) === 0 && Number(it?.moduleNumber ?? 1) === 1);
 
-    let cleanItems: AssessmentItem[] = rawItems
+    const moduleItemsMap: Map<number, AssessmentItem[]> = new Map();
+    for (let m = 0; m < moduleCount; m++) {
+        moduleItemsMap.set(m, []);
+    }
+
+    rawItems
         .filter((item: any) => item && typeof item === 'object' && cleanText(item.stem))
-        .map((item: any, idx: number) => {
+        .forEach((item: any, idx: number) => {
             const rawOpts = Array.isArray(item.options) ? item.options.map(cleanText).filter(Boolean) : [];
             let options = [...rawOpts];
             while (options.length < 4) {
@@ -612,89 +622,120 @@ export const ensure20AssessmentQuestions = (assessment: any, courseData: any = {
             const rawAnswer = cleanText(item.answer);
             const answer = options.includes(rawAnswer) ? rawAnswer : options[0];
 
-            let modIdx: number;
+            let modIdx = -1;
             if (!isCollapsed && item.moduleIndex !== undefined && Number.isFinite(Number(item.moduleIndex))) {
-                modIdx = Number(item.moduleIndex) % moduleCount;
+                const parsed = Number(item.moduleIndex);
+                if (parsed >= 0 && parsed < moduleCount) {
+                    modIdx = parsed;
+                }
             } else if (!isCollapsed && item.moduleNumber !== undefined && Number.isFinite(Number(item.moduleNumber))) {
-                modIdx = (Number(item.moduleNumber) - 1) % moduleCount;
-            } else {
-                modIdx = Math.min(moduleCount - 1, Math.floor((idx * moduleCount) / 20));
+                const parsed = Number(item.moduleNumber) - 1;
+                if (parsed >= 0 && parsed < moduleCount) {
+                    modIdx = parsed;
+                }
+            } else if (rawItems.length <= moduleCount * 20) {
+                modIdx = Math.min(moduleCount - 1, Math.floor((idx * moduleCount) / Math.max(1, rawItems.length)));
             }
-            const modNum = modIdx + 1;
-            const targetMod = safeModules[modIdx] || {};
-            const modTitle = cleanText(targetMod.Title || targetMod.title || targetMod.Module) || `Module ${modNum}`;
 
-            return {
-                itemNumber: idx + 1,
-                moduleIndex: modIdx,
-                moduleNumber: modNum,
-                stem: cleanText(item.stem),
-                options,
-                answer,
-                outcome: cleanText(item.outcome) || `Demonstrate mastery in ${modTitle}`,
-                cognitiveDemand: cleanText(item.cognitiveDemand) || 'Application',
-                difficulty: cleanText(item.difficulty) || 'Medium',
-                topic: cleanText(item.topic) || `${modTitle}: Core Practice`,
-                whyCorrect: cleanText(item.whyCorrect) || `Option "${answer}" directly meets the required standard.`,
-                whyDistractors: Array.isArray(item.whyDistractors) && item.whyDistractors.length
-                    ? item.whyDistractors.map(cleanText)
-                    : ['Incorrect alternative.', 'Does not satisfy domain criteria.', 'Violates best-practice recommendations.'],
-                misconception: cleanText(item.misconception) || 'Common operational misconception.',
-                remediation: cleanText(item.remediation) || `Review the ${modTitle} materials.`,
-                source: cleanText(item.source) || `${courseData?.title || 'Course'} Curriculum`
-            };
+            if (modIdx >= 0 && modIdx < moduleCount) {
+                const currentList = moduleItemsMap.get(modIdx) || [];
+                if (currentList.length < 20) {
+                    const targetMod = safeModules[modIdx] || {};
+                    const modNum = modIdx + 1;
+                    const modTitle = cleanText(targetMod.Title || targetMod.title || targetMod.Module) || `Module ${modNum}`;
+
+                    currentList.push({
+                        itemNumber: 0,
+                        moduleIndex: modIdx,
+                        moduleNumber: modNum,
+                        stem: cleanText(item.stem),
+                        options,
+                        answer,
+                        outcome: cleanText(item.outcome) || `Demonstrate mastery in ${modTitle}`,
+                        cognitiveDemand: cleanText(item.cognitiveDemand) || 'Application',
+                        difficulty: cleanText(item.difficulty) || 'Medium',
+                        topic: cleanText(item.topic) || `${modTitle}: Core Practice`,
+                        whyCorrect: cleanText(item.whyCorrect) || `Option "${answer}" directly meets the required standard.`,
+                        whyDistractors: Array.isArray(item.whyDistractors) && item.whyDistractors.length
+                            ? item.whyDistractors.map(cleanText)
+                            : ['Incorrect alternative.', 'Does not satisfy domain criteria.', 'Violates best-practice recommendations.'],
+                        misconception: cleanText(item.misconception) || 'Common operational misconception.',
+                        remediation: cleanText(item.remediation) || `Review the ${modTitle} materials.`,
+                        source: cleanText(item.source) || `${title} Curriculum`
+                    });
+                    moduleItemsMap.set(modIdx, currentList);
+                }
+            }
         });
 
-    if (cleanItems.length < 20) {
-        const needed = 20 - cleanItems.length;
-        const defaultItems = defaultAssessment.items;
-        for (let i = 0; i < needed; i++) {
-            const fallbackItem = defaultItems[(cleanItems.length + i) % defaultItems.length];
-            const modIdx = Math.min(moduleCount - 1, Math.floor((cleanItems.length * moduleCount) / 20));
+    for (let m = 0; m < moduleCount; m++) {
+        let modItems = moduleItemsMap.get(m) || [];
+        const targetMod = safeModules[m] || {};
+        const modNum = m + 1;
+        const modTitle = cleanText(targetMod.Title || targetMod.title || targetMod.Module) || `Module ${modNum}`;
+
+        if (modItems.length > 20) {
+            modItems = modItems.slice(0, 20);
+        } else if (modItems.length < 20) {
+            const needed = 20 - modItems.length;
+            for (let q = 0; q < needed; q++) {
+                const archetypeIdx = (modItems.length + q) % QUESTION_ARCHETYPES.length;
+                const template = QUESTION_ARCHETYPES[archetypeIdx];
+                const stem = template.stem(modTitle, title);
+                const options = template.optGen(modTitle);
+                const answer = options[template.correctIdx] || options[0];
+
+                modItems.push({
+                    itemNumber: 0,
+                    moduleIndex: m,
+                    moduleNumber: modNum,
+                    topic: `${modTitle}: ${template.focus}`,
+                    stem,
+                    options,
+                    answer,
+                    outcome: `Demonstrate mastery of ${template.focus.toLowerCase()} in ${modTitle}`,
+                    cognitiveDemand: template.cognitive,
+                    difficulty: template.difficulty,
+                    whyCorrect: template.whyCorrect(title),
+                    whyDistractors: template.whyDistractors,
+                    misconception: template.misconception,
+                    remediation: `Review ${modTitle} material on ${template.focus.toLowerCase()} and foundational implementation guidelines.`,
+                    source: `${title} - ${modTitle}`
+                });
+            }
+        }
+        moduleItemsMap.set(m, modItems);
+    }
+
+    const cleanItems: AssessmentItem[] = [];
+    for (let m = 0; m < moduleCount; m++) {
+        const modItems = moduleItemsMap.get(m) || [];
+        for (const item of modItems) {
             cleanItems.push({
-                ...fallbackItem,
+                ...item,
                 itemNumber: cleanItems.length + 1,
-                moduleIndex: modIdx,
-                moduleNumber: modIdx + 1
+                moduleIndex: m,
+                moduleNumber: m + 1
             });
         }
-    } else if (cleanItems.length > 20) {
-        cleanItems = cleanItems.slice(0, 20);
     }
-
-    cleanItems = cleanItems.map((item, idx) => {
-        let modIdx = item.moduleIndex;
-        if (isCollapsed || modIdx === undefined || !Number.isFinite(Number(modIdx))) {
-            modIdx = Math.min(moduleCount - 1, Math.floor((idx * moduleCount) / 20));
-        } else {
-            modIdx = Number(modIdx) % moduleCount;
-        }
-        return {
-            ...item,
-            itemNumber: idx + 1,
-            moduleIndex: modIdx,
-            moduleNumber: modIdx + 1
-        };
-    });
 
     const rawBlueprint = Array.isArray(assessment.blueprint) ? assessment.blueprint : [];
-    const cleanBlueprint: AssessmentBlueprintItem[] = [];
-    for (let i = 0; i < 20; i++) {
-        const matchingItem = cleanItems[i];
-        const existingBp = rawBlueprint[i] || {};
-        cleanBlueprint.push({
-            item: `Item ${i + 1}`,
-            moduleIndex: matchingItem.moduleIndex,
-            moduleNumber: matchingItem.moduleNumber,
-            outcome: cleanText(existingBp.outcome) || matchingItem.outcome,
-            cognitiveDemand: cleanText(existingBp.cognitiveDemand) || matchingItem.cognitiveDemand,
-            topic: cleanText(existingBp.topic) || matchingItem.topic,
+    const cleanBlueprint: AssessmentBlueprintItem[] = cleanItems.map((item, idx) => {
+        const existingBp = rawBlueprint[idx] || rawBlueprint.find((b: any) => Number(b?.moduleIndex) === item.moduleIndex && cleanText(b?.topic) === item.topic) || {};
+        return {
+            item: `Item ${idx + 1}`,
+            moduleIndex: item.moduleIndex,
+            moduleNumber: item.moduleNumber,
+            outcome: cleanText(existingBp.outcome) || item.outcome,
+            cognitiveDemand: cleanText(existingBp.cognitiveDemand) || item.cognitiveDemand,
+            topic: cleanText(existingBp.topic) || item.topic,
             type: 'Multiple Choice',
-            difficulty: cleanText(existingBp.difficulty) || matchingItem.difficulty,
-            evidence: cleanText(existingBp.evidence) || `Select correct option for question: ${matchingItem.stem.slice(0, 60)}...`,
-            source: cleanText(existingBp.source) || matchingItem.source
-        });
-    }
+            difficulty: cleanText(existingBp.difficulty) || item.difficulty,
+            evidence: cleanText(existingBp.evidence) || `Select correct option for question: ${item.stem.slice(0, 60)}...`,
+            source: cleanText(existingBp.source) || item.source
+        };
+    });
 
     const practicalTask = assessment.practicalTask && typeof assessment.practicalTask === 'object' && cleanText(assessment.practicalTask.prompt)
         ? assessment.practicalTask

@@ -176,11 +176,9 @@ const CourseStepTwo: React.FC = () => {
                             )}
                         </div>
                         <div className="mt-2 flex justify-end text-[11px] text-gray-500">{description.length} / 1500</div>
-                        {descriptionInvalid ? (
+                        {descriptionInvalid && (
                             <p className="mt-1.5 text-xs text-red-500 font-medium">Please provide a description with at least 50 words.</p>
-                        ) : descriptionValid ? (
-                            <p className="mt-1.5 text-xs text-lime-400 font-medium">Looks good!</p>
-                        ) : null}
+                        )}
                         {refinePromptOpen && (
                             <div className="mt-3 rounded-xl border border-lime-500/30 bg-black/40 p-3">
                                 <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-lime-400">How should I refine this?</label>
@@ -234,11 +232,9 @@ const CourseStepTwo: React.FC = () => {
                                 />
                                 <span className="inline-flex items-center gap-2 border-l border-white/10 pl-3 py-1 text-xs text-gray-400 select-none"><Clock className="h-3.5 w-3.5" /> Hours</span>
                             </div>
-                            {durationInvalid ? (
+                            {durationInvalid && (
                                 <p className="mt-1.5 text-xs text-red-500 font-medium">Please provide a valid duration in hours.</p>
-                            ) : durationValid ? (
-                                <p className="mt-1.5 text-xs text-lime-400 font-medium">Looks good!</p>
-                            ) : null}
+                            )}
                         </div>
                         <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                             <div className="flex items-center justify-between gap-2">
@@ -272,11 +268,9 @@ const CourseStepTwo: React.FC = () => {
                                 />
                                 <span className="inline-flex items-center gap-2 border-l border-white/10 pl-3 py-1 text-xs text-gray-400 select-none"><BookOpen className="h-3.5 w-3.5" /> Modules</span>
                             </div>
-                            {moduleInvalid ? (
+                            {moduleInvalid && (
                                 <p className="mt-1.5 text-xs text-red-500 font-medium">Please provide at least 1 module.</p>
-                            ) : moduleValid ? (
-                                <p className="mt-1.5 text-xs text-lime-400 font-medium">Looks good!</p>
-                            ) : null}
+                            )}
                         </div>
                     </div>
 

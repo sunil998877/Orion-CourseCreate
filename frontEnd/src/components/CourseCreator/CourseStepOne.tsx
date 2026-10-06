@@ -130,24 +130,22 @@ const CourseStepOne: React.FC = () => {
                             <label className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-gray-400 transition-colors group-hover:text-lime-500">Course Title <RequiredMark invalid={showValidation && !courseData.title?.trim()} /></label>
                             <div className="relative">
                                 <FileText className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
-                                <input className={`w-full min-h-[50px] bg-gray-800/50 border rounded-xl py-3 pl-11 pr-4 text-sm focus:ring-2 outline-none transition-all ${showValidation && !courseData.title?.trim() ? 'border-red-500 ring-1 ring-red-500/20 shadow-[0_0_12px_rgba(239,68,68,0.15)] focus:ring-red-500' : courseData.title?.trim() ? 'border-lime-500/80 ring-1 ring-lime-500/20 focus:ring-lime-500' : 'border-gray-700 focus:ring-lime-500'}`} placeholder="e.g. Masterclass in Quantum SEO" value={courseData.title} onChange={(e) => {
+                                <input className={`w-full h-[50px] bg-gray-800/50 border rounded-xl py-3 pl-11 pr-4 text-sm focus:ring-2 outline-none transition-all ${showValidation && !courseData.title?.trim() ? 'border-red-500 ring-1 ring-red-500/20 shadow-[0_0_12px_rgba(239,68,68,0.15)] focus:ring-red-500' : courseData.title?.trim() ? 'border-lime-500/80 ring-1 ring-lime-500/20 focus:ring-lime-500' : 'border-gray-700 focus:ring-lime-500'}`} placeholder="e.g. Masterclass in Quantum SEO" value={courseData.title} onChange={(e) => {
                                     const val = e.target.value;
                                     const capitalized = val.charAt(0).toUpperCase() + val.slice(1);
                                     updateCourseData({ title: capitalized });
                                 }} />
                             </div>
-                            {showValidation && !courseData.title?.trim() ? (
+                            {showValidation && !courseData.title?.trim() && (
                                 <p className="mt-1.5 text-xs text-red-500 font-medium">Please choose a course title.</p>
-                            ) : courseData.title?.trim() ? (
-                                <p className="mt-1.5 text-xs text-lime-400 font-medium">Looks good!</p>
-                            ) : null}
+                            )}
                         </div>
                         <div>
                             <label className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-gray-400">Target Audience <RequiredMark invalid={showValidation && !hasAudience(courseData.audience)} /></label>
                             <div className="relative" ref={audienceRef}>
                                 <Target className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 pointer-events-none z-10" />
                                 {!courseData.level ? (<div className="relative group opacity-60">
-                                    <input disabled className="w-full min-h-[50px] bg-gray-900/50 border border-gray-800 rounded-xl py-3 pl-11 pr-4 text-sm text-gray-500 cursor-not-allowed transition-all" placeholder="Please select an Experience Level first..." value="" />
+                                    <input disabled className="w-full h-[50px] bg-gray-900/50 border border-gray-800 rounded-xl py-3 pl-11 pr-4 text-sm text-gray-500 cursor-not-allowed transition-all" placeholder="Please select an Experience Level first..." value="" />
                                 </div>) : (<div className="relative">
                                     <div onClick={() => {
                                         setIsAudienceDropdownOpen(!isAudienceDropdownOpen);
@@ -155,30 +153,39 @@ const CourseStepOne: React.FC = () => {
                                         setIsCountryDropdownOpen(false);
                                         setIsIndustryDropdownOpen(false);
                                         setIsStyleDropdownOpen(false);
-                                    }} className={`w-full min-h-[50px] bg-gray-800/50 border rounded-xl py-2.5 pl-11 pr-10 flex items-center cursor-pointer transition-all ${showValidation && !hasAudience(courseData.audience) ? 'border-red-500 ring-1 ring-red-500/20 shadow-[0_0_12px_rgba(239,68,68,0.15)]' : hasAudience(courseData.audience) ? 'border-lime-500/80 ring-1 ring-lime-500/20' : 'border-gray-700 hover:border-gray-600'}`}>
+                                    }} className={`w-full h-[50px] bg-gray-800/50 border rounded-xl pl-11 pr-10 flex items-center cursor-pointer transition-all overflow-hidden ${showValidation && !hasAudience(courseData.audience) ? 'border-red-500 ring-1 ring-red-500/20 shadow-[0_0_12px_rgba(239,68,68,0.15)]' : hasAudience(courseData.audience) ? 'border-lime-500/80 ring-1 ring-lime-500/20' : 'border-gray-700 hover:border-gray-600'}`}>
                                         {Array.isArray(courseData.audience) && courseData.audience.length > 0 ? (
-                                            <div className="flex flex-wrap items-center gap-1.5 py-0.5 overflow-hidden">
-                                                {courseData.audience.map((aud: any, idx: any) => (<span key={idx} className="bg-lime-500/20 text-lime-400 text-xs px-2 py-0.5 rounded-md flex items-center gap-1 border border-lime-500/30 max-w-[160px] truncate">
+                                            <div
+                                                onWheel={(e) => {
+                                                    if (e.deltaY !== 0) {
+                                                        e.currentTarget.scrollLeft += e.deltaY;
+                                                    }
+                                                }}
+                                                className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex-nowrap py-0.5 w-full"
+                                            >
+                                                {courseData.audience.map((aud: any, idx: any) => (<span key={idx} className="bg-lime-500/20 text-lime-400 text-xs px-2 py-0.5 rounded-md flex items-center gap-1 border border-lime-500/30 shrink-0 max-w-[170px] select-none">
                                                     <span className="truncate">{aud}</span>
                                                     <button type="button" onClick={(e) => {
                                                         e.stopPropagation();
                                                         const newAud = (courseData.audience as string[]).filter(a => a !== aud);
                                                         updateCourseData({ audience: newAud });
-                                                    }} className="hover:text-lime-300 shrink-0">
+                                                    }} className="hover:text-lime-200 text-lime-400/80 shrink-0 p-0.5 transition-colors">
                                                         <X size={12} />
                                                     </button>
                                                 </span>))}
                                             </div>
                                         ) : (typeof courseData.audience === 'string' && courseData.audience.trim() ? (
-                                            <span className="bg-lime-500/20 text-lime-400 text-xs px-2 py-0.5 rounded-md flex items-center gap-1 border border-lime-500/30 max-w-[160px] truncate">
-                                                <span className="truncate">{courseData.audience}</span>
-                                                <button type="button" onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    updateCourseData({ audience: [] });
-                                                }} className="hover:text-lime-300 shrink-0">
-                                                    <X size={12} />
-                                                </button>
-                                            </span>
+                                            <div className="flex items-center overflow-hidden w-full">
+                                                <span className="bg-lime-500/20 text-lime-400 text-xs px-2 py-0.5 rounded-md flex items-center gap-1 border border-lime-500/30 shrink-0 max-w-[200px] select-none">
+                                                    <span className="truncate">{courseData.audience}</span>
+                                                    <button type="button" onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        updateCourseData({ audience: [] });
+                                                    }} className="hover:text-lime-200 text-lime-400/80 shrink-0 p-0.5 transition-colors">
+                                                        <X size={12} />
+                                                    </button>
+                                                </span>
+                                            </div>
                                         ) : (<span className="text-sm text-gray-500 select-none truncate whitespace-nowrap">Select target audience...</span>))}
                                     </div>
                                     <ChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 pointer-events-none transition-transform ${isAudienceDropdownOpen ? 'rotate-180' : ''}`} />
@@ -258,11 +265,9 @@ const CourseStepOne: React.FC = () => {
                                     </AnimatePresence>
                                 </div>)}
                             </div>
-                            {showValidation && !hasAudience(courseData.audience) ? (
+                            {showValidation && !hasAudience(courseData.audience) && (
                                 <p className="mt-1.5 text-xs text-red-500 font-medium">Please select a target audience.</p>
-                            ) : hasAudience(courseData.audience) ? (
-                                <p className="mt-1.5 text-xs text-lime-400 font-medium">Looks good!</p>
-                            ) : null}
+                            )}
                         </div>
                     </div>
                     <CourseOptionsExpand open={briefOpen} onOpenChange={setBriefOpen} />
@@ -303,11 +308,9 @@ const CourseStepOne: React.FC = () => {
                                     </motion.div>)}
                                 </AnimatePresence>
                             </div>
-                            {showValidation && !courseData.standards ? (
+                            {showValidation && !courseData.standards && (
                                 <p className="mt-1.5 text-xs text-red-500 font-medium">Please select an industry standard.</p>
-                            ) : courseData.standards ? (
-                                <p className="mt-1.5 text-xs text-lime-400 font-medium">Looks good!</p>
-                            ) : null}
+                            )}
                             {courseData.standards === 'Regional' && (<div className="mt-3 pl-4 border-l-2 border-lime-500/40 animate-in fade-in slide-in-from-top-2 duration-300">
                                 <label className="mb-1.5 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-lime-400">Specific Region/Country <RequiredMark invalid={showValidation && !courseData.country} /></label>
                                 <div className="relative">
@@ -357,11 +360,9 @@ const CourseStepOne: React.FC = () => {
                                         </motion.div>)}
                                     </AnimatePresence>
                                 </div>
-                                {showValidation && !courseData.country ? (
+                                {showValidation && !courseData.country && (
                                     <p className="mt-1.5 text-xs text-red-500 font-medium">Please provide a valid region or country.</p>
-                                ) : courseData.country ? (
-                                    <p className="mt-1.5 text-xs text-lime-400 font-medium">Looks good!</p>
-                                ) : null}
+                                )}
                             </div>)}
 
                             {courseData.standards === 'Industry Specific' && (<div className="mt-3 pl-4 border-l-2 border-lime-500/40 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -413,11 +414,9 @@ const CourseStepOne: React.FC = () => {
                                         </motion.div>)}
                                     </AnimatePresence>
                                 </div>
-                                {showValidation && !courseData.industry ? (
+                                {showValidation && !courseData.industry && (
                                     <p className="mt-1.5 text-xs text-red-500 font-medium">Please provide an industry.</p>
-                                ) : courseData.industry ? (
-                                    <p className="mt-1.5 text-xs text-lime-400 font-medium">Looks good!</p>
-                                ) : null}
+                                )}
                             </div>)}
                         </div>
 
