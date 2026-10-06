@@ -164,7 +164,7 @@ body,
 }
 
 html {
-  
+
 }
 
 html,
@@ -219,15 +219,15 @@ html.dark * {
 html,
 body {
   -ms-overflow-style: none;
-  
+
   scrollbar-width: none;
-  
+
 }
 
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   display: none;
-  
+
 }
 
 *::-webkit-scrollbar {
@@ -683,7 +683,7 @@ input.no-focus-outline::-webkit-inner-spin-button {
   margin: 0 !important;
 }
 
-/* Hide scrollbar completely while keeping full scroll functionality */
+
 .step-scrollbar {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
@@ -695,7 +695,7 @@ input.no-focus-outline::-webkit-inner-spin-button {
   height: 0 !important;
 }
 
-/* Course Video Slide Transitions */
+
 @keyframes slideInFromLeft {
   0% { transform: translate3d(-100%, 0, 0); opacity: 0.6; }
   100% { transform: translate3d(0, 0, 0); opacity: 1; }
@@ -715,3 +715,4 @@ input.no-focus-outline::-webkit-inner-spin-button {
   0% { transform: translate3d(0, 0, 0); opacity: 1; }
   100% { transform: translate3d(-100%, 0, 0); opacity: 0; }
 }
+

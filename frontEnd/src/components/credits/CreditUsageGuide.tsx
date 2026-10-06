@@ -85,7 +85,7 @@ const ACTION_RATES = [
 const CreditUsageGuide: React.FC = () => {
   return (
     <div className="flex h-full flex-col space-y-4">
-      {/* Header */}
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-lime-400 shadow-sm">
@@ -102,7 +102,6 @@ const CreditUsageGuide: React.FC = () => {
         </span>
       </div>
 
-      {/* Important Points Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         {IMPORTANT_POINTS.map((pt) => {
           const Icon = pt.icon;
@@ -129,7 +128,6 @@ const CreditUsageGuide: React.FC = () => {
         })}
       </div>
 
-      {/* Rate Sheet Table / Cards */}
       <div className="flex-1 rounded-xl border border-white/10 bg-[#0c121d]/70 divide-y divide-white/5 overflow-hidden">
         <div className="px-3.5 py-2 bg-white/[0.02] flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
           <span>Action</span>

@@ -593,7 +593,7 @@ export const ensure20AssessmentQuestions = (assessment: any, courseData: any = {
     }
 
     const rawItems = Array.isArray(assessment.items) ? assessment.items : [];
-    // Detect if items are collapsed entirely onto 1 module (e.g. moduleIndex 0) when moduleCount > 1
+
     const isCollapsed = moduleCount > 1 && rawItems.length > 0 &&
         rawItems.every((it: any) => Number(it?.moduleIndex ?? 0) === 0 && Number(it?.moduleNumber ?? 1) === 1);
 

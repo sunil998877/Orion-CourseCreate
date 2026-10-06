@@ -70,10 +70,10 @@ const HomePage: React.FC = () => {
   return (
     <PageTransition>
       <div className="space-y-10 animate-fade-in">
-        {/* Main Hero Card - Exactly matches the reference image */}
-        <section className="relative w-full rounded-[2.5rem] max-md:rounded-2xl overflow-hidden bg-[#070d0a] border border-[#1a3324] shadow-[0_24px_80px_rgba(0,0,0,0.6)] group isolate transition-all duration-700 min-h-[560px] lg:min-h-[600px] flex items-stretch">
-          
-          {/* Full-width 3D Stage Room Background (Desktop only - 100% unchanged) */}
+
+        <section className="relative w-full rounded-[2.5rem] max-md:rounded-2xl overflow-hidden bg-[#070d0a] border border-[#1a3324] shadow-[0_24px_80px_rgba(0,0,0,0.6)] group isolate transition-all duration-700 lg:min-h-[600px] flex items-stretch">
+
+
           <div className="absolute inset-0 pointer-events-none select-none z-0 hidden lg:block">
             <img
               src={heroBgImg}
@@ -82,45 +82,45 @@ const HomePage: React.FC = () => {
             />
           </div>
 
-          {/* Clean dark studio background for mobile (prevents avatar collision behind text) */}
+
           <div className="absolute inset-0 pointer-events-none select-none z-0 lg:hidden bg-[#070d0a]">
             <div className="absolute top-0 right-0 w-72 h-72 bg-lime-500/10 blur-[100px] rounded-full" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 blur-[90px] rounded-full" />
           </div>
 
-          {/* Foreground Content */}
+
           <div className="relative z-10 w-full flex flex-col lg:flex-row items-stretch justify-between px-4 pt-6 pb-6 sm:px-10 sm:pt-10 sm:pb-10 lg:px-12 lg:pt-12 lg:pb-12 gap-6 lg:gap-8">
-            
-            {/* Left Column: Badge, Headline, CTA buttons, and Quick start stepper */}
-            <div className="flex-1 flex flex-col justify-between max-w-[540px] space-y-6 sm:space-y-7">
-              
-              {/* Heading & Subtitle Block */}
-              <div className="space-y-3.5 sm:space-y-4">
-                {/* AI Badge */}
+
+
+            <div className="flex w-full flex-1 flex-col items-start justify-between self-stretch text-left max-w-[540px] space-y-6 sm:space-y-7">
+
+
+              <div className="flex w-full flex-col items-start space-y-3.5 text-left sm:space-y-4">
+
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#122218]/90 border border-lime-400/25 text-[11px] font-bold tracking-wider text-[#a3e635] uppercase backdrop-blur-md shadow-[0_0_20px_rgba(163,230,53,0.15)]">
                   <Sparkles className="w-3.5 h-3.5 text-[#a3e635] fill-lime-400/30" />
                   <span>AI-POWERED LEARNING</span>
                 </div>
 
-                {/* Big Headline */}
-                <h1 className="text-3xl sm:text-5xl lg:text-[3.85rem] font-black text-white tracking-[-0.03em] leading-[1.06] lg:leading-[1.04]">
+
+                <h1 className="w-full text-left text-3xl sm:text-5xl lg:text-[3.85rem] font-black text-white tracking-[-0.03em] leading-[1.06] lg:leading-[1.04]">
                   Welcome back,<br />
                   <span className="text-[#a3e635] font-black drop-shadow-[0_0_30px_rgba(163,230,53,0.35)]">
                     {displayName}!
                   </span>
                 </h1>
 
-                {/* Subtitle */}
-                <p className="text-gray-300 text-xs sm:text-base font-normal leading-relaxed max-w-[460px]">
+
+                <p className="w-full text-left text-gray-300 text-xs sm:text-base font-normal leading-relaxed max-w-[460px]">
                   Build, launch, and scale high-quality courses with the power of AI.
                 </p>
 
-                {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3 pt-1 sm:pt-2">
-                  {/* Start Creating Button */}
+
+                <div className="flex w-full flex-col items-stretch gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center sm:pt-2">
+
                   <button
                     onClick={handleCreateNew}
-                    className="group relative inline-flex items-center gap-2.5 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full bg-[#a3e635] hover:bg-[#b4f636] text-black font-extrabold text-xs sm:text-base tracking-tight transition-all duration-300 shadow-[0_0_35px_rgba(163,230,53,0.4)] hover:shadow-[0_0_45px_rgba(163,230,53,0.6)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    className="group relative inline-flex w-full items-center justify-center gap-2.5 px-5 py-3 sm:w-auto sm:px-6 sm:py-3.5 rounded-full bg-[#a3e635] hover:bg-[#b4f636] text-black font-extrabold text-xs sm:text-base tracking-tight transition-all duration-300 shadow-[0_0_35px_rgba(163,230,53,0.4)] hover:shadow-[0_0_45px_rgba(163,230,53,0.6)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                   >
                     <div className="w-5 h-5 rounded-full bg-black/15 flex items-center justify-center font-black text-sm">
                       +
@@ -129,17 +129,17 @@ const HomePage: React.FC = () => {
                     <ArrowRight className="w-4 h-4 stroke-[2.5] text-black transition-transform duration-300 group-hover:translate-x-1" />
                   </button>
 
-                  {/* Explore Dashboard Button */}
+
                   <button
                     onClick={() => navigate('/course-dashboard')}
-                    className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-[#111c16]/80 hover:bg-[#18291f] border border-white/10 hover:border-lime-500/30 text-white font-bold text-xs sm:text-base tracking-tight backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg"
+                    className="inline-flex w-full items-center justify-center gap-2.5 px-5 py-3 sm:w-auto sm:px-6 sm:py-3.5 rounded-2xl bg-[#111c16]/80 hover:bg-[#18291f] border border-white/10 hover:border-lime-500/30 text-white font-bold text-xs sm:text-base tracking-tight backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg"
                   >
                     <LayoutGrid className="w-4 h-4 text-gray-200" />
                     <span>Explore Dashboard</span>
                   </button>
                 </div>
 
-                {/* Mobile-Only Dedicated 3D Avatar Scene Showcase - 100% visible, crisp & uncropped */}
+
                 <div className="relative w-full rounded-2xl overflow-hidden border border-[#1b3425] bg-[#070e0a] shadow-xl lg:hidden mt-2 mb-1">
                   <img
                     src={heroAvatarMobile}
@@ -149,10 +149,10 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Quick start Stepper Card */}
+
               <div className="rounded-2xl sm:rounded-[1.75rem] bg-[#0c1410]/85 border border-[#1b3123] backdrop-blur-xl p-4 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.45)] space-y-3.5 sm:space-y-4">
-                {/* Header */}
-                <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] pb-3.5">
+
+                <div className="flex flex-col items-start gap-2 border-b border-white/[0.06] pb-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div className="flex items-center gap-2">
                     <Rocket className="w-4 h-4 text-[#a3e635]" />
                     <span className="text-white font-bold text-sm sm:text-base tracking-tight">Quick start</span>
@@ -162,9 +162,9 @@ const HomePage: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Steps List */}
+
                 <div className="space-y-3.5">
-                  {/* Step 1 */}
+
                   <div
                     onClick={handleCreateNew}
                     className="group flex items-start gap-3.5 cursor-pointer transition-all hover:translate-x-1"
@@ -190,7 +190,7 @@ const HomePage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Step 2 */}
+
                   <div
                     onClick={() => navigate('/course-dashboard')}
                     className="group flex items-start gap-3.5 cursor-pointer transition-all hover:translate-x-1"
@@ -216,7 +216,7 @@ const HomePage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Step 3 */}
+
                   <div
                     onClick={() => navigate('/course-dashboard')}
                     className="group flex items-start gap-3.5 cursor-pointer transition-all hover:translate-x-1"
@@ -244,7 +244,7 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column Interactive Hotspots (Desktop only - aligned with the 4 feature pills) */}
+
             <div className="hidden lg:flex relative flex-1 w-full lg:w-1/2 items-center justify-end self-stretch pointer-events-none">
               <div
                 className="absolute right-0 sm:right-4 lg:right-6 top-[34%] bottom-[30%] w-[130px] sm:w-[155px] flex flex-col justify-between pointer-events-auto"
@@ -275,7 +275,7 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
-        {/* Section Divider & Heading */}
+
         <div className="flex flex-col items-center text-center space-y-3 animate-fade-in-up pt-4">
           <div className="inline-flex items-center px-3.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
             Platform Capabilities
@@ -288,7 +288,7 @@ const HomePage: React.FC = () => {
           </p>
         </div>
 
-        {/* Capabilities Grid */}
+
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -397,3 +397,4 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
+

@@ -93,9 +93,9 @@ export default function Orb({ hue = 0, hoverIntensity = 0.2, rotateOnHover = tru
       return vec4(colorIn.rgb / (a + 1e-5), a);
     }
 
-    const vec3 baseColor1 = vec3(0.639, 0.902, 0.208);  // lime-400
-    const vec3 baseColor2 = vec3(0.518, 0.800, 0.086);  // lime-500
-    const vec3 baseColor3 = vec3(0.396, 0.639, 0.051);  // lime-600
+    const vec3 baseColor1 = vec3(0.639, 0.902, 0.208);
+    const vec3 baseColor2 = vec3(0.518, 0.800, 0.086);
+    const vec3 baseColor3 = vec3(0.396, 0.639, 0.051);
     const float innerRadius = 0.6;
     const float noiseScale = 0.65;
 

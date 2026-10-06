@@ -1,8 +1,3 @@
-/**
- * Client-side pure TypeScript PDF generator for Module Assessment & MCQs.
- * Generates standard, valid PDF 1.4 binary data without external dependencies.
- */
-
 export interface AssessmentPdfData {
   courseTitle?: string;
   moduleIndex: number;
@@ -35,7 +30,6 @@ export interface AssessmentPdfData {
   } | null;
 }
 
-// Sanitize text for standard Type 1 Helvetica font (escape PDF specials & normalize unicode)
 function sanitizeText(str: string): string {
   if (!str) return '';
   return str
@@ -71,11 +65,11 @@ function wrapText(text: string, maxCharsPerLine: number): string[] {
 }
 
 export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
-  const PAGE_WIDTH = 595.28; // A4 pt
+  const PAGE_WIDTH = 595.28;
   const PAGE_HEIGHT = 841.89;
   const MARGIN_LEFT = 45;
   const MARGIN_RIGHT = 45;
-  const CONTENT_WIDTH = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT; // 505.28 pt
+  const CONTENT_WIDTH = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT;
 
   const pagesCommands: string[][] = [];
   let currentCmds: string[] = [];
@@ -95,28 +89,25 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
     }
   };
 
-  // Start page 1
   startNewPage();
 
   const courseTitle = sanitizeText(data.courseTitle || 'Course Title');
   const moduleTitle = sanitizeText(data.moduleTitle || `Module ${data.moduleIndex + 1}`);
 
-  // Header Banner
   currentCmds.push(
-    // Dark background box
+
     `0.06 0.09 0.16 rg`,
     `${MARGIN_LEFT} ${currentY - 50} ${CONTENT_WIDTH} 55 re f`,
-    // Lime bottom accent line
+
     `0.52 0.80 0.09 rg`,
     `${MARGIN_LEFT} ${currentY - 53} ${CONTENT_WIDTH} 3 re f`,
-    // Header Text
+
     `BT /F2 9 Tf 0.52 0.80 0.09 rg ${MARGIN_LEFT + 15} ${currentY - 18} Td (COURSE ASSESSMENT & KNOWLEDGE CHECK) Tj ET`,
     `BT /F2 14 Tf 1 1 1 rg ${MARGIN_LEFT + 15} ${currentY - 34} Td (${courseTitle.slice(0, 50)}) Tj ET`,
     `BT /F1 10 Tf 0.8 0.85 0.9 rg ${MARGIN_LEFT + 15} ${currentY - 46} Td (Module ${data.moduleIndex + 1}: ${moduleTitle.slice(0, 60)}) Tj ET`
   );
   currentY -= 75;
 
-  // Competency Blueprint (if present)
   if (data.blueprint && (data.blueprint.item || data.blueprint.outcome)) {
     ensureSpace(60);
     const bp = data.blueprint;
@@ -141,7 +132,6 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
     currentY -= 55;
   }
 
-  // MCQs Section Header
   if (data.items.length > 0) {
     ensureSpace(35);
     currentCmds.push(
@@ -151,7 +141,6 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
     );
     currentY -= 25;
 
-    // Render each MCQ
     data.items.forEach((item, idx) => {
       const qNum = idx + 1;
       const stem = sanitizeText(item.stem);
@@ -162,7 +151,6 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
       const estimatedHeight = 30 + stemLines.length * 14 + options.length * 18 + 15;
       ensureSpace(estimatedHeight);
 
-      // Card container background
       const cardY = currentY;
       const boxHeight = 22 + stemLines.length * 13 + options.length * 16 + 18;
       currentCmds.push(
@@ -170,12 +158,11 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
         `${MARGIN_LEFT} ${cardY - boxHeight} ${CONTENT_WIDTH} ${boxHeight} re f`,
         `0.88 0.90 0.93 RG 0.5 w`,
         `${MARGIN_LEFT} ${cardY - boxHeight} ${CONTENT_WIDTH} ${boxHeight} re S`,
-        // Left accent bar
+
         `0.52 0.80 0.09 rg`,
         `${MARGIN_LEFT} ${cardY - boxHeight} 3.5 ${boxHeight} re f`
       );
 
-      // Question metadata tag (Question Number, Difficulty, Topic)
       const meta = [
         item.difficulty ? `Difficulty: ${sanitizeText(item.difficulty)}` : '',
         item.topic ? `Topic: ${sanitizeText(item.topic)}` : '',
@@ -193,7 +180,7 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
       }
 
       let textY = cardY - 28;
-      // Stem lines
+
       currentCmds.push(`BT /F2 9.5 Tf 0.12 0.15 0.20 rg`);
       stemLines.forEach((sLine, sIdx) => {
         if (sIdx === 0) {
@@ -205,14 +192,13 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
       currentCmds.push(`ET`);
       textY -= (stemLines.length - 1) * 13 + 16;
 
-      // Options
       options.forEach((opt, oIdx) => {
         const letter = String.fromCharCode(65 + oIdx);
         const isCorrect = answer && (opt.trim().toLowerCase() === answer.trim().toLowerCase() || opt.trim().startsWith(answer.trim()));
         const optLine = `${letter}.  ${opt.slice(0, 80)}`;
 
         if (isCorrect) {
-          // Highlight correct option with light green fill
+
           currentCmds.push(
             `0.90 0.96 0.88 rg`,
             `${MARGIN_LEFT + 10} ${textY - 3} ${CONTENT_WIDTH - 20} 14 re f`,
@@ -233,7 +219,6 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
     });
   }
 
-  // Practical Tasks Section (if present)
   const practicals = data.practicalTasks || [];
   if (practicals.length > 0 || data.legacyPracticalTask) {
     ensureSpace(40);
@@ -334,28 +319,25 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
     }
   }
 
-  // Push final page
   if (currentCmds.length > 0) {
     pagesCommands.push(currentCmds);
   }
 
   const totalPages = pagesCommands.length || 1;
 
-  // Add footer to each page
   pagesCommands.forEach((pageCmds, pIdx) => {
     const pageNum = pIdx + 1;
     pageCmds.push(
-      // Divider line
+
       `0.85 0.88 0.90 RG 0.5 w`,
       `${MARGIN_LEFT} 40 ${CONTENT_WIDTH} 0 re S`,
-      // Left footer info
+
       `BT /F1 8 Tf 0.50 0.55 0.60 rg ${MARGIN_LEFT} 28 Td (Module ${data.moduleIndex + 1} Assessment | ${courseTitle.slice(0, 45)}) Tj ET`,
-      // Right page number
+
       `BT /F2 8 Tf 0.40 0.45 0.50 rg ${PAGE_WIDTH - MARGIN_RIGHT - 55} 28 Td (Page ${pageNum} of ${totalPages}) Tj ET`
     );
   });
 
-  // Assemble the PDF 1.4 file
   const encoder = new TextEncoder();
   const pdfChunks: Uint8Array[] = [];
   const objectOffsets: number[] = [];
@@ -369,48 +351,37 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
 
   writeString('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
 
-  // Object 1: Catalog
   objectOffsets[1] = byteOffset;
   writeString(`1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`);
 
-  // Build page kids references
-  // Page objects will be indexed at: 6 + i*2
-  // Content objects will be at: 7 + i*2
   const pageObjectIds: number[] = [];
   for (let i = 0; i < totalPages; i++) {
     pageObjectIds.push(6 + i * 2);
   }
 
-  // Object 2: Pages
   objectOffsets[2] = byteOffset;
   writeString(
     `2 0 obj\n<< /Type /Pages /Kids [${pageObjectIds.map(id => `${id} 0 R`).join(' ')}] /Count ${totalPages} >>\nendobj\n`
   );
 
-  // Object 3: Font F1 (Helvetica regular)
   objectOffsets[3] = byteOffset;
   writeString(`3 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n`);
 
-  // Object 4: Font F2 (Helvetica-Bold)
   objectOffsets[4] = byteOffset;
   writeString(`4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n`);
 
-  // Object 5: Font F3 (Helvetica-Oblique)
   objectOffsets[5] = byteOffset;
   writeString(`5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>\nendobj\n`);
 
-  // Objects 6... : Pages and Content Streams
   pagesCommands.forEach((cmdList, i) => {
     const pageId = 6 + i * 2;
     const contentId = 7 + i * 2;
 
-    // Page object
     objectOffsets[pageId] = byteOffset;
     writeString(
       `${pageId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_WIDTH.toFixed(2)} ${PAGE_HEIGHT.toFixed(2)}] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents ${contentId} 0 R >>\nendobj\n`
     );
 
-    // Stream content
     const streamContent = cmdList.join('\n') + '\n';
     const streamBytes = encoder.encode(streamContent);
 
@@ -421,7 +392,6 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
     writeString(`\nendstream\nendobj\n`);
   });
 
-  // Cross-reference table (xref)
   const xrefOffset = byteOffset;
   const totalObjects = 5 + totalPages * 2;
   writeString(`xref\n0 ${totalObjects + 1}\n0000000000 65535 f \n`);
@@ -430,7 +400,6 @@ export function generateAssessmentPdfBlob(data: AssessmentPdfData): Blob {
     writeString(`${String(off).padStart(10, '0')} 00000 n \n`);
   }
 
-  // Trailer
   writeString(
     `trailer\n<< /Size ${totalObjects + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`
   );

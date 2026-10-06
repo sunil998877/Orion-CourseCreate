@@ -208,7 +208,6 @@ async function checkOpenAILive(record) {
     try {
         const start = Date.now();
 
-        // 1. Verify API key authentication with /v1/models
         const testRes = await fetch('https://api.openai.com/v1/models', {
             headers: { Authorization: `Bearer ${key}` }
         });
@@ -223,7 +222,6 @@ async function checkOpenAILive(record) {
             return record;
         }
 
-        // 2. Perform a live generation quota probe (1-token test) to check if credits are remaining
         let quotaExhausted = false;
         let quotaErrorMessage = '';
         try {
@@ -248,8 +246,8 @@ async function checkOpenAILive(record) {
                 const probeErr = await probeRes.json().catch(() => ({}));
                 const code = probeErr.error?.code || '';
                 const msg = probeErr.error?.message || '';
-                const isQuota = probeRes.status === 429 || 
-                                code === 'insufficient_quota' || 
+                const isQuota = probeRes.status === 429 ||
+                                code === 'insufficient_quota' ||
                                 /credit|quota|billing/i.test(msg);
                 if (isQuota) {
                     quotaExhausted = true;
@@ -277,7 +275,6 @@ async function checkOpenAILive(record) {
             return record;
         }
 
-        // Key is active and has credits remaining
         record.liveCheckSuccess = true;
         record.liveCheckMessage = `OpenAI API key active & authenticated (${latency}ms)`;
 
@@ -286,8 +283,8 @@ async function checkOpenAILive(record) {
             record.quotaLimit = 1000000;
         }
 
-        record.status = record.balance < record.lowCreditThreshold 
-            ? (record.balance <= 0 ? 'exhausted' : 'low_credits') 
+        record.status = record.balance < record.lowCreditThreshold
+            ? (record.balance <= 0 ? 'exhausted' : 'low_credits')
             : 'healthy';
 
         record.meta = {
@@ -645,4 +642,3 @@ export async function recordOpenAiQuotaExhausted(errorMessage = '') {
         console.warn('[OpenAI Exhaustion Sync] Failed to update balance record:', err.message);
     }
 }
-

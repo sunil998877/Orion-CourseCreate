@@ -16,7 +16,7 @@ const CreditPackages: React.FC<CreditPackagesProps> = ({
 }) => {
   return (
     <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#101720]/80 p-6 md:p-8 shadow-xl backdrop-blur-xl">
-      {/* Background Ambient Wave / Glow in Header */}
+
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <svg
           className="absolute -top-10 left-1/4 h-56 w-3/4 opacity-20"
@@ -50,9 +50,9 @@ const CreditPackages: React.FC<CreditPackagesProps> = ({
         </svg>
       </div>
 
-      {/* Top Header Section */}
+
       <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
-        {/* Left Title & Accent */}
+
         <div className="flex items-start gap-3">
           <div className="mt-1 h-8 w-1.5 rounded-full bg-[#10e760] shadow-[0_0_14px_#10e760] shrink-0" />
           <div>
@@ -65,9 +65,9 @@ const CreditPackages: React.FC<CreditPackagesProps> = ({
           </div>
         </div>
 
-        {/* Right Badges (Secure Payments, Instant Top-up, No Hidden Charges) */}
+
         <div className="flex flex-wrap items-center gap-5 sm:gap-7">
-          {/* Badge 1: Secure Payments */}
+
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-[#10e760] shadow-[0_0_12px_rgba(16,231,96,0.15)]">
               <ShieldCheck className="h-4 w-4" />
@@ -78,7 +78,7 @@ const CreditPackages: React.FC<CreditPackagesProps> = ({
             </div>
           </div>
 
-          {/* Badge 2: Instant Top-up */}
+
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-[#10e760] shadow-[0_0_12px_rgba(16,231,96,0.15)]">
               <Zap className="h-4 w-4" />
@@ -89,7 +89,7 @@ const CreditPackages: React.FC<CreditPackagesProps> = ({
             </div>
           </div>
 
-          {/* Badge 3: No Hidden Charges */}
+
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-[#10e760] shadow-[0_0_12px_rgba(16,231,96,0.15)]">
               <CreditCard className="h-4 w-4" />
@@ -102,7 +102,7 @@ const CreditPackages: React.FC<CreditPackagesProps> = ({
         </div>
       </div>
 
-      {/* Grid of Credit Package Cards */}
+
       <div className="relative z-10 mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {CREDIT_PACKAGES.map((pkg) => (
           <CreditPackageCard
@@ -115,7 +115,7 @@ const CreditPackages: React.FC<CreditPackagesProps> = ({
         ))}
       </div>
 
-      {/* Bottom Info Note */}
+
       <div className="relative z-10 mt-6 flex items-center justify-center gap-2 text-center text-xs text-slate-400">
         <Info className="h-4 w-4 text-[#00e5a3] shrink-0" />
         <span>
@@ -127,3 +127,4 @@ const CreditPackages: React.FC<CreditPackagesProps> = ({
 };
 
 export default CreditPackages;
+

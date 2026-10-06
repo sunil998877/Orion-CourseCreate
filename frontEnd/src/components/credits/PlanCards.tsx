@@ -66,7 +66,7 @@ const PlanCards: React.FC<PlanCardsProps> = ({ onSelectPlan, onCancelPlan }) => 
 
   return (
     <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#101720]/80 p-6 md:p-8 shadow-xl backdrop-blur-xl">
-      {/* Header row: Title on left, Monthly/Yearly toggle on right */}
+
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between mb-8">
         <div className="flex items-start gap-3">
           <div className="mt-1 h-7 md:h-8 w-1.5 rounded-full bg-[#10e760] shadow-[0_0_12px_#10e760] shrink-0" />
@@ -81,7 +81,6 @@ const PlanCards: React.FC<PlanCardsProps> = ({ onSelectPlan, onCancelPlan }) => 
           </div>
         </div>
 
-        {/* Right: Monthly / Yearly toggle & Save up to 20% callout */}
         <div className="flex items-center gap-3 self-start sm:self-auto">
           <div className="flex items-center rounded-xl border border-white/10 bg-[#0c121d] p-1 text-xs">
             <button
@@ -115,7 +114,6 @@ const PlanCards: React.FC<PlanCardsProps> = ({ onSelectPlan, onCancelPlan }) => 
         </div>
       </div>
 
-      {/* Plans Grid */}
       {loading ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (

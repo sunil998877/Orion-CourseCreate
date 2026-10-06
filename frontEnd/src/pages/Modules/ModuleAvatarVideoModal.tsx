@@ -1425,7 +1425,6 @@ export function ModuleAvatarVideoModal({
                   }
                 `}</style>
 
-                {/* Exiting previous slide (during transition) */}
                 {prevSlideIndex !== null && gammaImages[prevSlideIndex] && slideAnimDirection && (
                   <div
                     key={`prev-slide-${prevSlideIndex}`}
@@ -1443,7 +1442,6 @@ export function ModuleAvatarVideoModal({
                   </div>
                 )}
 
-                {/* Active current slide */}
                 {gammaImages[activeSlideIndex] ? (
                   <div
                     key={`curr-slide-${activeSlideIndex}`}

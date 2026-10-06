@@ -21,7 +21,6 @@ const PlanCard: React.FC<PlanCardProps> = ({
   const isTeam = plan.name.toLowerCase() === 'team';
   const isFree = !isPro && !isTeam;
 
-  // Yearly discount: 20% off
   const priceDisplay = isFree
     ? 'Free'
     : billingCycle === 'yearly'
@@ -30,7 +29,6 @@ const PlanCard: React.FC<PlanCardProps> = ({
 
   const originalPrice = !isFree && billingCycle === 'yearly' ? `₹${plan.priceInr.toLocaleString()}` : null;
 
-  // Features per plan
   const features = isFree
     ? [
         { text: '500 AI credits monthly', included: true },
@@ -67,7 +65,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
           : 'border border-sky-500/25 bg-gradient-to-b from-[#06111e]/95 via-[#040c15]/90 to-[#02060b]/95 hover:border-sky-500/50 shadow-[0_0_20px_rgba(14,165,233,0.1)]'
       }`}
     >
-      {/* Floating Recommended Badge for Pro */}
+
       {isPro && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#b5f33f] to-[#7ee217] px-3.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#0a2003] shadow-[0_0_18px_rgba(132,204,22,0.6)]">
           <Crown className="h-3 w-3 fill-current" />
@@ -76,7 +74,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
       )}
 
       <div>
-        {/* Header: Icon, Plan Name & Category Tag */}
+
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -105,7 +103,6 @@ const PlanCard: React.FC<PlanCardProps> = ({
             </div>
           </div>
 
-          {/* Plan Category Badge */}
           <span
             className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
               isPro
@@ -120,7 +117,6 @@ const PlanCard: React.FC<PlanCardProps> = ({
           </span>
         </div>
 
-        {/* Monthly Credits Allocation */}
         <div className="mt-6">
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-white tracking-tight">
@@ -133,7 +129,6 @@ const PlanCard: React.FC<PlanCardProps> = ({
           <p className="text-xs text-slate-400 mt-0.5">Monthly allocation</p>
         </div>
 
-        {/* Pricing */}
         <div className="mt-4 flex items-baseline gap-2">
           <span
             className={`text-2xl font-black tracking-tight ${
@@ -152,10 +147,8 @@ const PlanCard: React.FC<PlanCardProps> = ({
           )}
         </div>
 
-        {/* Divider */}
         <div className="my-5 h-px bg-white/10" />
 
-        {/* Features Checklist */}
         <ul className="space-y-2.5 mb-6">
           {features.map((feat, idx) => (
             <li
@@ -179,7 +172,6 @@ const PlanCard: React.FC<PlanCardProps> = ({
         </ul>
       </div>
 
-      {/* Action Button */}
       {isCurrentPlan ? (
         <div className="flex items-center gap-2">
           <button

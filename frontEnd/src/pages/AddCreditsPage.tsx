@@ -81,11 +81,10 @@ const AddCreditsPage: React.FC = () => {
         </div>)}
 
         <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#101720]/80 p-6 md:p-10 shadow-xl backdrop-blur-xl">
-          {/* Subtle ambient glow in background */}
+
           <div className="absolute -top-10 -left-10 h-48 w-48 rounded-full bg-lime-500/5 blur-[60px] pointer-events-none" />
           <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-emerald-500/5 blur-[100px] pointer-events-none" />
 
-          {/* Ambient aurora curve */}
           <svg className="absolute inset-0 h-full w-full pointer-events-none opacity-20" preserveAspectRatio="none" viewBox="0 0 1200 400" fill="none">
             <path
               d="M-50 400 C 350 360, 520 180, 800 320 C 980 410, 1120 160, 1250 90"
@@ -141,7 +140,6 @@ const AddCreditsPage: React.FC = () => {
               )}
             </div>
 
-            {/* Right: Current Balance Widget */}
             <div className="w-full lg:w-[460px] xl:w-[480px] shrink-0 rounded-2xl border border-white/10 bg-[#0c121d]/90 p-6 shadow-xl backdrop-blur-xl relative">
               {loading ? (
                 <div className="space-y-3">
@@ -156,7 +154,7 @@ const AddCreditsPage: React.FC = () => {
                 <>
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3.5">
-                      {/* 3D Stacked Green Coins / Database Icon Container */}
+
                       <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-[#4ade80] shadow-[0_0_15px_rgba(34,197,94,0.2)] shrink-0">
                         <svg className="h-6 w-6" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <ellipse cx="14" cy="7" rx="8.5" ry="3" fill="#4ade80" />
@@ -194,7 +192,6 @@ const AddCreditsPage: React.FC = () => {
                     </button>
                   </div>
 
-                 
                   <div className="mt-5">
                     <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/10">
                       <div

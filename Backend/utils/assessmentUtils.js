@@ -1,8 +1,5 @@
 const cleanText = (str) => String(str || '').trim();
 
-/**
- * Generate 20 high-quality, domain-specific assessment questions for any course.
- */
 export const generateDefault20Assessment = (courseData = {}, modules = []) => {
     const title = cleanText(courseData.title) || 'Course Topic';
     const audience = cleanText(Array.isArray(courseData.audience) ? courseData.audience.join(', ') : courseData.audience) || 'learners and practitioners';
@@ -520,10 +517,6 @@ export const generateDefault20Assessment = (courseData = {}, modules = []) => {
     };
 };
 
-/**
- * Ensures that any assessment object has EXACTLY 20 questions in items and 20 blueprint rows,
- * and that questions and practical tasks are evenly distributed across all course modules.
- */
 export const ensure20AssessmentQuestions = (assessment, courseData = {}, modules = []) => {
     const title = cleanText(courseData?.title) || 'Course Topic';
     const detectedCount = Number(courseData?.moduleCount) ||
@@ -556,7 +549,7 @@ export const ensure20AssessmentQuestions = (assessment, courseData = {}, modules
     }
 
     let rawItems = Array.isArray(assessment.items) ? assessment.items : [];
-    // Detect if items are collapsed entirely onto 1 module (e.g. moduleIndex 0) when moduleCount > 1
+
     const isCollapsed = moduleCount > 1 && rawItems.length > 0 &&
         rawItems.every(it => Number(it?.moduleIndex ?? 0) === 0 && Number(it?.moduleNumber ?? 1) === 1);
 
@@ -608,7 +601,6 @@ export const ensure20AssessmentQuestions = (assessment, courseData = {}, modules
             };
         });
 
-    // If fewer than 20 items, pad with items from defaultAssessment
     if (cleanItems.length < 20) {
         const needed = 20 - cleanItems.length;
         const defaultItems = defaultAssessment.items;
@@ -626,7 +618,6 @@ export const ensure20AssessmentQuestions = (assessment, courseData = {}, modules
         cleanItems = cleanItems.slice(0, 20);
     }
 
-    // Re-index itemNumbers 1..20 and guarantee proper distribution across modules
     cleanItems = cleanItems.map((item, idx) => {
         let modIdx = item.moduleIndex;
         if (isCollapsed || modIdx === undefined || !Number.isFinite(Number(modIdx))) {
@@ -642,7 +633,6 @@ export const ensure20AssessmentQuestions = (assessment, courseData = {}, modules
         };
     });
 
-    // Ensure blueprint has exactly 20 corresponding items
     const rawBlueprint = Array.isArray(assessment.blueprint) ? assessment.blueprint : [];
     let cleanBlueprint = [];
     for (let i = 0; i < 20; i++) {

@@ -91,7 +91,6 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
         1
     );
 
-    // Detect if items are collapsed entirely onto 1 module (e.g. moduleIndex 0) when moduleCount > 1
     const isCollapsedOnModuleZero = effectiveModuleCount > 1 && allItems.length > 0 &&
         allItems.every((it: any) => Number(it?.moduleIndex ?? 0) === 0 && Number(it?.moduleNumber ?? 1) === 1);
 
@@ -305,7 +304,6 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                 return;
             }
 
-            // Immediately refresh user's wallet balance across the UI
             refreshWallet().catch(() => {});
 
             const t = data.task;
@@ -925,7 +923,6 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                                 Add Quiz Task
                                             </button>
 
-
                                             <button
                                                 type="button"
                                                 disabled={isGeneratingAI}
@@ -944,7 +941,6 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                                     </>
                                                 )}
                                             </button>
-
 
                                         </div>
                                     </div>

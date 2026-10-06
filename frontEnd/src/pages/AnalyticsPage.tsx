@@ -94,37 +94,32 @@ const AnalyticsPage: React.FC = () => {
   return (
     <PageTransition>
       <div className="min-h-screen text-white relative font-sans selection:bg-lime-500/30 space-y-8 pb-16">
-        
-        {/* Top Hero Banner - Native Vector Text, Sleek Deep Dark Emerald Studio Background */}
+
         <section className="relative w-full rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden bg-[#030906] border border-[#14281c] shadow-[0_24px_80px_rgba(0,0,0,0.7)] group isolate transition-all duration-700 min-h-[340px] sm:min-h-[360px] lg:min-h-[370px] flex flex-col lg:flex-row items-center justify-between">
-          
-          {/* Full-width 3D Studio Background Plate (Desktop) */}
+
           <div className="absolute inset-0 pointer-events-none select-none z-0 hidden lg:block">
             <img
               src={analyticsHeroFullPlate}
               alt="Orion Analytics Studio Background"
               className="w-full h-full object-cover object-right"
             />
-            {/* Sleek deep dark gradient overlay on left side for moody dark tone & razor-sharp legibility */}
+
             <div className="absolute inset-0 bg-gradient-to-r from-[#030906]/85 via-[#030906]/55 to-transparent pointer-events-none" />
           </div>
 
-          {/* Subtle Ambient Lighting - Deep, moody dark emerald glow */}
           <div className="absolute top-0 right-1/4 w-[450px] h-[300px] bg-lime-500/10 blur-[140px] rounded-full pointer-events-none -translate-y-1/3 opacity-50" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[250px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none translate-y-1/3 opacity-40" />
 
-          {/* Left Column: Real Crystal-Clear Vector Text & Cards */}
           <div className="relative z-10 w-full lg:w-[48%] flex flex-col justify-between p-6 sm:p-8 lg:p-10 space-y-4 sm:space-y-5">
-            
+
             <div className="space-y-3 sm:space-y-3.5">
-              {/* LIVE DASHBOARD Badge */}
+
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#122218]/90 border border-lime-400/25 text-[11px] font-bold tracking-wider text-[#a3e635] uppercase backdrop-blur-md shadow-[0_0_20px_rgba(163,230,53,0.15)] w-fit">
                 <Activity className="w-3.5 h-3.5 text-[#a3e635]" />
                 <span>LIVE DASHBOARD</span>
                 <span className="w-2 h-2 rounded-full bg-[#a3e635] shadow-[0_0_8px_#a3e635] animate-pulse" />
               </div>
 
-              {/* Title - Razor sharp vector typography */}
               <h1 className="text-3xl sm:text-4xl lg:text-[3.25rem] font-black text-white tracking-[-0.03em] leading-[1.05]">
                 Analytics{' '}
                 <span className="text-[#34d399] font-black drop-shadow-[0_0_30px_rgba(52,211,153,0.35)]">
@@ -132,13 +127,11 @@ const AnalyticsPage: React.FC = () => {
                 </span>
               </h1>
 
-              {/* Subtitle */}
               <p className="text-gray-300 text-xs sm:text-sm md:text-base font-normal leading-relaxed max-w-[460px]">
                 Monitor your implementation metrics, engagement rates, and growth trajectory in real-time.
               </p>
             </div>
 
-            {/* Agent Orion Walkthrough Guide Card */}
             <div
               onClick={() => {
                 const el = document.getElementById('performance-metrics');
@@ -168,7 +161,6 @@ const AnalyticsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Mobile-Only Dedicated 3D Avatar Scene Showcase - 100% visible, no text overlapping */}
             <div className="relative w-full rounded-2xl overflow-hidden border border-[#1b3425] bg-[#08120c] shadow-xl lg:hidden mt-2 p-2">
               <img
                 src={analyticsHeroAvatar}
@@ -179,9 +171,8 @@ const AnalyticsPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Section Header: Title & Time Filter Tabs */}
         <div id="performance-metrics" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-          {/* Title */}
+
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-7 bg-gradient-to-b from-lime-400 to-emerald-500 rounded-full shadow-[0_0_12px_#a3e635]" />
             <div>
@@ -194,9 +185,8 @@ const AnalyticsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Filters: Time Period Pill + Date Selector */}
           <div className="flex flex-wrap items-center gap-3">
-            {/* Range Tabs */}
+
             <div className="inline-flex items-center bg-[#0a110e] border border-white/10 rounded-full p-1 shadow-inner">
               <button
                 onClick={() => setRange('week')}
@@ -230,7 +220,6 @@ const AnalyticsPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Date Pill Picker */}
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0a110e] border border-white/10 text-xs font-semibold text-gray-300 hover:border-white/20 transition-all cursor-pointer">
               <Calendar className="w-3.5 h-3.5 text-gray-400" />
               <span>{selectedDate}</span>
@@ -239,12 +228,10 @@ const AnalyticsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 4 Performance Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          
-          {/* Card 1: Active Range */}
+
           <div className="rounded-2xl bg-[#091118]/80 border border-white/[0.08] backdrop-blur-xl p-5 hover:border-emerald-500/30 transition-all duration-300 shadow-xl flex flex-col justify-between h-[180px] group">
-            {/* Top Row */}
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
@@ -260,10 +247,8 @@ const AnalyticsPage: React.FC = () => {
               <Info className="w-4 h-4 text-gray-500 group-hover:text-gray-300 transition-colors" />
             </div>
 
-            {/* Middle Subtitle */}
             <p className="text-xs text-gray-400 font-medium">Current time period</p>
 
-            {/* Bottom Row: Mini Green Vertical Bars + Action Arrow */}
             <div className="flex items-end justify-between pt-2">
               <div className="flex items-end gap-1.5 h-8">
                 <span className="w-1.5 h-4 bg-emerald-400/50 rounded-t-sm" />
@@ -281,9 +266,8 @@ const AnalyticsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 2: Total Courses */}
           <div className="rounded-2xl bg-[#091118]/80 border border-white/[0.08] backdrop-blur-xl p-5 hover:border-blue-500/30 transition-all duration-300 shadow-xl flex flex-col justify-between h-[180px] group">
-            {/* Top Row */}
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
@@ -304,10 +288,8 @@ const AnalyticsPage: React.FC = () => {
               <Info className="w-4 h-4 text-gray-500 group-hover:text-gray-300 transition-colors" />
             </div>
 
-            {/* Middle Subtitle */}
             <p className="text-xs text-gray-400 font-medium">Published courses</p>
 
-            {/* Bottom Row: Mini Blue Spline Wave + Action Arrow */}
             <div className="flex items-end justify-between pt-2">
               <svg className="w-28 h-7 text-blue-400 overflow-visible" viewBox="0 0 100 25" fill="none">
                 <path
@@ -323,9 +305,8 @@ const AnalyticsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 3: Peak Date */}
           <div className="rounded-2xl bg-[#091118]/80 border border-white/[0.08] backdrop-blur-xl p-5 hover:border-purple-500/30 transition-all duration-300 shadow-xl flex flex-col justify-between h-[180px] group">
-            {/* Top Row */}
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
@@ -341,10 +322,8 @@ const AnalyticsPage: React.FC = () => {
               <Info className="w-4 h-4 text-gray-500 group-hover:text-gray-300 transition-colors" />
             </div>
 
-            {/* Middle Subtitle */}
             <p className="text-xs text-gray-400 font-medium">Highest activity recorded</p>
 
-            {/* Bottom Row: Mini Purple Vertical Bars + Action Arrow */}
             <div className="flex items-end justify-between pt-2">
               <div className="flex items-end gap-1.5 h-8">
                 <span className="w-1.5 h-3 bg-purple-400/40 rounded-t-sm" />
@@ -360,9 +339,8 @@ const AnalyticsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 4: Average */}
           <div className="rounded-2xl bg-[#091118]/80 border border-white/[0.08] backdrop-blur-xl p-5 hover:border-amber-500/30 transition-all duration-300 shadow-xl flex flex-col justify-between h-[180px] group">
-            {/* Top Row */}
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
@@ -378,10 +356,8 @@ const AnalyticsPage: React.FC = () => {
               <Info className="w-4 h-4 text-gray-500 group-hover:text-gray-300 transition-colors" />
             </div>
 
-            {/* Middle Subtitle */}
             <p className="text-xs text-gray-400 font-medium">Engagement score</p>
 
-            {/* Bottom Row: Mini Orange Spline Wave + Action Arrow */}
             <div className="flex items-end justify-between pt-2">
               <svg className="w-28 h-7 text-amber-400 overflow-visible" viewBox="0 0 100 25" fill="none">
                 <path
@@ -398,7 +374,6 @@ const AnalyticsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Activity Visualization Chart Section */}
         <div className="space-y-4 pt-4">
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-6 bg-gradient-to-b from-lime-400 to-emerald-500 rounded-full shadow-[0_0_12px_#a3e635]" />

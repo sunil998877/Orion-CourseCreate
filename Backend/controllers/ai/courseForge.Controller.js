@@ -572,7 +572,6 @@ export const generateModuleTask = async (req, res) => {
 
         const isPractical = taskType === 'practical';
 
-        // Ensure the pricing rule exists in DB with default 8 credits if not present
         await PricingRule.findOneAndUpdate(
             { actionKey },
             {
@@ -587,7 +586,6 @@ export const generateModuleTask = async (req, res) => {
             { upsert: true, new: true }
         ).catch(() => {});
 
-        // Reserve credits from user wallet
         try {
             console.log(`[Credits] Reserving credits for user ${userId}, action: ${actionKey}`);
             reservation = await reserve(userId, actionKey, referenceId);
@@ -655,7 +653,6 @@ Return JSON strictly in this structure:
             return res.status(502).json({ message: 'Could not generate module task' });
         }
 
-        // Deduct actual cost from wallet via reconcile
         const actualCost = Math.abs(Number(reservation?.amount || 8));
         const usageMeta = {
             provider: 'openai',

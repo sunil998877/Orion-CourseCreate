@@ -55,7 +55,6 @@ function getInitialCourses(): CachedCourse[] {
   }
 }
 
-// Itemized module detail within a course
 export interface ModuleDetail {
   moduleNumber: number | string;
   title?: string;
@@ -67,7 +66,6 @@ export interface ModuleDetail {
   timestamp?: string;
 }
 
-// Formatted unified activity item
 export interface ActivityItem {
   id: string;
   title: string;
@@ -118,16 +116,13 @@ const formatFullDate = (iso?: string) => {
 };
 
 const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeight, fill = false }) => {
-  // viewMode: 'course' = Unified course level (e.g. 1 Course, 5 Modules = 400 cr)
-  //           'module' = Per-module breakdown (e.g. 80 cr per module)
-  //           'ledger' = Raw database entries
+
   const [viewMode, setViewMode] = useState<'course' | 'module' | 'ledger'>('course');
   const [activeTab, setActiveTab] = useState<'all' | 'courses' | 'recharges' | 'refunds'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [userCourses, setUserCourses] = useState<CachedCourse[]>(getInitialCourses);
 
-  // Fetch user courses to match courseId or cluster to real course title
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -158,12 +153,10 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
     };
   }, []);
 
-  // Helper to match a group or module transaction with the user's real course
   const resolveCourse = useMemo(() => {
     return (cId?: string, date?: Date, refId?: string, modCount?: number): CachedCourse | null => {
       if (!userCourses || userCourses.length === 0) return null;
 
-      // 1. Direct courseId or _id match
       if (cId) {
         const target = cId.toLowerCase();
         const direct = userCourses.find((c) => {
@@ -174,7 +167,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
         if (direct) return direct;
       }
 
-      // 2. Reference ID substring match
       if (refId) {
         const refLower = refId.toLowerCase();
         const refMatch = userCourses.find((c) => {
@@ -185,12 +177,10 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
         if (refMatch) return refMatch;
       }
 
-      // 3. If user has only one course in their account, match it directly
       if (userCourses.length === 1) {
         return userCourses[0];
       }
 
-      // 4. Time proximity match (closest createdAt) with bonus for moduleCount match
       if (date) {
         const targetTime = date.getTime();
         let best: CachedCourse | null = null;
@@ -218,7 +208,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
     };
   }, [userCourses]);
 
-  // 1. Process Raw Transactions into Module-Level Pairs (Hold + Refund = Net ~80 cr)
   const moduleActivities = useMemo<ActivityItem[]>(() => {
     if (!items || items.length === 0) return [];
 
@@ -231,7 +220,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
     const usedIndices = new Set<number>();
     const activities: ActivityItem[] = [];
 
-    // Pass 1: Match exact referenceId (e.g. courseId_mod_1)
     for (let i = 0; i < sorted.length; i++) {
       if (usedIndices.has(i)) continue;
       const tx = sorted[i];
@@ -255,7 +243,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
           usedIndices.add(i);
           usedIndices.add(reserveIdx);
 
-          // Check if ref has course and module info (e.g. "course_123_mod_1")
           const modMatch = ref.match(/^(.+?)_mod_(\d+)$/i) || ref.match(/^(.+?)_module_?(\d+)/i);
           const courseId = modMatch ? modMatch[1] : undefined;
           const modNum = modMatch ? modMatch[2] : undefined;
@@ -292,7 +279,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
       }
     }
 
-    // Pass 2: Match adjacent RESERVE (-250) & RECONCILE (+170) if referenceId was generic
     for (let i = 0; i < sorted.length; i++) {
       if (usedIndices.has(i)) continue;
       const tx = sorted[i];
@@ -352,7 +338,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
       }
     }
 
-    // Pass 3: Process remaining single transactions (Recharges, Grants, Standalone Holds, etc.)
     for (let i = 0; i < sorted.length; i++) {
       if (usedIndices.has(i)) continue;
       const tx = sorted[i];
@@ -458,8 +443,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
     return activities.sort((a, b) => b.rawDate.getTime() - a.rawDate.getTime());
   }, [items, resolveCourse]);
 
-  // 2. Intelligent Aggregation by Course: Group modules belonging to the same course into a single Course item
-  // e.g. 5 modules * 80 cr = 400 cr Course Activity!
   const courseActivities = useMemo<ActivityItem[]>(() => {
     if (!moduleActivities || moduleActivities.length === 0) return [];
 
@@ -467,7 +450,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
     const courseGroups = new Map<string, ActivityItem[]>();
     const unassignedModules: ActivityItem[] = [];
 
-    // Separate modules from recharges/other
     for (const act of moduleActivities) {
       if (act.type === 'MODULE_COMPLETE' || act.type === 'COURSE_PENDING') {
         if (act.courseId) {
@@ -482,7 +464,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
       }
     }
 
-    // Cluster unassigned modules that occurred close together (e.g. batch generation within 10 mins)
     if (unassignedModules.length > 0) {
       const sortedUnassigned = [...unassignedModules].sort(
         (a, b) => a.rawDate.getTime() - b.rawDate.getTime()
@@ -514,11 +495,10 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
       }
     }
 
-    // Convert Course Groups into Unified Course Activities
     const unifiedCourses: ActivityItem[] = [];
 
     courseGroups.forEach((mods, cId) => {
-      // Sort modules by module number if possible
+
       mods.sort((a, b) => {
         const numA = parseInt(a.referenceId?.match(/_mod_(\d+)/)?.[1] || '0', 10);
         const numB = parseInt(b.referenceId?.match(/_mod_(\d+)/)?.[1] || '0', 10);
@@ -531,7 +511,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
       const latestDate = new Date(Math.max(...mods.map((m) => m.rawDate.getTime())));
       const moduleCount = mods.length;
 
-      // Resolve actual course title from user courses
       const firstRef = mods.find((m) => m.referenceId)?.referenceId || undefined;
       const matchedCourse = resolveCourse(cId.startsWith('cluster-') ? undefined : cId, latestDate, firstRef, moduleCount);
       const courseTitle = matchedCourse?.title?.trim();
@@ -591,10 +570,8 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
     return combined.sort((a, b) => b.rawDate.getTime() - a.rawDate.getTime());
   }, [moduleActivities, resolveCourse]);
 
-  // Choose which activity list to display based on viewMode
   const activeActivities = viewMode === 'course' ? courseActivities : moduleActivities;
 
-  // Filtered activities
   const filteredActivities = useMemo(() => {
     let list = activeActivities;
 
@@ -710,7 +687,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
           ))}
         </div>
 
-        {/* Search */}
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <input
@@ -724,9 +700,8 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
       </div>
       )}
 
-      {/* Content list */}
       {viewMode === 'ledger' ? (
-        // RAW AUDIT LEDGER VIEW (Individual Database Rows)
+
         items.length === 0 ? (
           <div className="rounded-2xl border border-white/10 bg-[#0c121d]/60 p-8 text-center text-xs text-slate-400">
             No raw transactions recorded yet.
@@ -784,7 +759,7 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
           </div>
         )
       ) : (
-        // BY COURSE (UNIFIED - e.g. 1 Course, 5 Modules = 400 cr) OR BY MODULE
+
         filteredActivities.length === 0 ? (
           <div className="rounded-2xl border border-white/10 bg-[#0c121d]/60 p-8 text-center text-xs text-slate-400">
             No transactions match your search or filter.
@@ -890,10 +865,9 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
                   </div>
                   )}
 
-                  {/* Expandable Breakdown Drawer */}
                   {isExpanded && (
                     <div className="mt-3.5 pt-3 border-t border-white/10 animate-fadeIn space-y-3">
-                      {/* Visual Reconciliation Flow */}
+
                       <div className="divide-y divide-white/5 overflow-hidden rounded-xl border border-white/10 bg-black/40">
                         <div className="flex items-center justify-between gap-3 px-3 py-2">
                           <span className="text-[11px] text-slate-400">Upfront hold</span>
@@ -930,7 +904,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
                         )}
                       </div>
 
-                      {/* Itemized Module List if Course Group (Answers: 1 Course, 5 Modules = 400 credits) */}
                       {act.modules && act.modules.length > 0 && (
                         <div className="space-y-2 rounded-xl border border-white/10 bg-[#090f19]/80 p-3">
                           <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 border-b border-white/5 pb-1.5">
@@ -967,7 +940,6 @@ const UsageHistory: React.FC<Props> = ({ items, limit, compact = false, maxHeigh
                         </div>
                       )}
 
-                      {/* Explanation note */}
                       <p className="text-[11px] text-slate-400 flex items-center gap-1.5 bg-black/30 rounded-lg p-2.5">
                         <Info className="h-4 w-4 text-[#10e760] shrink-0" />
                         <span>
