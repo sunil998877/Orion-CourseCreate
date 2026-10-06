@@ -63,6 +63,32 @@ function formatTime(totalSec: number) {
   return `${m}:${r.toString().padStart(2, '0')}`;
 }
 
+function absoluteMediaUrl(url: string) {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `${ORIGIN}${url.startsWith('/') ? url : `/${url}`}`;
+}
+
+function waitForCanPlay(el: HTMLMediaElement, isCurrent: () => boolean, timeoutMs = 20000) {
+  if (!isCurrent()) return Promise.reject(new Error('stale'));
+  if (el.readyState >= 3 && el.src) return Promise.resolve();
+  return new Promise<void>((resolve, reject) => {
+    const finish = (ok: boolean) => {
+      window.clearTimeout(timer);
+      el.removeEventListener('canplay', onReady);
+      el.removeEventListener('error', onFail);
+      if (!isCurrent()) reject(new Error('stale'));
+      else if (ok) resolve();
+      else reject(new Error('media'));
+    };
+    const onReady = () => finish(true);
+    const onFail = () => finish(false);
+    const timer = window.setTimeout(() => finish(false), timeoutMs);
+    el.addEventListener('canplay', onReady);
+    el.addEventListener('error', onFail);
+  });
+}
+
 function liveCaptionFromOffset(text: string, offset: number, windowSize = 8) {
   const clean = String(text || '').replace(/\s+/g, ' ').trim();
   if (!clean) return '';
@@ -128,12 +154,9 @@ export function ModuleAvatarVideoModal({
   const avatarVideoRef = useRef<HTMLVideoElement | null>(null);
   const isSpeakingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioCacheRef = useRef<Record<number, string>>({});
-  const audioLoadingRef = useRef<Record<number, boolean>>({});
+  const audioCacheRef = useRef<Record<string, string>>({});
+  const audioLoadingRef = useRef<Record<string, boolean>>({});
   const [slideDurations, setSlideDurations] = useState<Record<number, number>>({});
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
   const vocalAnimFrameRef = useRef<number | null>(null);
 
   const mutedRef = useRef(false);
@@ -149,7 +172,15 @@ export function ModuleAvatarVideoModal({
   const utteranceIdRef = useRef(0);
   const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const speakTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const speechProgressRef = useRef({ slide: 0, offset: 0, text: '' });
+  const speechProgressRef = useRef({ slide: 0, offset: 0, text: '', at: 0 });
+  const narrationIdRef = useRef<string | null>(null);
+  const avatarVideoIdRef = useRef<string | null>(null);
+  const syncStatusRef = useRef('idle');
+  const mediaLoadingRef = useRef(false);
+  const loadedSlideRef = useRef<number | null>(null);
+  const lipSyncUrlRef = useRef<string | null>(null);
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [lipSyncVideoUrl, setLipSyncVideoUrl] = useState<string | null>(null);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [captionLine, setCaptionLine] = useState('');
 
@@ -218,6 +249,7 @@ export function ModuleAvatarVideoModal({
             slide?.Transcript ||
             slide?.transcript ||
             slide?.VoiceScript ||
+            
             slide?.voiceScript ||
             slide?.Narration ||
             slide?.narration ||
@@ -324,6 +356,11 @@ export function ModuleAvatarVideoModal({
     load();
     return () => {
       cancelled = true;
+      utteranceIdRef.current += 1;
+      if (pollTimerRef.current) {
+        clearTimeout(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
       if (tickRef.current) window.cancelAnimationFrame(tickRef.current);
       try { window.speechSynthesis?.cancel(); } catch {}
       if (vocalAnimFrameRef.current) window.cancelAnimationFrame(vocalAnimFrameRef.current);
@@ -331,8 +368,10 @@ export function ModuleAvatarVideoModal({
         audioRef.current.pause();
         audioRef.current.src = '';
       }
-      if (audioContextRef.current) {
-        try { audioContextRef.current.close(); } catch {}
+      if (avatarVideoRef.current) {
+        avatarVideoRef.current.pause();
+        avatarVideoRef.current.removeAttribute('src');
+        try { avatarVideoRef.current.load(); } catch {}
       }
     };
   }, [courseId, moduleNumber, gammaUrlProp, fallbackSlides, moduleTitle]);
@@ -416,19 +455,25 @@ export function ModuleAvatarVideoModal({
     }
     setIsSpeaking(false);
     isSpeakingRef.current = false;
+    loadedSlideRef.current = null;
+    narrationIdRef.current = null;
+    avatarVideoIdRef.current = null;
+    lipSyncUrlRef.current = null;
+    syncStatusRef.current = 'idle';
+    mediaLoadingRef.current = false;
+    if (pollTimerRef.current) {
+      clearTimeout(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
     setCaptionLine('');
+    setLipSyncVideoUrl(null);
     const vid = avatarVideoRef.current;
     if (vid) {
-      if (lipTickRef.current) {
-        vid.removeEventListener('timeupdate', lipTickRef.current);
-        lipTickRef.current = null;
-      }
+      vid.muted = true;
+      vid.defaultMuted = true;
+      vid.volume = 0;
+      vid.loop = false;
       vid.pause();
-      try {
-        vid.currentTime = 0.04;
-      } catch {
-
-      }
     }
   }, []);
 
@@ -515,121 +560,26 @@ export function ModuleAvatarVideoModal({
     }
   };
 
-  const lipTickRef = useRef<((this: HTMLVideoElement, ev: Event) => void) | null>(null);
-
-  const setAvatarLips = useCallback((speaking: boolean, rate = 1) => {
+  const setAvatarLips = useCallback((speaking: boolean) => {
     const vid = avatarVideoRef.current;
     if (!vid) return;
     vid.muted = true;
     vid.volume = 0;
-    vid.loop = true;
-
-    if (lipTickRef.current) {
-      vid.removeEventListener('timeupdate', lipTickRef.current);
-      lipTickRef.current = null;
+    if (!speaking || !playingRef.current) {
+      if (!vid.paused) vid.pause();
     }
-
-    if (speaking && playingRef.current && !mutedRef.current) {
-      vid.playbackRate = Math.min(1.4, Math.max(0.75, rate));
-      const p = vid.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
-    } else {
-      vid.pause();
-      try {
-        vid.currentTime = 0.04;
-      } catch {
-
-      }
-    }
-  }, []);
-
-  const initAudioAnalyser = useCallback((audioEl: HTMLAudioElement) => {
-    try {
-      if (!audioContextRef.current) {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioCtx) return;
-        audioContextRef.current = new AudioCtx();
-      }
-      const ctx = audioContextRef.current;
-      if (ctx.state === 'suspended') {
-        ctx.resume().catch(() => {});
-      }
-      if (!sourceNodeRef.current && ctx) {
-        const analyser = ctx.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.25;
-        analyserRef.current = analyser;
-
-        const source = ctx.createMediaElementSource(audioEl);
-        source.connect(analyser);
-        analyser.connect(ctx.destination);
-        sourceNodeRef.current = source;
-      }
-    } catch (e) {
-      console.warn('Web Audio analyser skipped:', e);
-    }
-  }, []);
-
-  const startLipSyncLoop = useCallback(() => {
-    if (vocalAnimFrameRef.current) {
-      cancelAnimationFrame(vocalAnimFrameRef.current);
-    }
-
-    const checkVocalEnergy = () => {
-      if (!playingRef.current || mutedRef.current || !isSpeakingRef.current) {
-        const vid = avatarVideoRef.current;
-        if (vid && !vid.paused) {
-          vid.pause();
-        }
-        return;
-      }
-
-      const vid = avatarVideoRef.current;
-      const analyser = analyserRef.current;
-
-      if (analyser && vid) {
-        const data = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(data);
-        let sum = 0;
-        const maxBin = Math.min(data.length, 64);
-        for (let i = 2; i < maxBin; i++) {
-          sum += data[i];
-        }
-        const vocalEnergy = sum / (maxBin - 2);
-
-        if (vocalEnergy > 8) {
-          if (vid.paused) {
-            vid.playbackRate = Math.min(1.4, Math.max(0.8, speedRef.current));
-            vid.play().catch(() => {});
-          }
-        } else {
-
-          if (!vid.paused) {
-            vid.pause();
-          }
-        }
-      } else if (vid) {
-        if (vid.paused) {
-          vid.playbackRate = Math.min(1.4, Math.max(0.8, speedRef.current));
-          vid.play().catch(() => {});
-        }
-      }
-
-      vocalAnimFrameRef.current = requestAnimationFrame(checkVocalEnergy);
-    };
-
-    vocalAnimFrameRef.current = requestAnimationFrame(checkVocalEnergy);
   }, []);
 
   const prefetchSlideAudio = useCallback((slideIdx: number) => {
     if (slideIdx < 0 || slideIdx >= slides.length) return;
-    if (audioCacheRef.current[slideIdx] || audioLoadingRef.current[slideIdx]) return;
     const s = slides[slideIdx];
     const text = (s?.script || s?.content || s?.title || '').replace(/\s+/g, ' ').trim();
     if (!text) return;
-    audioLoadingRef.current[slideIdx] = true;
+    const cacheKey = `${slideIdx}::${text}`;
+    if (audioCacheRef.current[cacheKey] || audioLoadingRef.current[cacheKey]) return;
+    audioLoadingRef.current[cacheKey] = true;
     const token = localStorage.getItem('token');
-    fetch(`${API_BASE}/heygen/speak`, {
+    fetch(`${API_BASE}/heygen/slide-sync`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -639,6 +589,7 @@ export function ModuleAvatarVideoModal({
         text,
         voiceId: masterAvatar.voiceId || undefined,
         gender: masterAvatar.gender || (/albert|adrian|male/i.test(masterAvatar.avatarName) ? 'male' : 'female'),
+        avatarId: masterAvatar.avatarId,
       }),
     })
       .then(async (res) => {
@@ -648,18 +599,14 @@ export function ModuleAvatarVideoModal({
           const fullUrl = data.audioUrl.startsWith('http')
             ? data.audioUrl
             : `${ORIGIN}${data.audioUrl.startsWith('/') ? data.audioUrl : `/${data.audioUrl}`}`;
-          audioCacheRef.current[slideIdx] = fullUrl;
+          audioCacheRef.current[cacheKey] = fullUrl;
         }
       })
       .catch(() => {})
       .finally(() => {
-        audioLoadingRef.current[slideIdx] = false;
+        audioLoadingRef.current[cacheKey] = false;
       });
   }, [slides, masterAvatar]);
-
-  useEffect(() => {
-    setAvatarLips(isSpeaking && playing && !muted, speedRef.current);
-  }, [isSpeaking, playing, muted, playbackSpeed, setAvatarLips]);
 
   const pickVoice = useCallback((): SpeechSynthesisVoice | null => {
     if (!('speechSynthesis' in window)) return null;
@@ -688,355 +635,457 @@ export function ModuleAvatarVideoModal({
     );
   }, [masterAvatar]);
 
-  const splitSpeechChunks = (text: string, maxLen = 180): string[] => {
-    const cleaned = text.replace(/\s+/g, ' ').trim();
-    if (!cleaned) return [];
-    if (cleaned.length <= maxLen) return [cleaned];
-    const parts = cleaned.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [cleaned];
-    const chunks: string[] = [];
-    let buf = '';
-    for (const part of parts) {
-      const next = part.trim();
-      if (!next) continue;
-      if ((buf + ' ' + next).trim().length <= maxLen) {
-        buf = (buf + ' ' + next).trim();
-      } else {
-        if (buf) chunks.push(buf);
-        if (next.length <= maxLen) buf = next;
-        else {
-          for (let i = 0; i < next.length; i += maxLen) chunks.push(next.slice(i, i + maxLen));
-          buf = '';
-        }
-      }
+  const logSync = useCallback((event: string, extra?: Record<string, unknown>) => {
+    const audio = audioRef.current;
+    const video = avatarVideoRef.current;
+    const slide = slides[slideIndexRef.current];
+    console.log('[course-video]', {
+      event,
+      slideId: slide?.slideNumber ?? slideIndexRef.current,
+      narrationId: narrationIdRef.current,
+      avatarVideoId: avatarVideoIdRef.current,
+      audioCurrentTime: audio && Number.isFinite(audio.currentTime) ? Number(audio.currentTime.toFixed(3)) : null,
+      avatarCurrentTime: video && video.currentSrc && Number.isFinite(video.currentTime) ? Number(video.currentTime.toFixed(3)) : null,
+      playing: playingRef.current,
+      loading: mediaLoadingRef.current,
+      generationStatus: syncStatusRef.current,
+      ...extra,
+    });
+  }, [slides]);
+
+  const stopAvatarLock = useCallback(() => {
+    if (vocalAnimFrameRef.current) {
+      cancelAnimationFrame(vocalAnimFrameRef.current);
+      vocalAnimFrameRef.current = null;
     }
-    if (buf) chunks.push(buf);
-    return chunks.length ? chunks : [cleaned];
-  };
+  }, []);
+
+  const startAvatarLock = useCallback(() => {
+    stopAvatarLock();
+    const tick = () => {
+      if (!playingRef.current) return;
+      const audio = audioRef.current;
+      const video = avatarVideoRef.current;
+      const narrationLive = !!audio && !audio.paused && !audio.ended;
+      const speechLive = isSpeakingRef.current && (!audio || !audio.src);
+      if (video && (narrationLive || speechLive)) {
+        video.muted = true;
+        video.defaultMuted = true;
+        video.volume = 0;
+        if (lipSyncUrlRef.current && video.readyState >= 2 && narrationLive && audio) {
+          video.loop = false;
+          const drift = video.currentTime - audio.currentTime;
+          if (Number.isFinite(drift) && Math.abs(drift) > 0.12) {
+            try { video.currentTime = audio.currentTime; } catch {}
+            logSync('correct-drift', { drift: Number(drift.toFixed(3)) });
+          }
+          video.playbackRate = audio.playbackRate || speedRef.current;
+        } else {
+          video.loop = true;
+          const rate = narrationLive && audio ? audio.playbackRate : speedRef.current;
+          video.playbackRate = Math.min(1.25, Math.max(0.85, rate || 1));
+          const duration = video.duration;
+          if (duration && Number.isFinite(duration) && (video.currentTime < 0.15 || video.currentTime > duration - 0.12)) {
+            try { video.currentTime = Math.min(0.35, duration / 3); } catch {}
+          }
+        }
+        if (video.paused) {
+          const attempt = video.play();
+          if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+        }
+      } else if (video && !video.paused) {
+        video.pause();
+      }
+      vocalAnimFrameRef.current = requestAnimationFrame(tick);
+    };
+    vocalAnimFrameRef.current = requestAnimationFrame(tick);
+  }, [logSync, stopAvatarLock]);
+
+  const clearAvatarPoll = useCallback(() => {
+    if (pollTimerRef.current) {
+      clearTimeout(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+  }, []);
+
+  const detachAvatarVideo = useCallback(() => {
+    lipSyncUrlRef.current = null;
+    avatarVideoIdRef.current = null;
+    setLipSyncVideoUrl(null);
+    const video = avatarVideoRef.current;
+    if (!video) return;
+    video.pause();
+  }, []);
+
+  const attachAvatarVideo = useCallback(async (session: number, videoUrl: string, videoId: string | null) => {
+    if (utteranceIdRef.current !== session || !videoUrl) return;
+    const absolute = absoluteMediaUrl(videoUrl);
+    lipSyncUrlRef.current = absolute;
+    avatarVideoIdRef.current = videoId;
+    syncStatusRef.current = 'ready';
+    setLipSyncVideoUrl(absolute);
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+    if (utteranceIdRef.current !== session) return;
+    const video = avatarVideoRef.current;
+    const audio = audioRef.current;
+    if (!video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.volume = 0;
+    video.loop = false;
+    video.playsInline = true;
+    try {
+      await waitForCanPlay(video, () => utteranceIdRef.current === session);
+    } catch (error) {
+      if ((error as Error).message === 'stale') return;
+      lipSyncUrlRef.current = null;
+      avatarVideoIdRef.current = null;
+      setLipSyncVideoUrl(null);
+      syncStatusRef.current = 'audio_only';
+      logSync('avatar-video-load-failed', { avatarVideoId: videoId, message: (error as Error).message });
+      return;
+    }
+    if (utteranceIdRef.current !== session) return;
+    try { video.currentTime = audio?.currentTime || 0; } catch {}
+    video.playbackRate = audio?.playbackRate || speedRef.current;
+    if (playingRef.current && audio && !audio.paused) {
+      const attempt = video.play();
+      if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+    }
+    logSync('avatar-attached');
+    startAvatarLock();
+  }, [logSync, startAvatarLock]);
+
+  const pollAvatarVideo = useCallback((session: number, narrationId: string, avatarId: string) => {
+    clearAvatarPoll();
+    const run = async () => {
+      if (utteranceIdRef.current !== session) return;
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(
+          `${API_BASE}/heygen/slide-sync/${encodeURIComponent(narrationId)}?avatarId=${encodeURIComponent(avatarId)}`,
+          { headers: { Authorization: `Bearer ${token || ''}` } }
+        );
+        if (utteranceIdRef.current !== session) return;
+        if (!res.ok) {
+          syncStatusRef.current = 'audio_only';
+          logSync('avatar-status-failed', { statusCode: res.status });
+          return;
+        }
+        const data = await res.json();
+        syncStatusRef.current = data.status || 'audio_only';
+        avatarVideoIdRef.current = data.avatarVideoId || null;
+        logSync('avatar-status');
+        if (data.status === 'ready' && data.avatarVideoUrl) {
+          await attachAvatarVideo(session, data.avatarVideoUrl, data.avatarVideoId || null);
+          return;
+        }
+        if (data.status === 'generating') {
+          pollTimerRef.current = setTimeout(run, 4000);
+        }
+      } catch (error) {
+        if (utteranceIdRef.current !== session) return;
+        syncStatusRef.current = 'audio_only';
+        logSync('avatar-status-error', { message: (error as Error).message });
+      }
+    };
+    pollTimerRef.current = setTimeout(run, 1200);
+  }, [attachAvatarVideo, clearAvatarPoll, logSync]);
 
   const speakSlide = useCallback(
-    (index: number, opts?: { fromUserGesture?: boolean; startOffset?: number }) => {
+    (index: number, opts?: { fromUserGesture?: boolean; startOffset?: number; startSeconds?: number }) => {
       utteranceIdRef.current += 1;
       const speakId = utteranceIdRef.current;
+      clearAvatarPoll();
+      stopAvatarLock();
       if (speakTimeoutRef.current) {
         clearTimeout(speakTimeoutRef.current);
         speakTimeoutRef.current = null;
       }
       activeUtteranceRef.current = null;
-      setSpeechError(null);
-
+      try { window.speechSynthesis?.cancel(); } catch {}
+      loadedSlideRef.current = null;
+      narrationIdRef.current = null;
+      detachAvatarVideo();
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.onended = null;
         audioRef.current.ontimeupdate = null;
         audioRef.current.onerror = null;
+        audioRef.current.onplay = null;
+        audioRef.current.onloadedmetadata = null;
+        audioRef.current.onpause = null;
+        audioRef.current.removeAttribute('src');
+        try { audioRef.current.load(); } catch {}
       }
-
-      const wasBusy =
-        typeof window !== 'undefined' &&
-        'speechSynthesis' in window &&
-        (window.speechSynthesis.speaking || window.speechSynthesis.pending);
-      if (wasBusy) {
-        try {
-          window.speechSynthesis.cancel();
-        } catch {
-
-        }
-      }
-
-      if (mutedRef.current) {
-        setIsSpeaking(false);
-        setAvatarLips(false);
-        return;
-      }
+      setSpeechError(null);
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
 
       const slide = slides[index];
-      const fullText = (slide?.script || slide?.content || slide?.title || '')
-        .replace(/\s+/g, ' ')
-        .trim();
+      const fullText = (slide?.script || slide?.content || slide?.title || '').replace(/\s+/g, ' ').trim();
       if (!fullText) {
-        setIsSpeaking(false);
-        setAvatarLips(false);
+        syncStatusRef.current = 'missing-narration';
+        mediaLoadingRef.current = false;
+        logSync('missing-narration', { slideId: slide?.slideNumber ?? index });
         return;
       }
 
-      const finishSlideSpeech = () => {
-        advanceRef.current();
-      };
+      const startSeconds = Math.max(0, opts?.startSeconds || 0);
+      const gender = masterAvatar.gender || (/albert|adrian|male/i.test(masterAvatar.avatarName) ? 'male' : 'female');
+      const avatarId = masterAvatar.avatarId;
+      mediaLoadingRef.current = true;
+      syncStatusRef.current = 'loading-narration';
+      logSync('load-narration', { slideId: slide?.slideNumber ?? index });
 
       const fallbackSpeechSynthesis = () => {
-        if (utteranceIdRef.current !== speakId || mutedRef.current) return;
+        if (utteranceIdRef.current !== speakId) return;
         if (!('speechSynthesis' in window)) {
           setIsSpeaking(false);
-          setAvatarLips(false);
-          setSpeechError('Browser voice is not supported in this browser.');
+          setSpeechError('Narration audio is unavailable in this browser.');
+          syncStatusRef.current = 'narration-failed';
+          logSync('narration-failed');
           return;
         }
-
-        const startOffset = Math.max(0, Math.min(fullText.length, opts?.startOffset || 0));
-        const text =
-          startOffset > 0
-            ? fullText.slice(startOffset).replace(/^\s+/, '') || fullText
-            : fullText;
-        const baseOffset = startOffset > 0 && text !== fullText ? fullText.length - text.length : startOffset;
-
-        speechProgressRef.current = { slide: index, offset: baseOffset, text: fullText };
-        setCaptionLine(baseOffset > 0 ? liveCaptionFromOffset(fullText, baseOffset) : '');
-
-        const chunks = splitSpeechChunks(text);
-        let chunkIndex = 0;
-        let chunkBase = baseOffset;
-
-        const speakNextChunk = () => {
-          if (utteranceIdRef.current !== speakId || mutedRef.current) return;
-          if (chunkIndex >= chunks.length) {
-            finishSlideSpeech();
-            return;
-          }
-
-          const chunkText = chunks[chunkIndex];
-          const thisChunkBase = chunkBase;
-          const utter = new SpeechSynthesisUtterance(chunkText);
-          activeUtteranceRef.current = utter;
-          const rate = Math.min(1.5, Math.max(0.75, speedRef.current));
-          utter.rate = rate;
-          utter.pitch = 1;
-          utter.volume = 1;
-          utter.lang = 'en-US';
-          const voice = pickVoice();
-          if (voice) utter.voice = voice;
-
-          utter.onstart = () => {
-            if (utteranceIdRef.current !== speakId) return;
-            setIsSpeaking(true);
-            setSpeechError(null);
-            setAvatarLips(true, rate);
-            setCaptionLine(liveCaptionFromOffset(fullText, thisChunkBase));
-          };
-
-          utter.onboundary = (event) => {
-            if (utteranceIdRef.current !== speakId) return;
-            if (event.name === 'word') {
-              const nextOffset = thisChunkBase + (event.charIndex || 0);
-              speechProgressRef.current = {
-                slide: index,
-                offset: nextOffset,
-                text: fullText,
-              };
-              setCaptionLine(liveCaptionFromOffset(fullText, Math.max(0, nextOffset - 12)));
-            }
-          };
-
-          utter.onend = () => {
-            if (utteranceIdRef.current !== speakId) return;
-            chunkBase += chunkText.length + 1;
-            speechProgressRef.current = {
-              slide: index,
-              offset: Math.min(fullText.length, chunkBase),
-              text: fullText,
-            };
-            setCaptionLine(liveCaptionFromOffset(fullText, Math.min(fullText.length, chunkBase)));
-            chunkIndex += 1;
-            speakNextChunk();
-          };
-
-          utter.onerror = (event) => {
-            const err = (event as SpeechSynthesisErrorEvent).error;
-            if (err === 'interrupted' || err === 'canceled') return;
-            if (utteranceIdRef.current !== speakId) return;
-            console.warn('Speech error:', err);
-            if (chunkIndex === 0) {
-              setSpeechError('Browser voice failed. Check Windows speech voices / tab mute.');
-              setIsSpeaking(false);
-              setAvatarLips(false);
-              return;
-            }
-            chunkBase += chunkText.length + 1;
-            chunkIndex += 1;
-            speakNextChunk();
-          };
-
-          try {
-            if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-            window.speechSynthesis.speak(utter);
-            setIsSpeaking(true);
-            setAvatarLips(true, rate);
-          } catch (err) {
-            console.warn('speak() failed:', err);
-            setSpeechError('Could not start browser voice.');
-            setIsSpeaking(false);
-            setAvatarLips(false);
-          }
-        };
-
-        speakNextChunk();
-      };
-
-      const playHumanAudio = (audioUrl: string) => {
-        if (utteranceIdRef.current !== speakId || mutedRef.current) return;
-        const audio = audioRef.current || (audioRef.current = new Audio());
-        audio.crossOrigin = 'anonymous';
-        audio.src = audioUrl;
-        audio.playbackRate = speedRef.current;
-        audio.muted = mutedRef.current;
-
-        initAudioAnalyser(audio);
-
-        audio.onloadedmetadata = () => {
-          if (utteranceIdRef.current !== speakId) return;
-          if (audio.duration && isFinite(audio.duration) && audio.duration > 0) {
-            setSlideDurations((prev) =>
-              prev[index] === audio.duration ? prev : { ...prev, [index]: audio.duration }
-            );
-          }
-        };
-
-        audio.onplay = () => {
+        syncStatusRef.current = 'speech-fallback';
+        detachAvatarVideo();
+        const utter = new SpeechSynthesisUtterance(fullText);
+        activeUtteranceRef.current = utter;
+        const rate = Math.min(1.5, Math.max(0.75, speedRef.current));
+        utter.rate = rate;
+        utter.pitch = 1;
+        utter.volume = mutedRef.current ? 0 : 1;
+        utter.lang = 'en-US';
+        const voice = pickVoice();
+        if (voice) utter.voice = voice;
+        speechProgressRef.current = { slide: index, offset: 0, text: fullText, at: performance.now() };
+        utter.onstart = () => {
           if (utteranceIdRef.current !== speakId) return;
           setIsSpeaking(true);
           isSpeakingRef.current = true;
           setSpeechError(null);
-          startLipSyncLoop();
+          logSync('play');
         };
-
-        audio.onpause = () => {
+        utter.onboundary = (event) => {
+          if (utteranceIdRef.current !== speakId || event.name !== 'word') return;
+          const nextOffset = event.charIndex || 0;
+          speechProgressRef.current = { slide: index, offset: nextOffset, text: fullText, at: performance.now() };
+          setCaptionLine(liveCaptionFromOffset(fullText, Math.max(0, nextOffset - 12)));
+        };
+        utter.onend = () => {
           if (utteranceIdRef.current !== speakId) return;
           setIsSpeaking(false);
           isSpeakingRef.current = false;
-          if (vocalAnimFrameRef.current) {
-            cancelAnimationFrame(vocalAnimFrameRef.current);
-            vocalAnimFrameRef.current = null;
-          }
-          const vid = avatarVideoRef.current;
-          if (vid) {
-            vid.pause();
-            try {
-              vid.currentTime = 0.04;
-            } catch {
-
-            }
-          }
+          logSync('ended');
+          advanceRef.current();
         };
-
-        audio.ontimeupdate = () => {
-          if (utteranceIdRef.current !== speakId) return;
-          const cur = audio.currentTime;
-          const dur = audio.duration || 1;
-          setElapsedInSlide(cur);
-          elapsedRef.current = cur;
-          const charOffset = Math.floor((cur / dur) * fullText.length);
-          speechProgressRef.current = { slide: index, offset: charOffset, text: fullText };
-          setCaptionLine(liveCaptionFromOffset(fullText, charOffset));
-        };
-
-        audio.onended = () => {
+        utter.onerror = (event) => {
+          const err = (event as SpeechSynthesisErrorEvent).error;
+          if (err === 'interrupted' || err === 'canceled') return;
           if (utteranceIdRef.current !== speakId) return;
           setIsSpeaking(false);
           isSpeakingRef.current = false;
-          if (vocalAnimFrameRef.current) {
-            cancelAnimationFrame(vocalAnimFrameRef.current);
-            vocalAnimFrameRef.current = null;
-          }
-          const vid = avatarVideoRef.current;
-          if (vid) {
-            vid.pause();
-            try {
-              vid.currentTime = 0.04;
-            } catch {
-
-            }
-          }
-          finishSlideSpeech();
+          setSpeechError('Narration could not be played.');
+          logSync('audio-error', { message: err });
         };
-
-        audio.onerror = () => {
-          if (utteranceIdRef.current !== speakId) return;
-          console.warn('Human audio load error, using fallback');
-          fallbackSpeechSynthesis();
-        };
-
-        prefetchSlideAudio(index + 1);
-
-        const p = audio.play();
-        if (p && typeof p.catch === 'function') {
-          p.catch(() => {
-            fallbackSpeechSynthesis();
-          });
+        try {
+          if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+          setIsSpeaking(true);
+          isSpeakingRef.current = true;
+          window.speechSynthesis.speak(utter);
+          const video = avatarVideoRef.current;
+          if (video) {
+            video.muted = true;
+            video.volume = 0;
+            video.loop = true;
+            const attempt = video.play();
+            if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+          }
+          startAvatarLock();
+          loadedSlideRef.current = null;
+          mediaLoadingRef.current = false;
+          logSync('speech-fallback');
+        } catch (error) {
+          setSpeechError('Narration could not be played.');
+          logSync('audio-error', { message: (error as Error).message });
         }
       };
 
-      const cached = audioCacheRef.current[index];
-      if (cached) {
-        playHumanAudio(cached);
-      } else {
-        const token = localStorage.getItem('token');
-        fetch(`${API_BASE}/heygen/speak`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token || ''}`,
-          },
-          body: JSON.stringify({
-            text: fullText,
-            voiceId: masterAvatar.voiceId || undefined,
-            gender: masterAvatar.gender || (/albert|adrian|male/i.test(masterAvatar.avatarName) ? 'male' : 'female'),
-          }),
+      const token = localStorage.getItem('token');
+      fetch(`${API_BASE}/heygen/slide-sync`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token || ''}`,
+        },
+        body: JSON.stringify({
+          text: fullText,
+          voiceId: masterAvatar.voiceId || undefined,
+          gender,
+          avatarId,
+        }),
+      })
+        .then(async (res) => {
+          if (utteranceIdRef.current !== speakId) return null;
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body?.message || `HTTP ${res.status}`);
+          }
+          return res.json();
         })
-          .then(async (res) => {
+        .then(async (data) => {
+          if (!data || utteranceIdRef.current !== speakId) return;
+          narrationIdRef.current = data.narrationId || null;
+          avatarVideoIdRef.current = data.avatarVideoId || null;
+          syncStatusRef.current = data.status || 'audio_only';
+          const audioUrl = absoluteMediaUrl(data.audioUrl || '');
+          if (!audioUrl) throw new Error('Narration audio missing');
+          logSync('narration-ready');
+
+          const audio = audioRef.current || (audioRef.current = new Audio());
+          audio.crossOrigin = 'anonymous';
+          audio.loop = false;
+          audio.preload = 'auto';
+          audio.src = audioUrl;
+          audio.playbackRate = speedRef.current;
+          audio.muted = mutedRef.current;
+
+          await waitForCanPlay(audio, () => utteranceIdRef.current === speakId);
+          if (utteranceIdRef.current !== speakId) return;
+
+          const offset = audio.duration && Number.isFinite(audio.duration)
+            ? Math.min(startSeconds, Math.max(0, audio.duration - 0.05))
+            : 0;
+          try { audio.currentTime = offset; } catch {}
+          setElapsedInSlide(offset);
+          elapsedRef.current = offset;
+
+          audio.onloadedmetadata = () => {
             if (utteranceIdRef.current !== speakId) return;
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            if (data?.audioUrl) {
-              const fullUrl = data.audioUrl.startsWith('http')
-                ? data.audioUrl
-                : `${ORIGIN}${data.audioUrl.startsWith('/') ? data.audioUrl : `/${data.audioUrl}`}`;
-              audioCacheRef.current[index] = fullUrl;
-              playHumanAudio(fullUrl);
-            } else {
-              fallbackSpeechSynthesis();
+            if (audio.duration && Number.isFinite(audio.duration) && audio.duration > 0) {
+              setSlideDurations((prev) => (prev[index] === audio.duration ? prev : { ...prev, [index]: audio.duration }));
             }
-          })
-          .catch((err) => {
+          };
+          audio.ontimeupdate = () => {
             if (utteranceIdRef.current !== speakId) return;
-            console.warn('ElevenLabs speak unavailable, falling back:', err);
+            const cur = audio.currentTime;
+            const dur = audio.duration || 1;
+            setElapsedInSlide(cur);
+            elapsedRef.current = cur;
+            const charOffset = Math.floor((cur / dur) * fullText.length);
+            speechProgressRef.current = { slide: index, offset: charOffset, text: fullText, at: performance.now() };
+            setCaptionLine(liveCaptionFromOffset(fullText, charOffset));
+          };
+          audio.onplay = () => {
+            if (utteranceIdRef.current !== speakId) return;
+            setIsSpeaking(true);
+            isSpeakingRef.current = true;
+            const video = avatarVideoRef.current;
+            if (video) {
+              video.muted = true;
+              video.volume = 0;
+              const attempt = video.play();
+              if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+            }
+            logSync('play');
+          };
+          audio.onpause = () => {
+            if (utteranceIdRef.current !== speakId) return;
+            const video = avatarVideoRef.current;
+            if (video && !video.paused) video.pause();
+            if (!playingRef.current) {
+              setIsSpeaking(false);
+              isSpeakingRef.current = false;
+            }
+            logSync('pause');
+          };
+          audio.onended = () => {
+            if (utteranceIdRef.current !== speakId) return;
+            setIsSpeaking(false);
+            isSpeakingRef.current = false;
+            const video = avatarVideoRef.current;
+            if (video && !video.paused) video.pause();
+            logSync('ended');
+            advanceRef.current();
+          };
+          audio.onerror = () => {
+            if (utteranceIdRef.current !== speakId) return;
+            mediaLoadingRef.current = false;
+            syncStatusRef.current = 'audio-error';
+            logSync('audio-error');
+            setSpeechError('Narration audio failed to load.');
             fallbackSpeechSynthesis();
-          });
-      }
+          };
+
+          loadedSlideRef.current = index;
+          mediaLoadingRef.current = false;
+
+          if (data.status === 'ready' && data.avatarVideoUrl) {
+            await attachAvatarVideo(speakId, data.avatarVideoUrl, data.avatarVideoId || null);
+            if (utteranceIdRef.current !== speakId) return;
+          } else if (data.status === 'generating' && data.narrationId) {
+            logSync('avatar-generating');
+            pollAvatarVideo(speakId, data.narrationId, avatarId);
+          } else {
+            logSync('avatar-fallback', { error: data.error || null });
+          }
+
+          if (!playingRef.current || utteranceIdRef.current !== speakId) {
+            logSync('narration-ready-paused');
+            return;
+          }
+          setIsSpeaking(true);
+          isSpeakingRef.current = true;
+          const video = avatarVideoRef.current;
+          if (video) {
+            video.muted = true;
+            video.defaultMuted = true;
+            video.volume = 0;
+            if (lipSyncUrlRef.current) {
+              try { video.currentTime = audio.currentTime; } catch {}
+              video.loop = false;
+              video.playbackRate = audio.playbackRate || speedRef.current;
+            } else {
+              video.loop = true;
+            }
+            const videoStart = video.play();
+            if (videoStart && typeof videoStart.catch === 'function') videoStart.catch(() => {});
+          }
+          const started = audio.play();
+          if (started && typeof started.catch === 'function') {
+            started.catch(() => {
+              if (utteranceIdRef.current !== speakId) return;
+              fallbackSpeechSynthesis();
+            });
+          }
+          startAvatarLock();
+          prefetchSlideAudio(index + 1);
+        })
+        .catch((error) => {
+          if (utteranceIdRef.current !== speakId) return;
+          mediaLoadingRef.current = false;
+          syncStatusRef.current = 'narration-failed';
+          logSync('narration-failed', { message: (error as Error).message });
+          setSpeechError((error as Error).message || 'Narration could not be generated.');
+          fallbackSpeechSynthesis();
+        });
     },
-    [slides, pickVoice, setAvatarLips, prefetchSlideAudio, masterAvatar, initAudioAnalyser, startLipSyncLoop]
+    [slides, pickVoice, prefetchSlideAudio, masterAvatar, logSync, clearAvatarPoll, stopAvatarLock, detachAvatarVideo, attachAvatarVideo, pollAvatarVideo, startAvatarLock]
   );
 
   const toggleMute = () => {
     const nextMuted = !mutedRef.current;
     mutedRef.current = nextMuted;
     setMuted(nextMuted);
-
-    if (audioRef.current) {
-      audioRef.current.muted = nextMuted;
+    if (audioRef.current) audioRef.current.muted = nextMuted;
+    const video = avatarVideoRef.current;
+    if (video) {
+      video.muted = true;
+      video.volume = 0;
     }
-
-    if (nextMuted) {
-      if (speakTimeoutRef.current) {
-        clearTimeout(speakTimeoutRef.current);
-        speakTimeoutRef.current = null;
-      }
-      activeUtteranceRef.current = null;
-      try {
-        window.speechSynthesis?.cancel();
-      } catch {
-
-      }
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      setIsSpeaking(false);
-      setAvatarLips(false);
-      setCaptionLine('');
-      return;
-    }
-
-    if (playingRef.current && slides.length) {
-      speakSlide(slideIndexRef.current, { fromUserGesture: true });
-    }
+    logSync(nextMuted ? 'mute' : 'unmute');
   };
 
   const applyPlaybackSpeed = (next: number) => {
@@ -1045,13 +1094,10 @@ export function ModuleAvatarVideoModal({
     if (audioRef.current) {
       audioRef.current.playbackRate = next;
     }
-    if (avatarVideoRef.current) {
+    if (avatarVideoRef.current && lipSyncUrlRef.current) {
       avatarVideoRef.current.playbackRate = next;
     }
-
-    if (playingRef.current && !mutedRef.current) {
-      speakSlide(slideIndexRef.current, { fromUserGesture: true });
-    }
+    logSync('speed', { playbackRate: next });
   };
 
   const cyclePlaybackSpeed = () => {
@@ -1134,8 +1180,9 @@ export function ModuleAvatarVideoModal({
         }
       }
       const local = Math.max(0, t - (slideStarts[idx] || 0));
-      if (idx !== slideIndexRef.current) {
-        setSlideDirection(idx >= slideIndexRef.current ? 1 : -1);
+      const previous = slideIndexRef.current;
+      if (idx !== previous) {
+        setSlideDirection(idx >= previous ? 1 : -1);
       }
       setSlideIndex(idx);
       slideIndexRef.current = idx;
@@ -1143,27 +1190,43 @@ export function ModuleAvatarVideoModal({
       elapsedRef.current = local;
       lastTickRef.current = performance.now();
 
-      if (
-        idx === slideIndexRef.current &&
-        audioRef.current &&
-        audioRef.current.src &&
-        audioRef.current.duration
-      ) {
-        audioRef.current.currentTime = Math.min(audioRef.current.duration - 0.05, local);
-        if (playingRef.current && !mutedRef.current) {
-          audioRef.current.play().catch(() => {});
-          startLipSyncLoop();
+      const audio = audioRef.current;
+      const sameLoadedSlide = previous === idx && loadedSlideRef.current === idx && !!audio?.src;
+      if (sameLoadedSlide && audio) {
+        const nextTime = audio.duration && Number.isFinite(audio.duration)
+          ? Math.min(Math.max(0, audio.duration - 0.05), local)
+          : local;
+        try { audio.currentTime = nextTime; } catch {}
+        const video = avatarVideoRef.current;
+        if (video) {
+          video.muted = true;
+          video.volume = 0;
+          if (lipSyncUrlRef.current) {
+            try { video.currentTime = audio.currentTime; } catch {}
+            video.loop = false;
+            video.playbackRate = audio.playbackRate || speedRef.current;
+          } else {
+            video.loop = true;
+          }
         }
+        if (playingRef.current) {
+          audio.play().catch(() => {});
+          if (video) video.play().catch(() => {});
+          startAvatarLock();
+        } else if (video && !video.paused) {
+          video.pause();
+        }
+        logSync('seek', { slideId: slides[idx]?.slideNumber ?? idx, local: Number(local.toFixed(3)) });
         return;
       }
 
       if (playingRef.current) {
-        speakSlide(idx, { fromUserGesture: opts?.fromUserGesture });
+        speakSlide(idx, { fromUserGesture: opts?.fromUserGesture, startSeconds: local });
       } else {
         stopSpeech();
       }
     },
-    [slides.length, totalDuration, slideStarts, durations, speakSlide, stopSpeech, startLipSyncLoop]
+    [slides, totalDuration, slideStarts, durations, speakSlide, stopSpeech, startAvatarLock, logSync]
   );
 
   const advanceToNextSlide = useCallback(() => {
@@ -1203,7 +1266,7 @@ export function ModuleAvatarVideoModal({
       setElapsedInSlide(0);
       elapsedRef.current = 0;
       lastTickRef.current = performance.now();
-      speechProgressRef.current = { slide: next, offset: 0, text: '' };
+      speechProgressRef.current = { slide: next, offset: 0, text: '', at: 0 };
 
       if (playingRef.current) {
         speakTimeoutRef.current = setTimeout(() => {
@@ -1243,14 +1306,19 @@ export function ModuleAvatarVideoModal({
       const dur = durations[idx] || 5;
 
       const curAudio = audioRef.current;
-      if (curAudio && !curAudio.paused && curAudio.currentTime > 0) {
-        const cur = curAudio.currentTime;
-        const audioDur = curAudio.duration || dur;
-        setElapsedInSlide(cur);
-        elapsedRef.current = cur;
-        if (audioDur > 0 && cur >= audioDur - 0.08) {
-          advanceRef.current();
-          lastTickRef.current = performance.now();
+      const usingNarrationClock =
+        mediaLoadingRef.current ||
+        (syncStatusRef.current !== 'speech-fallback' && !!curAudio?.src);
+      if (usingNarrationClock) {
+        if (curAudio && !curAudio.paused && Number.isFinite(curAudio.currentTime)) {
+          const cur = curAudio.currentTime;
+          const audioDur = curAudio.duration || dur;
+          setElapsedInSlide(cur);
+          elapsedRef.current = cur;
+          if (audioDur > 0 && cur >= audioDur - 0.08) {
+            advanceRef.current();
+            lastTickRef.current = performance.now();
+          }
         }
         if (playingRef.current) {
           tickRef.current = window.requestAnimationFrame(loop);
@@ -1286,13 +1354,14 @@ export function ModuleAvatarVideoModal({
 
   const togglePlay = () => {
     if (!slides.length) return;
-    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume().catch(() => {});
-    }
     if (playing) {
       setPlaying(false);
       playingRef.current = false;
-      stopSpeech();
+      stopAvatarLock();
+      audioRef.current?.pause();
+      if (avatarVideoRef.current && !avatarVideoRef.current.paused) avatarVideoRef.current.pause();
+      try { window.speechSynthesis?.pause(); } catch {}
+      logSync('pause');
       return;
     }
     setPlaying(true);
@@ -1305,10 +1374,39 @@ export function ModuleAvatarVideoModal({
       slideIndexRef.current = 0;
       setElapsedInSlide(0);
       elapsedRef.current = 0;
+      loadedSlideRef.current = null;
       speakSlide(0, { fromUserGesture: true });
-    } else {
-      speakSlide(slideIndex, { fromUserGesture: true });
+      return;
     }
+
+    const audio = audioRef.current;
+    if (loadedSlideRef.current === slideIndexRef.current && audio?.src) {
+      audio.muted = mutedRef.current;
+      audio.playbackRate = speedRef.current;
+      const video = avatarVideoRef.current;
+      if (video) {
+        video.muted = true;
+        video.volume = 0;
+        if (lipSyncUrlRef.current) {
+          try { video.currentTime = audio.currentTime; } catch {}
+          video.loop = false;
+          video.playbackRate = audio.playbackRate;
+        } else {
+          video.loop = true;
+          video.playbackRate = audio.playbackRate;
+        }
+        const videoPlay = video.play();
+        if (videoPlay && typeof videoPlay.catch === 'function') videoPlay.catch(() => {});
+      }
+      const audioPlay = audio.play();
+      if (audioPlay && typeof audioPlay.catch === 'function') audioPlay.catch(() => {});
+      startAvatarLock();
+      logSync('resume');
+      return;
+    }
+
+    try { window.speechSynthesis?.resume(); } catch {}
+    speakSlide(slideIndex, { fromUserGesture: true, startSeconds: elapsedRef.current });
   };
 
   const skipBy = (delta: number) => seekAbsolute(currentTime + delta, { fromUserGesture: true });
@@ -1508,17 +1606,34 @@ export function ModuleAvatarVideoModal({
                   <div className="relative h-[132px] w-[132px] md:h-[162px] md:w-[162px] overflow-hidden rounded-full border-2 border-black bg-black">
                     <video
                       ref={avatarVideoRef}
-                      src={masterAvatar.previewVideoUrl}
+                      src={lipSyncVideoUrl || masterAvatar.previewVideoUrl}
                       poster={masterAvatar.previewImageUrl}
                       playsInline
                       muted
+                      loop={!lipSyncVideoUrl}
                       autoPlay={false}
-                      preload="metadata"
-                      onLoadedData={(e) => {
+                      preload="auto"
+                      onPlay={(e) => {
                         e.currentTarget.muted = true;
+                        e.currentTarget.defaultMuted = true;
                         e.currentTarget.volume = 0;
                       }}
+                      onError={() => {
+                        if (!lipSyncUrlRef.current) return;
+                        lipSyncUrlRef.current = null;
+                        avatarVideoIdRef.current = null;
+                        syncStatusRef.current = 'audio_only';
+                        setLipSyncVideoUrl(null);
+                        logSync('avatar-video-load-failed');
+                      }}
                       className="h-full w-full scale-[1.15] object-cover object-[50%_12%]"
+                    />
+                    <img
+                      src={masterAvatar.previewImageUrl || avatarPlaceholder}
+                      alt=""
+                      className={`pointer-events-none absolute inset-0 h-full w-full scale-[1.15] object-cover object-[50%_12%] transition-opacity duration-100 ${
+                        playing && isSpeaking ? 'opacity-0' : 'opacity-100'
+                      }`}
                     />
 
                     <div

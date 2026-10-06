@@ -7,3 +7,4 @@ export { getHeyGenAvatars } from './heygen/getHeyGenAvatars.Controller.js';
 export { selectHeyGenAvatar } from './heygen/selectHeyGenAvatar.Controller.js';
 export { proxyHeyGenMedia } from './heygen/proxyHeyGenMedia.Controller.js';
 export { speakSlideNarration } from './heygen/speakSlideNarration.Controller.js';
+export { syncSlideAvatar, getSlideAvatarStatus } from './heygen/syncSlideAvatar.Controller.js';

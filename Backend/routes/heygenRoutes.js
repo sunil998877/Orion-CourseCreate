@@ -10,6 +10,8 @@ import {
     selectHeyGenAvatar,
     proxyHeyGenMedia,
     speakSlideNarration,
+    syncSlideAvatar,
+    getSlideAvatarStatus,
 } from '../controllers/heygenController.js';
 
 const router = express.Router();
@@ -20,6 +22,8 @@ router.get('/heygen/config', authenticateJWT, getHeyGenConfigStatus);
 router.get('/heygen/avatars', authenticateJWT, getHeyGenAvatars);
 router.post('/heygen/avatar/select', authenticateJWT, selectHeyGenAvatar);
 router.post('/heygen/speak', authenticateJWT, speakSlideNarration);
+router.post('/heygen/slide-sync', authenticateJWT, syncSlideAvatar);
+router.get('/heygen/slide-sync/:narrationId', authenticateJWT, getSlideAvatarStatus);
 router.post('/heygen/courses/:courseId/generate', authenticateJWT, generateHeyGenVideo);
 router.get('/heygen/courses/:courseId/status', authenticateJWT, getHeyGenVideoStatus);
 router.post(
