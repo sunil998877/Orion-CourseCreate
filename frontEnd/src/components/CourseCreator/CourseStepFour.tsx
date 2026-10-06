@@ -1,15 +1,67 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCourseCreator } from '../../contextAPI/CourseCreatorContext';
 import avatar from '../../assests/avatar.png';
 import { GAMMA_THEMES } from '../../utils/themes';
 import ThemeModal from './ThemeModal';
 import ModuleList from './ModuleList';
+import CourseForgeGates from './CourseForgeGates';
 import { ChevronRight, ChevronLeft, Zap, Sparkles, AlertTriangle, Construction, Lightbulb, RefreshCw, Layers, Rocket, Loader2 } from 'lucide-react';
 const CourseStepFour: React.FC = () => {
     const { courseData, isBlueprinting, hasBlueprint, previewModules, blueprintingProgress, setThemeByModule, showGenerateWarning, setShowGenerateWarning, goToNextStep, goToPrevStep, generateOrionPreview, stepVariants, containerVariants, itemVariants, isContinuing, isBatchGenerating } = useCourseCreator();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [productionOpen, setProductionOpen] = useState(() => {
+        try {
+            return JSON.parse(sessionStorage.getItem('orion_creator_session') || '{}').productionOpen === true;
+        }
+        catch {
+            return false;
+        }
+    });
+    const [openModuleId, setOpenModuleId] = useState<number | null>(null);
+    useEffect(() => {
+        try {
+            const current = JSON.parse(sessionStorage.getItem('orion_creator_session') || '{}');
+            sessionStorage.setItem('orion_creator_session', JSON.stringify({ ...current, productionOpen }));
+        }
+        catch {
+
+        }
+    }, [productionOpen]);
+    const selectModule = (id: number) => {
+        setOpenModuleId((current) => current === id ? null : id);
+        setProductionOpen(true);
+    };
     const isLoading = Boolean(isSubmitting || isContinuing || isBatchGenerating);
+
+    const rightCardRef = useRef<HTMLDivElement>(null);
+    const [rightCardHeight, setRightCardHeight] = useState<number | undefined>(undefined);
+
+    useEffect(() => {
+        const updateHeight = () => {
+            if (window.innerWidth >= 1024 && rightCardRef.current) {
+                setRightCardHeight(rightCardRef.current.offsetHeight);
+            } else {
+                setRightCardHeight(undefined);
+            }
+        };
+
+        updateHeight();
+
+        const ro = new ResizeObserver(() => {
+            updateHeight();
+        });
+
+        if (rightCardRef.current) {
+            ro.observe(rightCardRef.current);
+        }
+        window.addEventListener('resize', updateHeight);
+
+        return () => {
+            ro.disconnect();
+            window.removeEventListener('resize', updateHeight);
+        };
+    }, []);
 
     const handleContinue = async () => {
         if (isLoading) return;
@@ -22,55 +74,58 @@ const CourseStepFour: React.FC = () => {
             setIsSubmitting(false);
         }
     };
-    return (<motion.div key="step4" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="pt-6 flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] h-full max-md:min-h-0">
+    return (<motion.div key="step4" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="pt-6 flex flex-col lg:flex-row gap-6 lg:gap-8 xl:gap-12 min-h-[600px] h-full max-md:min-h-0">
 
-        <div className="flex-1 xl:w-[66%] bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group flex flex-col h-full max-md:rounded-2xl max-md:p-4">
-            {!hasBlueprint && !isBlueprinting ? (<div className="flex-1 flex flex-col h-full">
-                <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
-                    <div className="bg-gray-800/50 p-8 rounded-full mb-6 border border-gray-700">
-                        <Sparkles className="w-16 h-16 text-lime-400" />
-                    </div>
-                    <h2 className="text-3xl font-bold mb-4 max-md:text-2xl">Module Blueprinting</h2>
-                    <p className="text-gray-400 max-w-lg mb-10 leading-relaxed">
-                        Based on your inputs, ORION is ready to architect {courseData.module} specialized modules for <span className="text-lime-400">"{courseData.title || 'Your Course'}"</span>.
-                    </p>
-                    <div className="relative group">
+        <div style={{ height: rightCardHeight ? `${rightCardHeight}px` : undefined }} className="flex-1 lg:w-[62%] xl:w-[66%] w-full bg-[#0A0A0B]/60 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative group flex flex-col justify-between overflow-hidden max-md:rounded-2xl max-md:p-4">
+            {!hasBlueprint && !isBlueprinting ? (<div className="flex-1 min-h-0 flex flex-col justify-between">
+                <div className="flex-1 min-h-0 overflow-y-auto step-scrollbar pr-2 relative z-10">
+                    <div className="flex flex-col items-center text-center py-6">
+                        <div className="bg-gray-800/50 p-8 rounded-full mb-6 border border-gray-700">
+                            <Sparkles className="w-16 h-16 text-lime-400" />
+                        </div>
+                        <h2 className="text-3xl font-bold mb-4 max-md:text-2xl">Module Blueprinting</h2>
+                        <p className="text-gray-400 max-w-lg mb-10 leading-relaxed">
+                            Based on your inputs, ORION is ready to architect {courseData.module} specialized modules for <span className="text-lime-400">"{courseData.title || 'Your Course'}"</span>.
+                        </p>
+                        <div className="relative group w-full">
 
-                        <AnimatePresence>
-                            {showGenerateWarning && (<motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-72 max-md:w-[min(18rem,calc(100vw-2.5rem))] bg-[#1a1c24] border border-red-500/30 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-xl">
-                                <div className="flex flex-col justify-center items-center text-center">
-                                    <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
-                                        <AlertTriangle className="text-red-500 w-6 h-6 animate-pulse" />
+                            <AnimatePresence>
+                                {showGenerateWarning && (<motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-72 max-md:w-[min(18rem,calc(100vw-2.5rem))] bg-[#1a1c24] border border-red-500/30 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-xl">
+                                    <div className="flex flex-col justify-center items-center text-center">
+                                        <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
+                                            <AlertTriangle className="text-red-500 w-6 h-6 animate-pulse" />
+                                        </div>
+                                        <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wider">Are you sure?</h4>
+                                        <p className="text-gray-400 text-[11px] leading-relaxed mb-4">
+                                            Once generation begins, <span className="text-red-400 font-bold underline">there's no turning back</span>. Your core settings will be locked in to architect the modules.
+                                        </p>
+                                        <div className="flex gap-2 w-full">
+                                            <button onClick={() => setShowGenerateWarning(false)} className="flex-1 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-[10px] font-black uppercase tracking-widest transition-all">
+                                                No
+                                            </button>
+                                            <button onClick={() => {
+                                                setShowGenerateWarning(false);
+                                                generateOrionPreview();
+                                            }} className="flex-1 py-2 rounded-lg bg-red-500 hover:bg-red-400 text-black text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-red-500/20">
+                                                Yes
+                                            </button>
+                                        </div>
                                     </div>
-                                    <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wider">Are you sure?</h4>
-                                    <p className="text-gray-400 text-[11px] leading-relaxed mb-4">
-                                        Once generation begins, <span className="text-red-400 font-bold underline">there's no turning back</span>. Your core settings will be locked in to architect the modules.
-                                    </p>
-                                    <div className="flex gap-2 w-full">
-                                        <button onClick={() => setShowGenerateWarning(false)} className="flex-1 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-[10px] font-black uppercase tracking-widest transition-all">
-                                            No
-                                        </button>
-                                        <button onClick={() => {
-                                            setShowGenerateWarning(false);
-                                            generateOrionPreview();
-                                        }} className="flex-1 py-2 rounded-lg bg-red-500 hover:bg-red-400 text-black text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-red-500/20">
-                                            Yes
-                                        </button>
-                                    </div>
-                                </div>
 
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-8 border-transparent border-t-[#1a1c24]"></div>
-                            </motion.div>)}
-                        </AnimatePresence>
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-8 border-transparent border-t-[#1a1c24]"></div>
+                                </motion.div>)}
+                            </AnimatePresence>
 
-                        <button onClick={() => setShowGenerateWarning(true)} className="flex items-center gap-3 bg-lime-500 hover:bg-lime-400 text-black px-12 py-4 rounded-2xl font-black text-lg transition-all shadow-xl shadow-lime-500/20 max-md:w-full max-md:justify-center max-md:px-6 max-md:text-base" type="button">
-                            <Zap size={24} /> Generate Modules
-                        </button>
+                            <CourseForgeGates stage="build" open />
+                        </div>
                     </div>
                 </div>
-                <div className="mt-auto pt-8 flex justify-start">
-                    <button onClick={goToPrevStep} className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-gray-400 hover:text-white hover:bg-gray-800 transition-all" type="button">
-                        <ChevronLeft size={20} /> Back
+                <div className="mt-8 pt-4 border-t border-white/10 flex w-full items-center justify-between shrink-0 relative z-10 max-md:mt-6 max-md:flex-col max-md:gap-4">
+                    <button onClick={goToPrevStep} className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-black text-sm text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 transition-all max-md:w-full" type="button">
+                        <ChevronLeft size={18} /> Back
+                    </button>
+                    <button onClick={() => setShowGenerateWarning(true)} disabled={!courseData.courseForge?.blueprintApproved} className="flex min-w-0 w-[13.5rem] max-md:w-full items-center justify-center gap-2 bg-lime-500 hover:bg-lime-400 text-black px-5 py-2.5 rounded-xl font-black text-sm transition-all shadow-xl shadow-lime-500/20 max-md:w-full max-md:min-w-0 disabled:opacity-40 disabled:cursor-not-allowed" type="button">
+                        <Zap size={18} /> Generate Modules
                     </button>
                 </div>
             </div>) : isBlueprinting ? (<div className="flex-1 flex flex-col items-center justify-center py-20">
@@ -105,7 +160,7 @@ const CourseStepFour: React.FC = () => {
                         {Array.from({ length: courseData.module ?? 0 }).map((_, idx) => (<div key={idx} className={`w-2 h-2 rounded-full transition-all duration-500 ${idx < Math.floor((blueprintingProgress / 100) * (courseData.module || 1)) ? 'bg-lime-500 shadow-[0_0_8px_rgba(132,204,22,0.6)]' : 'bg-gray-800'}`} />))}
                     </div>
                 </div>
-            </div>) : (<div className="flex-1 flex flex-col">
+            </div>) : (<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
                     <div>
                         <h2 className="text-4xl font-black tracking-tight text-white mb-2 max-md:text-2xl">Curriculum Blueprint</h2>
@@ -131,45 +186,44 @@ const CourseStepFour: React.FC = () => {
 
                 </div>
 
-
-                <ThemeModal />
-                <ModuleList />
-
-                <div className="mt-auto pt-8 flex justify-end max-md:justify-stretch">
-                    <motion.button
-                        whileHover={{ scale: isLoading ? 1 : 1.05 }}
-                        whileTap={{ scale: isLoading ? 1 : 0.95 }}
-                        onClick={handleContinue}
-                        disabled={isLoading}
-                        className="flex items-center gap-2 bg-lime-500 hover:bg-lime-400 text-black px-8 py-3 rounded-xl font-black shadow-lg shadow-lime-500/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed max-md:w-full max-md:justify-center"
-                        type="button"
-                    >
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                Please wait...
-                            </>
-                        ) : (
-                            <>
-                                Looks Good, Continue <ChevronRight size={20} />
-                            </>
-                        )}
-                    </motion.button>
+                <div className="flex-1 min-h-0 overflow-y-auto step-scrollbar pr-2 relative z-10 pb-4">
+                    <CourseForgeGates stage="build" open={productionOpen} onToggle={() => setProductionOpen((value) => !value)} />
+                    <ThemeModal />
+                    <ModuleList openModuleId={openModuleId} onSelectModule={selectModule}>
+                        <motion.button
+                            whileHover={{ scale: isLoading ? 1 : 1.05 }}
+                            whileTap={{ scale: isLoading ? 1 : 0.95 }}
+                            onClick={handleContinue}
+                            disabled={isLoading}
+                            className="flex items-center gap-2 bg-lime-500 hover:bg-lime-400 text-black px-8 py-3 rounded-xl font-black shadow-lg shadow-lime-500/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed max-md:w-full max-md:justify-center"
+                            type="button"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Please wait...
+                                </>
+                            ) : (
+                                <>
+                                    Looks Good, Continue <ChevronRight size={20} />
+                                </>
+                            )}
+                        </motion.button>
+                    </ModuleList>
                 </div>
             </div>)}
         </div>
 
-
-        <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="flex-1 xl:w-[30%] xl:ml-auto bg-gradient-to-br from-[#0D0D15] via-[#0A0A0E] to-[#050505] rounded-[2.5rem] p-6 sm:p-9 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group self-start sticky top-8 max-md:rounded-2xl max-md:p-4 max-md:static max-md:overflow-visible">
+        <motion.div ref={rightCardRef} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="flex-1 lg:w-[38%] xl:w-[30%] w-full lg:ml-auto bg-gradient-to-br from-[#0D0D15] via-[#0A0A0E] to-[#050505] rounded-[2.5rem] p-6 sm:p-9 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group self-start sticky top-8 max-md:rounded-2xl max-md:p-4 max-md:static max-md:overflow-visible">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-lime-500/5 rounded-full blur-[100px] -mr-48 -mt-48 transition-all duration-700 group-hover:bg-lime-500/10 pointer-events-none"></div>
 
-            <div className="absolute top-8 right-8 w-32 h-32 rounded-full border-4 border-lime-500/30 overflow-hidden shadow-[0_0_50px_rgba(132,204,22,0.2)] z-20 hidden xl:block transition-all duration-700 group-hover:scale-110 group-hover:border-lime-500/50 group-hover:shadow-[0_0_60px_rgba(132,204,22,0.4)] bg-[#0A0A0E]">
+            <div className="absolute top-8 right-8 w-24 h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 rounded-full border-4 border-lime-500/30 overflow-hidden shadow-[0_0_50px_rgba(132,204,22,0.2)] z-20 hidden lg:block transition-all duration-700 group-hover:scale-110 group-hover:border-lime-500/50 group-hover:shadow-[0_0_60px_rgba(132,204,22,0.4)] bg-[#0A0A0E]">
                 <img src={avatar} alt="Orion" className="w-full h-full object-top object-cover" />
             </div>
 
-            <div className="relative z-10 flex flex-col h-full max-h-[80vh] max-md:h-auto max-md:max-h-none">
+            <div className="relative z-10 flex flex-col">
                 {!hasBlueprint ? (<>
-                    <div className="mb-6 xl:pr-48 text-left xl:min-h-[140px] shrink-0">
+                    <div className="mb-6 lg:pr-32 xl:pr-48 text-left min-h-0 lg:min-h-[120px] xl:min-h-[140px] shrink-0">
                         <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight">
                             Design the Blueprint <Construction className="inline-block w-5 h-5 ml-1 text-lime-400" />
                         </h3>
@@ -181,12 +235,12 @@ const CourseStepFour: React.FC = () => {
 
                     <div className="h-px w-full bg-gradient-to-r from-lime-500/20 via-gray-700/50 to-transparent mb-6"></div>
 
-                    <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar relative max-md:overflow-visible max-md:flex-none">
+                    <div className="relative">
                         <h4 className="text-xs font-black text-white uppercase tracking-[0.15em] mb-6 flex items-center gap-2">
                             <span className="p-1.5 rounded bg-gray-800/80 border border-gray-700 shadow-sm text-sm">
                                 <Lightbulb className="w-4 h-4 text-lime-400" />
                             </span>
-                            Guidance
+                            Step-by-Step Guidance
                         </h4>
 
                         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
@@ -202,16 +256,24 @@ const CourseStepFour: React.FC = () => {
                             <motion.div variants={itemVariants} className="flex gap-4 group/item">
                                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 border border-gray-700 flex items-center justify-center text-sm font-black text-lime-400 shadow-inner group-hover/item:border-lime-500/50 transition-colors">1</div>
                                 <div>
-                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Generate Module</h5>
-                                    <p className="text-gray-400 text-xs leading-relaxed">Click Generate module and I will synthesize all your inputs—title, files, and description—to build a logical flow of modules.</p>
+                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">CourseForge Research & Blueprint Gates</h5>
+                                    <p className="text-gray-400 text-xs leading-relaxed">Review and approve the automated deep-research dossier and curriculum blueprint generated by CourseForge. Module generation is unlocked once the blueprint gate is approved.</p>
                                 </div>
                             </motion.div>
 
                             <motion.div variants={itemVariants} className="flex gap-4 group/item">
                                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 border border-gray-700 flex items-center justify-center text-sm font-black text-lime-400 shadow-inner group-hover/item:border-lime-500/50 transition-colors">2</div>
                                 <div>
-                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Review & Edit Blueprint</h5>
-                                    <p className="text-gray-400 text-xs leading-relaxed">Once the curriculum appears, you can hover over any module to edit titles or reorder them. This is your chance to fine-tune the story before slide creation.</p>
+                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Generate Modules</h5>
+                                    <p className="text-gray-400 text-xs leading-relaxed">Click 'Generate Modules' to synthesize all your previous inputs—title, audience, duration, and reference materials—into your dedicated module structure.</p>
+                                </div>
+                            </motion.div>
+
+                            <motion.div variants={itemVariants} className="flex gap-4 group/item">
+                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 border border-gray-700 flex items-center justify-center text-sm font-black text-lime-400 shadow-inner group-hover/item:border-lime-500/50 transition-colors">3</div>
+                                <div>
+                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Review & Refine Architecture</h5>
+                                    <p className="text-gray-400 text-xs leading-relaxed">Once modules are generated, inspect the curriculum, preview lessons, shuffle visual presentation themes, and refine module titles before proceeding to slide generation.</p>
                                 </div>
                             </motion.div>
                         </motion.div>
@@ -230,60 +292,59 @@ const CourseStepFour: React.FC = () => {
 
                     <div className="h-px w-full bg-gradient-to-r from-lime-500/20 via-gray-700/50 to-transparent mb-6"></div>
 
-                    <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar relative max-md:overflow-visible max-md:flex-none">
+                    <div className="relative">
                         <h4 className="text-xs font-black text-white uppercase tracking-[0.15em] mb-6 flex items-center gap-2">
                             <span className="p-1.5 rounded bg-gray-800/80 border border-gray-700 shadow-sm text-sm shrink-0">
                                 <Layers className="w-4 h-4 text-lime-400" />
                             </span>
-                            Advanced Blueprint Tools
+                            Step-by-Step Guidance
                         </h4>
 
                         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
                             <motion.div variants={itemVariants} className="flex gap-4 group/item">
                                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 border border-gray-700 flex items-center justify-center text-sm font-black text-lime-400 shadow-inner group-hover/item:border-lime-500/50 transition-colors">1</div>
                                 <div>
-                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Review Generated Module content</h5>
-                                    <p className="text-gray-400 text-xs leading-relaxed">Click view button inside each module and walk through the module wise content. I've logicaly organized your topics into a sequence that ensures a smooth learning curve for the students. But still You can adjust the module content by scrolling down at the buttom of that section which is named as "<span className="text-lime-400 font-bold">Refine Your Architecture</span>".</p>
+                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Shuffle Themes & Theme Selection</h5>
+                                    <p className="text-gray-400 text-xs leading-relaxed">Use the <span className="text-lime-400 font-bold">"Shuffle Themes"</span> button at the top right or click the theme selector on any module card to customize color palettes and slide design styles.</p>
                                 </div>
                             </motion.div>
 
                             <motion.div variants={itemVariants} className="flex gap-4 group/item">
                                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 border border-gray-700 flex items-center justify-center text-sm font-black text-lime-400 shadow-inner group-hover/item:border-lime-500/50 transition-colors">2</div>
                                 <div>
-                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Review Generated Module Slide Content</h5>
-                                    <p className="text-gray-400 text-xs leading-relaxed">Click the Slides button inside each module to preview the automatically generated slide content. I have transformed your lesson structure into clear, engaging slides designed for effective learning delivery.</p>
+                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Inspect Module Lessons & Content</h5>
+                                    <p className="text-gray-400 text-xs leading-relaxed">Click the <span className="text-lime-400 font-bold">"View"</span> button on each module to review detailed lesson breakdowns, subtopics, and key learning outcomes organized for students.</p>
                                 </div>
                             </motion.div>
+
                             <motion.div variants={itemVariants} className="flex gap-4 group/item">
                                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 border border-gray-700 flex items-center justify-center text-sm font-black text-lime-400 shadow-inner group-hover/item:border-lime-500/50 transition-colors">3</div>
                                 <div>
-                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Choose slide theme</h5>
-                                    <p className="text-gray-400 text-xs leading-relaxed">Before generating slide i have added choose theme section in each module section by clicking change button you can select desired theme "<span className="text-lime-400 font-bold">note: you can change the theme for each slide seperately </span>"</p>
+                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Preview Generated Slide Content</h5>
+                                    <p className="text-gray-400 text-xs leading-relaxed">Click the <span className="text-lime-400 font-bold">"Slides"</span> button on any module to preview structured slide titles, bullet points, and presenter notes before rendering final assets.</p>
                                 </div>
                             </motion.div>
 
                             <motion.div variants={itemVariants} className="flex gap-4 group/item">
                                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 border border-gray-700 flex items-center justify-center text-sm font-black text-lime-400 shadow-inner group-hover/item:border-lime-500/50 transition-colors">4</div>
                                 <div>
-                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Final Slide Engine</h5>
-                                    <p className="text-gray-400 text-xs leading-relaxed">Once satisfied, and choosed the theme click <span className="text-lime-400 font-bold">'Generate Orion Slides'</span> . and once you click Generate orion slide I'll start generating slides based on you input and"<span className="text-lime-400 font-bold"> please wait it may take some time based on the modules you have selected. </span>" </p>
+                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Refine Your Architecture</h5>
+                                    <p className="text-gray-400 text-xs leading-relaxed">Need adjustments? Scroll to the <span className="text-lime-400 font-bold">"Refine Your Architecture"</span> input at the bottom of the module list to adjust topics, add specific points, or tweak modules.</p>
                                 </div>
                             </motion.div>
 
                             <motion.div variants={itemVariants} className="flex gap-4 group/item">
                                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 border border-gray-700 flex items-center justify-center text-sm font-black text-lime-400 shadow-inner group-hover/item:border-lime-500/50 transition-colors">5</div>
                                 <div>
-                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Next (Final Review)</h5>
-                                    <p className="text-gray-400 text-xs leading-relaxed">After generating slides, click 'Continue' to perform the final review before launching your course.</p>
+                                    <h5 className="text-white font-bold text-sm mb-1.5 tracking-wide">Continue to Batch Slide Generation</h5>
+                                    <p className="text-gray-400 text-xs leading-relaxed">Click <span className="text-lime-400 font-bold">'Looks Good, Continue'</span> to trigger batch slide generation across all modules simultaneously and proceed to the final review.</p>
                                 </div>
                             </motion.div>
                         </motion.div>
 
-
                         <motion.div variants={itemVariants} className="relative mt-6 rounded-2xl overflow-hidden border border-lime-500/40 bg-gradient-to-br from-lime-500/10 via-emerald-500/5 to-transparent p-4 shadow-[0_0_24px_rgba(132,204,22,0.12)]" style={{ animation: 'pulse-lime-border 2.5s ease-in-out infinite' }}>
 
                             <div className="absolute -top-6 -right-6 w-24 h-24 bg-lime-500/20 rounded-full blur-2xl pointer-events-none" />
-
 
                             <div className="flex items-center gap-2 mb-2 relative z-10">
                                 <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-lime-500/20 border border-lime-500/40 shadow-inner shrink-0">
@@ -294,7 +355,6 @@ const CourseStepFour: React.FC = () => {
                                 </h5>
 
                             </div>
-
 
                             <p className="text-gray-300 text-xs leading-relaxed relative z-10">
                                 Clicking{' '}

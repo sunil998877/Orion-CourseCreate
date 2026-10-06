@@ -62,6 +62,14 @@ export const generateAudio = async (req, res) => {
             });
         }
         const courseStyleNote = course.courseStyle || 'Academic / Formal Style';
+        let engagingScript = '';
+        if (course.courseForge?.narrationApproved && hasSlideTranscripts) {
+            engagingScript = rawContent
+                .replace(/===.*?===\n/g, '')
+                .replace(/\[Slide[^\]]*\]\n/g, '')
+                .trim();
+        }
+        else {
         const scriptResponse = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
@@ -86,7 +94,9 @@ Your job:
             ],
             temperature: 0.7
         });
-        const engagingScript = scriptResponse.choices[0].message.content;
+        const engagingScriptFromModel = scriptResponse.choices[0].message.content;
+        engagingScript = engagingScriptFromModel;
+        }
         course.audioTranscript = engagingScript;
         console.log("voiceover Generated");
         const ELEVEN_API_KEY = process.env.ELEVEN_API_KEY;

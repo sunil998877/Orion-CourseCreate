@@ -5,7 +5,7 @@ const systemApiBalanceSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        enum: ['gamma', 'openai', 'elevenlabs']
+        enum: ['gamma', 'openai', 'elevenlabs', 'heygen']
     },
     displayName: {
         type: String,

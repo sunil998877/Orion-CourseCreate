@@ -16,7 +16,6 @@ export default async function authenticateJWT(req, res, next) {
     token = req.query.token;
   }
 
-  
   if (typeof token === 'string') {
     try {
       token = decodeURIComponent(token).trim();
@@ -27,7 +26,6 @@ export default async function authenticateJWT(req, res, next) {
     token = token.replace(/^["']+|["']+$/g, '').trim();
   }
 
-  
   if ((!token || req.query?.dev === 'true') && process.env.NODE_ENV !== 'production' && req.query?.dev === 'true') {
     const devUser = await User.findOne();
     if (devUser) {

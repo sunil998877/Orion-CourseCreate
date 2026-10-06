@@ -21,6 +21,7 @@ export type Course = {
     podcastScript?: {
         speaker: string;
         text: string;
+
     }[];
     podcastStatus?: 'idle' | 'generating' | 'completed' | 'failed';
     courseId?: string;
@@ -32,7 +33,7 @@ export const emptyCourse: Course = {
     audience: '',
     type: '',
     module: 0,
-    level: '',
+    level: 'Beginner',
     duration: { value: 0, unit: 'hours' },
     country: '',
     standards: '',

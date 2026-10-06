@@ -5,7 +5,10 @@ export const getModuleContents = async (req, res) => {
         const moduleNumber = req.query.moduleNumber !== undefined ? Number(req.query.moduleNumber) : undefined;
         if (!courseId)
             return res.status(400).json({ message: 'courseId required' });
-        const course = await Course.findOne({ userId: req.user?.id, courseId }).select('modules');
+        let course = await Course.findOne({ userId: req.user?.id, courseId }).select('modules').lean();
+        if (!course && /^[a-f0-9]{24}$/i.test(courseId)) {
+            course = await Course.findOne({ userId: req.user?.id, _id: courseId }).select('modules').lean();
+        }
         if (!course)
             return res.status(404).json({ message: 'Content not found' });
         let mods = Array.isArray(course.modules) ? course.modules : [];

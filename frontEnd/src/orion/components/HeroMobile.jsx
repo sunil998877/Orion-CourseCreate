@@ -8,7 +8,7 @@ const HeroMobile = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0A0A0A] via-[#101010] to-[#0A0A0A] overflow-hidden pt-24 md:hidden">
-      
+
       <div className="w-full h-[400px] absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-[-279px] z-0">
         <Orb
           hoverIntensity={0.5}
@@ -17,8 +17,6 @@ const HeroMobile = () => {
           forceHoverState={false}
         />
       </div>
-      
-      
 
       <div className="container mx-auto px-6 relative z-20 mb-10">
         <div className="flex justify-center">
@@ -37,7 +35,6 @@ const HeroMobile = () => {
               </span>
             </h2>
 
-            
             <div className="mt-8 animate-on-scroll fade-in-up delay-200">
               <div className="flex items-center justify-center gap-4">
                 <a

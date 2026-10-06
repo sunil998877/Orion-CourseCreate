@@ -131,7 +131,6 @@ const Pricing = () => {
           ))}
         </div>
 
-        
         <div
           ref={enterpriseRef}
           className="mt-16 bg-gradient-to-br from-[#1A1A1A] to-[#101010] border border-[#2A2A2A] hover:border-[#4AF2A1] p-8 rounded-2xl flex flex-col md:flex-row justify-between items-center animate-on-scroll fade-in-up transition-all duration-300 hover:shadow-[0_0_20px_rgba(74,242,161,0.4),0_0_40px_rgba(74,242,161,0.2)] hover:-translate-y-1"
@@ -168,4 +167,3 @@ const Pricing = () => {
 };
 
 export default Pricing;
-

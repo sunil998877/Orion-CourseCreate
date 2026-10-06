@@ -43,6 +43,8 @@ type Course = {
     }[];
     podcastStatus?: 'idle' | 'generating' | 'completed' | 'failed';
     courseId?: string;
+    heroImageUrl?: string;
+    heroImageTitle?: string;
     createdAt?: string;
     modules?: {
         gammaUrl?: string;
@@ -66,7 +68,7 @@ function writeCachedCourses(list: Course[]) {
     try {
         sessionStorage.setItem(COURSES_CACHE_KEY, JSON.stringify(list));
     } catch {
-        /* ignore quota errors */
+
     }
 }
 
@@ -76,7 +78,7 @@ const emptyCourse: Course = {
     audience: '',
     type: '',
     module: 0,
-    level: '',
+    level: 'Beginner',
     duration: { value: 0, unit: 'hours' },
     country: '',
     standards: '',
@@ -187,6 +189,7 @@ export const HeroPage: React.FC = () => {
             country: course.country || '',
             standards: course.standards || '',
             courseId: course.courseId || course._id,
+            courseForge: (course as any).courseForge || {},
         });
         setView('details');
     };
@@ -246,21 +249,29 @@ export const HeroPage: React.FC = () => {
                 <ArrowLeft className="w-4 h-4"/>
                 Back to Dashboard
               </button>
-              <div className="flex flex-col xl:flex-row gap-8 xl:gap-12 min-h-[600px] items-start">
-                <div className="w-full xl:flex-[0_0_66.6%]">
+              <div className="flex flex-col items-stretch gap-8 xl:flex-row xl:gap-12">
+                <div className="flex w-full flex-col gap-6 xl:flex-[0_0_66.6%]">
                   <CourseDetails course={courseData} generation={generation} audioPlayer={audioPlayer} podcastPlayer={podcastPlayer} showAudioPlayer={showAudioPlayer} setShowAudioPlayer={setShowAudioPlayer} showTranscript={showTranscript} setShowTranscript={setShowTranscript} showPodcastPlayer={showPodcastPlayer} setShowPodcastPlayer={setShowPodcastPlayer} showPodcastTranscript={showPodcastTranscript} setShowPodcastTranscript={setShowPodcastTranscript} onGenerateEbook={generation.handleGenerateEbook} onDownloadEbook={() => downloads.downloadEbook(courseData.ebookUrl, courseData.title)} onGenerateAudio={() => setShowAudioModal(true)} onGeneratePodcast={() => setShowPodcastModal(true)} onOpenPublisher={() => {
                     if (!publisherName) setPublisherName(localStorage.getItem('username') || '');
                     if (!userEmail) setUserEmail(localStorage.getItem('email') || '');
                     setShowPublisherModal(true);
+                  }} onHeroImage={(hero) => {
+                    const id = courseData.courseId || courseData._id;
+                    setCourseData((prev) => ({ ...prev, ...hero }));
+                    setCourses((prev) => {
+                        const next = prev.map((item) => (item.courseId === id || item._id === id ? { ...item, ...hero } : item));
+                        writeCachedCourses(next);
+                        return next;
+                    });
                   }}/>
-                  <section className="mt-16">
-                    <div className="bg-black/50 border border-white/10 rounded-2xl p-6 shadow-lg ring-1 ring-lime-400/10 max-md:p-3">
-                      <ModuleGen />
-                    </div>
-                  </section>
                 </div>
                 <OrionGuidance />
               </div>
+              <section className="mt-8">
+                <div className="w-full bg-black/50 border border-white/10 rounded-2xl p-6 shadow-lg ring-1 ring-lime-400/10 max-md:p-3">
+                  <ModuleGen />
+                </div>
+              </section>
             </div>)}
         </main>
 

@@ -1,5 +1,6 @@
 import { OpenAI } from 'openai';
 import { handleOpenAIError } from '../../utils/openaiErrorHandler.js';
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'dummy-key' });
 export const generateCourseDescription = async (req, res) => {
     try {

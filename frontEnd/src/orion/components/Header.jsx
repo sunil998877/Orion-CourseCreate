@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { href: '#pricingSection', label: 'Pricing' },
   { href: '#testimonials', label: 'Testimonials' },
   { href: '#contact', label: 'Get Started' },
-  
+
 ];
 
 const Header = () => {
@@ -82,7 +82,7 @@ const Header = () => {
 
   return (
     <>
-      
+
       <header
         ref={headerRef}
         id="header"
@@ -182,7 +182,6 @@ const Header = () => {
         </div>
       </header>
 
-      
       <div
         className={`fixed left-0 right-0 w-full z-40 flex h-12 items-center justify-between transition-all duration-300 md:h-14 ${
           isScrolled
@@ -217,7 +216,6 @@ const Header = () => {
         </div>
       </div>
 
-      
       <div
         id="mobile-menu"
         className={`fixed top-0 right-0 z-50 flex h-full w-4/5 max-w-sm transform flex-col border-l border-lime-500/20 bg-gradient-to-b from-[#0A0A0A] to-[#101010] p-8 shadow-2xl transition-transform duration-300 lg:hidden ${

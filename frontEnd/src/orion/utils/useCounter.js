@@ -51,4 +51,3 @@ export const useCounter = (target, duration = 1500) => {
 
   return counterRef;
 };
-

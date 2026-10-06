@@ -1,40 +1,108 @@
-
-import { Loader2, Zap, Monitor, BookOpen, Eye } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronDown, Loader2, Zap, Monitor, BookOpen, Eye, Trash2, Check, X } from 'lucide-react';
 import { useCourseCreator } from '../../contextAPI/CourseCreatorContext';
 import { GAMMA_THEMES } from '../../utils/themes';
+import { ModuleAssessmentTask } from './ModuleAssessmentTask';
 
 const ModuleCard: React.FC<{
   mod: any;
-}> = ({ mod }) => {
+  expanded: boolean;
+  onSelect: () => void;
+}> = ({ mod, expanded, onSelect }) => {
   const {
-    moduleRefs, highlightedModuleId, moduleCredits, courseData, themeByModule,
+    moduleRefs, highlightedModuleId, moduleCredits, courseData, previewModules, themeByModule,
     setSelectedModuleForTheme, setIsThemeModalOpen, openContentPreview,
     openSlidesPreview, isPreviewLoading, orionUrlByModule, handleGenerateSlidesOrion,
-    generatingSlidesModuleId, slideGenerationProgress
+    generatingSlidesModuleId, slideGenerationProgress, deleteModule
   } = useCourseCreator();
+
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
                               <div
                                 key={mod.id}
                                 ref={(el) => (moduleRefs.current[mod.id] = el)}
-                                className={`bg-gray-900/40 backdrop-blur-md p-10 md:p-12 rounded-[2.5rem] border flex flex-col hover:border-lime-500/30 transition-all duration-300 group/card shadow-2xl hover:shadow-lime-500/10 ${highlightedModuleId === mod.id ? 'animate-blink-module' : 'border-gray-700/30'
-                                  }`}
+                                className={`rounded-2xl border bg-gray-900/40 p-4 transition-all duration-300 ${expanded ? 'border-lime-500/40 shadow-lg shadow-lime-500/10' : 'border-gray-700/30 hover:border-lime-500/20'} ${highlightedModuleId === mod.id ? 'animate-blink-module' : ''}`}
                               >
-                                <div className="flex justify-between items-start mb-4">
-                                  <h4 className="font-black text-3xl text-white flex items-center gap-4">
-                                    <span className="px-5 h-12 rounded-2xl bg-lime-500/10 text-lime-500 flex items-center justify-center text-lg font-black ring-1 ring-lime-500/20 whitespace-nowrap">Module {mod.id}</span>
-                                    {mod.title}
-                                  </h4>
-                                </div>
-                                <div className="flex items-center gap-4 mb-8">
-                                  <div className="px-5 py-2 rounded-full bg-lime-500/10 border border-lime-500/20 text-xs font-black text-lime-400 uppercase tracking-widest flex items-center gap-2 shadow-sm">
-                                    <Zap size={16} className="fill-lime-400" /> {moduleCredits[mod.id] || 0} Credits
+                                <div className="flex w-full items-center justify-between gap-3 text-left">
+                                  <button
+                                    type="button"
+                                    onClick={onSelect}
+                                    className="flex-1 min-w-0 text-left focus:outline-none group/title"
+                                  >
+                                    <span className="flex items-center gap-3">
+                                      <span className="flex h-9 min-w-9 items-center justify-center rounded-xl bg-lime-500/10 px-2 text-sm font-black text-lime-400 ring-1 ring-lime-500/20">Module {mod.id}</span>
+                                      <span className="truncate text-base font-bold text-white group-hover/title:text-lime-400 transition-colors">{mod.title}</span>
+                                    </span>
+                                    <span className="mt-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                                      <Zap size={12} className="fill-lime-400 text-lime-400" /> {moduleCredits[mod.id] || 0} credits
+                                      <span className="text-gray-700">·</span>
+                                      {mod.lessons.length} lessons
+                                    </span>
+                                  </button>
+
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    {confirmDelete ? (
+                                      <div
+                                        className="flex items-center gap-2 bg-red-950/80 border border-red-500/40 rounded-xl px-2.5 py-1.5 shadow-lg shadow-red-950/50"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <span className="text-[11px] font-black uppercase tracking-wider text-red-300">Delete?</span>
+                                        <button
+                                          type="button"
+                                          aria-label="Confirm delete"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (deleteModule) {
+                                              deleteModule(mod.id);
+                                            }
+                                            setConfirmDelete(false);
+                                          }}
+                                          className="p-1 rounded-lg bg-red-600 hover:bg-red-500 text-white transition-all active:scale-90"
+                                          title="Yes, delete module"
+                                        >
+                                          <Check size={13} strokeWidth={3} />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          aria-label="Cancel delete"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setConfirmDelete(false);
+                                          }}
+                                          className="p-1 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-all active:scale-90"
+                                          title="Cancel"
+                                        >
+                                          <X size={13} strokeWidth={3} />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        aria-label={`Delete Module ${mod.id}`}
+                                        title="Delete module"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setConfirmDelete(true);
+                                        }}
+                                        className="p-2 rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all active:scale-95"
+                                      >
+                                        <Trash2 size={16} />
+                                      </button>
+                                    )}
+
+                                    <button
+                                      type="button"
+                                      onClick={onSelect}
+                                      aria-label={expanded ? 'Collapse module' : 'Expand module'}
+                                      className="p-2 rounded-xl text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all"
+                                    >
+                                      <ChevronDown className={`h-5 w-5 shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+                                    </button>
                                   </div>
-                                  <div className="px-5 py-2 rounded-full bg-gray-800/50 border border-gray-700/30 text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                    <Monitor size={16} /> {mod.lessons.length} LESSONS
-                                  </div>
                                 </div>
-                                <div className="space-y-2 mb-8 flex-1">
+                                {expanded && <>
+                                <div className="mt-4 space-y-2">
                                   {mod.lessons.map((lesson:any, idx:any) => (
                                     <p key={idx} className="text-base text-gray-400 flex items-center gap-4 group/lesson transition-colors hover:text-gray-200 py-1">
                                       <span className="w-2 h-2 bg-gray-700 rounded-full group-hover/lesson:bg-lime-500 transition-colors" /> {lesson.title}
@@ -112,10 +180,17 @@ const ModuleCard: React.FC<{
                                             )}
                                           </div>
                                         </button>
+                                        <ModuleAssessmentTask
+                                          assessment={courseData.courseForge?.assessment}
+                                          moduleIndex={Math.max(0, Number(mod.id) - 1)}
+                                          moduleCount={previewModules.length || Number(courseData.module) || 0}
+                                          moduleTitle={mod.title}
+                                        />
                                       </div>
                                     </div>
                                   );
                                 })()}
+                                </>}
                               </div>
   );
 };

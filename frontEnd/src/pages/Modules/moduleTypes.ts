@@ -1,6 +1,7 @@
 export type ModuleState = {
   id: number;
   Module: string;
+  title?: string;
   Content: any;
   slide: any;
   isGenerating: boolean;

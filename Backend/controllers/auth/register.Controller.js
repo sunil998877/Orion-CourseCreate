@@ -100,7 +100,7 @@ export const register = async (req, res) => {
             const base64 = req.file.buffer.toString('base64');
             avatar = `data:${mime};base64,${base64}`;
         }
-        
+
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const skipOtp = skipRegistrationOtp();
         const newUser = new User({

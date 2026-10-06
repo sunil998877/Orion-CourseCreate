@@ -27,7 +27,6 @@ const ThemeModal: React.FC = () => {
                         </button>
                     </div>
 
-
                     <div className="p-6 overflow-y-auto custom-scrollbar">
 
                         <div className="flex flex-wrap gap-2 mb-8">
@@ -35,7 +34,6 @@ const ThemeModal: React.FC = () => {
                                     {cat}
                                 </button>))}
                         </div>
-
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             {GAMMA_THEMES.filter(t => themeFilter === 'All' || t.category === themeFilter).map(theme => (<motion.button key={theme.id} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }} onClick={() => {

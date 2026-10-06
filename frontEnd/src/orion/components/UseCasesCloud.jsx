@@ -21,7 +21,7 @@ const UseCasesCloud = () => {
 
   return (
     <section className="py-20 bg-[#0A0A0A] relative overflow-hidden">
-      
+
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-lime-500/5 rounded-full blur-[100px] pointer-events-none -z-0"></div>
 
       <div className="container mx-auto px-6 relative z-10">
@@ -34,14 +34,14 @@ const UseCasesCloud = () => {
           </p>
         </div>
 
-        <div 
-          ref={cloudRef} 
+        <div
+          ref={cloudRef}
           className="animate-on-scroll fade-in-up delay-200 max-w-5xl mx-auto flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-5"
         >
           {useCases.map((useCase, index) => {
             const delay = `delay-${(index % 5 + 1) * 100}`;
             return (
-              <div 
+              <div
                 key={index}
                 className={`animate-on-scroll fade-in-up ${delay} flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-[#121212] border border-gray-800 hover:border-lime-500 hover:shadow-[0_0_15px_rgba(132,204,22,0.3)] transition-all duration-300 group cursor-default`}
               >

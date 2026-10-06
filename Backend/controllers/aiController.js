@@ -6,3 +6,4 @@ export * from './ai/getModuleContents.Controller.js';
 export * from './ai/generateModuleDraft.Controller.js';
 export * from './ai/generateSingleModule.Controller.js';
 export * from './ai/generateAllModulesDraft.Controller.js';
+export * from './ai/courseForge.Controller.js';

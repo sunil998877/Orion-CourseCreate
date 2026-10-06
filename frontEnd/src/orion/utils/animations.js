@@ -62,4 +62,3 @@ export const initCounterAnimations = () => {
     counters.forEach((el) => counterObserver.unobserve(el));
   };
 };
-

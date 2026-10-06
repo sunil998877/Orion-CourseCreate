@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AnimatedBackground from './AnimatedBg';
 import HeroImage from '../assests/avatar.png';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import PageTransition from '../components/PageTransition';
 import { API_BASE } from '../utils/api';
 import GoogleAuthButton from '../components/GoogleAuthButton';
@@ -339,9 +339,9 @@ function App() {
                     </div>
 
                     <div className="text-center">
-                      <a href="/registration" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
+                      <Link to="/registration" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
                         Create a new account
-                      </a>
+                      </Link>
                     </div>
 
                   </form>

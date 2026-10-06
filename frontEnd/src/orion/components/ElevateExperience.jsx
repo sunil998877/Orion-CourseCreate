@@ -81,22 +81,20 @@ const ElevateExperience = () => {
                 className={`animate-on-scroll fade-in-up ${delay} group`}
               >
                 <div className="relative h-full p-8 rounded-2xl bg-[#121212] border border-gray-800 hover:border-transparent transition-all duration-500 overflow-hidden">
-                  
+
                   <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
-                  
-                  
+
                   <div className="absolute inset-0 overflow-hidden">
                     <div className={`absolute top-4 right-4 w-2 h-2 bg-gradient-to-br ${gradient} rounded-full opacity-0 group-hover:opacity-100 animate-ping`} style={{ animationDelay: `${index * 0.2}s` }}></div>
                     <div className={`absolute bottom-4 left-4 w-3 h-3 bg-gradient-to-br ${gradient} rounded-full opacity-0 group-hover:opacity-100 animate-ping`} style={{ animationDelay: `${index * 0.3}s` }}></div>
                   </div>
 
                   <div className="relative z-10">
-                    
+
                     <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${gradient} mb-6 text-black group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
                       {benefit.icon}
                     </div>
 
-                    
                     <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-lime-400 group-hover:to-lime-600 transition-all duration-300" style={{ fontFamily: "'Outfit', sans-serif" }}>
                       {benefit.title}
                     </h3>
@@ -105,7 +103,6 @@ const ElevateExperience = () => {
                     </p>
                   </div>
 
-                  
                   <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000`}></div>
                 </div>
               </div>

@@ -72,11 +72,11 @@ const WhyChooseORIONSupport = () => {
                   className={`animate-on-scroll fade-in-up ${delay} group`}
                 >
                   <div className="relative h-full p-8 rounded-2xl bg-gradient-to-br from-[#121212] to-[#0A0A0A] border border-gray-800 hover:border-lime-500/50 transition-all duration-500 overflow-hidden">
-                    
+
                     <div className="absolute inset-0 bg-gradient-to-br from-lime-500/0 via-lime-500/5 to-lime-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                     <div className="relative z-10">
-                      
+
                       <div className="flex items-center justify-between mb-6">
                         <span className="text-6xl font-bold text-gray-800 group-hover:text-lime-500/20 transition-colors duration-300" style={{ fontFamily: "'Outfit', sans-serif" }}>
                           {reason.number}
@@ -93,7 +93,6 @@ const WhyChooseORIONSupport = () => {
                         </div>
                       </div>
 
-                      
                       <div className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full z-0 transition-all duration-700 animate-float">
                         <img
                           src='orion 2.png'
@@ -101,7 +100,6 @@ const WhyChooseORIONSupport = () => {
                         />
                       </div>
 
-                      
                       <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-lime-400 transition-colors duration-300" style={{ fontFamily: "'Outfit', sans-serif" }}>
                         {reason.title}
                       </h3>
@@ -110,7 +108,6 @@ const WhyChooseORIONSupport = () => {
                       </p>
                     </div>
 
-                    
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-lime-500 via-lime-600 to-lime-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
                   </div>
                 </div>
@@ -124,4 +121,3 @@ const WhyChooseORIONSupport = () => {
 };
 
 export default WhyChooseORIONSupport;
-

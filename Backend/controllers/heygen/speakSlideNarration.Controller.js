@@ -4,11 +4,6 @@ import path from 'path';
 
 const MAX_TEXT_LEN = 2500;
 
-/**
- * Generate (or return cached) ElevenLabs MP3 for a slide narration script.
- * POST body: { text: string, voiceId?: string }
- * Response: { audioUrl: string }
- */
 export const speakSlideNarration = async (req, res) => {
     try {
         const text = String(req.body?.text || '').replace(/\s+/g, ' ').trim();
@@ -29,9 +24,19 @@ export const speakSlideNarration = async (req, res) => {
             });
         }
 
-        const voiceId = String(
-            req.body?.voiceId || process.env.VOICE_ID || 'pNInz6obpgDQGcFmaJgB'
-        ).trim();
+        const requestedVoice = String(req.body?.voiceId || '').trim();
+        const gender = String(req.body?.gender || '').toLowerCase().trim();
+        const isHeyGenHexId = /^[0-9a-fA-F]{30,36}$/.test(requestedVoice);
+
+        const DEFAULT_MALE_VOICE = process.env.VOICE_ID || 'pNInz6obpgDQGcFmaJgB';
+        const DEFAULT_FEMALE_VOICE = '21m00Tcm4TlvDq8ikWAM';
+
+        let voiceId = DEFAULT_MALE_VOICE;
+        if (gender === 'female') {
+            voiceId = DEFAULT_FEMALE_VOICE;
+        } else if (requestedVoice && !isHeyGenHexId && requestedVoice.length >= 15 && requestedVoice.length <= 25) {
+            voiceId = requestedVoice;
+        }
 
         const hash = crypto
             .createHash('sha256')

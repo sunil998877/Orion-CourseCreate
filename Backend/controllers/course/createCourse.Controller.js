@@ -1,6 +1,7 @@
 import Course from '../../models/courseModel.js';
 import User from '../../models/userModel.js';
 import { randomUUID } from 'crypto';
+import { ensure20AssessmentQuestions } from '../../utils/assessmentUtils.js';
 export const createCourse = async (req, res) => {
     console.log("Controller Hit - createCourse");
     try {
@@ -17,6 +18,19 @@ export const createCourse = async (req, res) => {
         if (!source || !source.title || String(source.title).trim().length === 0) {
             return res.status(400).json({ message: 'Invalid course data: missing title' });
         }
+        const forge = source.courseForge && typeof source.courseForge === 'object' ? { ...source.courseForge } : {};
+        const mCount = Number(source.module) || Number(source.moduleCount) || (Array.isArray(source.modules) ? source.modules.length : 0) || 5;
+        let safeModules = Array.isArray(source.modules) && source.modules.length > 0
+            ? source.modules
+            : [];
+        if (safeModules.length < mCount) {
+            safeModules = Array.from({ length: mCount }, (_, idx) => ({
+                moduleNumber: idx + 1,
+                Title: `${source.title || 'Course'} - Module ${idx + 1}`
+            }));
+        }
+        forge.assessment = ensure20AssessmentQuestions(forge.assessment, { ...source, moduleCount: mCount, module: mCount }, safeModules);
+
         const normalized = {
             courseId: randomUUID(),
             title: String(source.title || ''),
@@ -33,6 +47,7 @@ export const createCourse = async (req, res) => {
             industry: String(source.industry || ''),
             standards: String(source.standards || ''),
             courseStyle: String(source.courseStyle || 'Academic / Formal Style'),
+            courseForge: forge,
             createdAt: new Date()
         };
         const courseDoc = new Course({ userId: req.user.id, ...normalized });

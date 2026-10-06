@@ -1,6 +1,6 @@
 import express from 'express';
 import authenticateJWT from '../middlewares/authMiddleware.js';
-import { createCourse, saveCourseData, getUserCourses, deleteCourse, getCourseModules, searchCourses, getUserCourseData } from '../controllers/courseController.js';
+import { createCourse, saveCourseData, getUserCourses, deleteCourse, getCourseModules, searchCourses, getUserCourseData, generateCourseHero } from '../controllers/courseController.js';
 const router = express.Router();
 router.post('/create-course', authenticateJWT, createCourse);
 router.post('/save-course-data', authenticateJWT, saveCourseData);
@@ -9,6 +9,7 @@ router.delete('/delete-course/:courseId', authenticateJWT, deleteCourse);
 router.get('/get-course-modules/:courseId', authenticateJWT, getCourseModules);
 router.get('/search-courses', authenticateJWT, searchCourses);
 router.get('/get-user-course-data', authenticateJWT, getUserCourseData);
+router.post('/hero-image', authenticateJWT, generateCourseHero);
 router.post('/', authenticateJWT, createCourse);
 router.delete('/:courseId', authenticateJWT, deleteCourse);
 router.get('/search', authenticateJWT, searchCourses);

@@ -44,7 +44,7 @@ const DelightfulService = () => {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-          
+
           <div ref={leftRef} className="animate-on-scroll fade-in-left space-y-6">
             {features.map((feature, index) => (
               <div
@@ -69,22 +69,20 @@ const DelightfulService = () => {
             ))}
           </div>
 
-          
           <div ref={rightRef} className="hidden lg:block animate-on-scroll fade-in-right delay-200 relative">
             <div className="relative">
-              
+
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border-2 border-lime-500/20 rounded-full animate-pulse"></div>
 
-              
               <div className="relative z-10 flex items-center justify-center">
-                
+
                 <div className="absolute w-[450px] h-[450px] rounded-full bg-gradient-to-br from-[#121212] via-[#1A1A1A] to-[#0A0A0A] border-2 border-gray-800 shadow-2xl">
-                  
+
                   <div className="absolute inset-0 rounded-full" style={{
                     background: 'radial-gradient(circle, rgba(74, 242, 161, 0.1) 0%, rgba(74, 242, 161, 0.05) 50%, transparent 100%)'
                   }}></div>
                 </div>
-                
+
                 <div className="relative z-10 w-[400px] h-[400px] rounded-full overflow-hidden border-4 border-lime-500/40 shadow-2xl shadow-lime-500/20">
                   <img
                     src={ServicesImage}

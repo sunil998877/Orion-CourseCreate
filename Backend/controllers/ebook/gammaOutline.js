@@ -1,7 +1,7 @@
 export const buildGammaOutlineFromPayload = ({ moduleNumber, moduleContent, slideContent }) => {
   let outline = '';
   if (slideContent && typeof slideContent === 'object' && Array.isArray(slideContent.Slides) && slideContent.Slides.length) {
-    slideContent.Slides.forEach((sl, idx) => {
+        slideContent.Slides.forEach((sl, idx) => {
       const title = sl.Title || sl.title || 'Slide ' + (idx + 1);
       outline += '## ' + title + '\n';
       const bullets = Array.isArray(sl.Bullets) ? sl.Bullets : (Array.isArray(sl.BulletPoints) ? sl.BulletPoints : []);
@@ -9,12 +9,15 @@ export const buildGammaOutlineFromPayload = ({ moduleNumber, moduleContent, slid
         outline += '- ' + b + '\n';
       });
       if (sl.Content) outline += sl.Content + '\n';
-      outline += '\n';
+      if (sl.VisualPrompt) outline += 'Visual: ' + sl.VisualPrompt + '\n';
+      outline += '\n---\n\n';
     });
     return outline;
+
   }
   if (moduleContent && typeof moduleContent === 'object') {
     const c = moduleContent;
+
     const title = c.Title || c.title || `Module ${moduleNumber}`;
     const objectives = Array.isArray(c.Objectives) ? c.Objectives : (Array.isArray(c.objectives) ? c.objectives : []);
     const tc = Array.isArray(c.TeachingContent) ? c.TeachingContent : (Array.isArray(c.teachingContent) ? c.teachingContent : []);

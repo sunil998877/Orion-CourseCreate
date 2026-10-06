@@ -38,7 +38,6 @@ const BatchGenerationOverlay: React.FC = () => {
                                 </div>
                             </div>
 
-
                             <div className="shrink-0 mb-6 bg-gray-900/40 border border-white/5 p-4 rounded-2xl">
                                 <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
                                     <span>Batch Generation</span>
@@ -50,7 +49,6 @@ const BatchGenerationOverlay: React.FC = () => {
                             </div>
 
                             <div className="shrink-0 text-xs font-black uppercase tracking-widest text-gray-500 mb-3 text-left">Modules status</div>
-
 
                             <div className="flex-1 overflow-y-auto pr-2 space-y-2.5 custom-scrollbar min-h-0">
                                 {previewModules.map((mod: any) => {
@@ -76,7 +74,6 @@ const BatchGenerationOverlay: React.FC = () => {
                                                 </span>
                                             </div>
 
-
                                             <div className="shrink-0 flex items-center gap-2">
                                                 {isGenerated ? (<span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black uppercase text-emerald-400">
                                                         <Check className="w-3 h-3"/> Ready
@@ -90,7 +87,6 @@ const BatchGenerationOverlay: React.FC = () => {
             })}
                             </div>
                         </div>
-
 
                         <div className="flex-1 flex flex-col h-full min-h-0 bg-black/50 border border-white/[0.04] rounded-3xl overflow-hidden relative shadow-inner">
                             {(() => {

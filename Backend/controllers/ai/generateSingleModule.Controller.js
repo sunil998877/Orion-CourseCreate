@@ -2,6 +2,7 @@ import Course from '../../models/courseModel.js';
 import User from '../../models/userModel.js';
 import { OpenAI } from 'openai';
 import { handleOpenAIError } from '../../utils/openaiErrorHandler.js';
+import { buildModuleContentPrompt, buildSlidePrompt, sanitizeModuleContent, slidesNeedBlueprint } from '../../utils/courseForgePrompt.js';
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'dummy-key' });
 const addNotification = async (userId, title, message, type = 'info') => {
     try {
@@ -21,6 +22,9 @@ export const generateSingleModule = async (req, res) => {
         const course = await Course.findOne({ userId: req.user.id, courseId: String(courseId) });
         if (!course) {
             return res.status(404).json({ message: 'Course not found' });
+        }
+        if (slidesNeedBlueprint(course)) {
+            return res.status(409).json({ message: 'Approve the course blueprint before generating slides.' });
         }
         if (!course.modules)
             course.modules = [];
@@ -55,112 +59,28 @@ export const generateSingleModule = async (req, res) => {
                 const refineText = refinePrompt
                     ? `\nUSER REFINEMENT REQUEST: ${refinePrompt}\nPLEASE INCORPORATE THESE CHANGES INTO THE MODULE GENERATION.`
                     : '';
-                const prompt1 = `
-You are an expert curriculum designer.
-
-Course Title: ${course.title}
-Course Description: ${course.description}
-Target Audience: ${course.audience}
-Course Level: ${course.level}
-Country/Standards Context: ${course.standards || course.country}
-Course Style / Tone: ${course.courseStyle || 'Academic / Formal Style'} (Ensure the module output, teaching context, case studies, and quiz questions deeply reflect this specific style. e.g. for storytelling use narrative flow, for scenario-based use fictional characters/scenarios throughout the content)
-Previously generated modules (must not be repeated):
-${previousModulesText}
-${refineText}
-
-Create comprehensive module content for Module ${moduleNumber}.
-
-Return EXACTLY in this JSON format:
-{
-  "Title": "Module Title",
-  "Objectives": ["Objective 1", "Objective 2", "Objective 3"],
-  "TeachingContent": [
-    {
-      "Topics": "Topic Title",
-      "StandardsReference": "Relevant Standard",
-      "ContentPoints": ["Point 1", "Point 2", "Point 3"]
-    }
-  ],
-  "CaseStudy": {
-    "CaseStudyDescription": "Case study description",
-    "Questions": ["Question 1", "Question 2"],
-    "ModelAnswers": ["Answer 1", "Answer 2"]
-  },
-  "Quizzes": [
-    {
-      "QuizDescription": "Quiz Title",
-      "Questions": ["Question 1", "Question 2"],
-      "Answers": ["Answer 1", "Answer 2"]
-    }
-  ],
-  "VisualDescriptions": ["Visual 1", "Visual 2"],
-  "FurtherStudy": {
-    "ExternalLinks": ["https://link1.com"],
-    "BookReferences": ["Book 1"]
-  }
-}
-
-Rules:
-- Content MUST strictly relate to the course topic
-- Module ${moduleNumber} should logically follow previous modules
-- This module MUST focus on a distinct sub-topic that is NOT already covered in previous modules.
-- Title/Objectives/Teaching topics MUST be non-overlapping with prior modules.
-- Do NOT include text outside JSON
-`;
-                const prompt2 = `
-Create slides for Module ${moduleNumber} of the course "${course.title}".
-Course Style / Tone: ${course.courseStyle || 'Academic / Formal Style'} (Ensure the slides and their voiceover transcript text rigidly adhere to this style. If scenario-based, introduce characters in the visuals/transcript. If storytelling, write a narrative transcript. If academic, remain formal.)
-Previously generated modules (must not be repeated):
-${previousModulesText}
-${refineText}
-Return EXACTLY this JSON:
-{
-  "Slides": [
-    { "SlideNumber": 1, "Title": "", "Bullets": ["", ""], "Content": "", "VisualPrompt": "", "Transcript": "" },
-    { "SlideNumber": 2, "Title": "", "Bullets": ["", ""], "Content": "", "VisualPrompt": "", "Transcript": "" },
-    { "SlideNumber": 3, "Title": "", "Bullets": ["", ""], "Content": "", "VisualPrompt": "", "Transcript": "" },
-    { "SlideNumber": 4, "Title": "", "Bullets": ["", ""], "Content": "", "VisualPrompt": "", "Transcript": "" },
-    { "SlideNumber": 5, "Title": "", "Bullets": ["", ""], "Content": "", "VisualPrompt": "", "Transcript": "" },
-    { "SlideNumber": 6, "Title": "", "Bullets": ["", ""], "Content": "", "VisualPrompt": "", "Transcript": "" },
-    { "SlideNumber": 7, "Title": "", "Bullets": ["", ""], "Content": "", "VisualPrompt": "", "Transcript": "" },
-    { "SlideNumber": 8, "Title": "", "Bullets": ["", ""], "Content": "", "VisualPrompt": "", "Transcript": "" },
-    { "SlideNumber": 9, "Title": "", "Bullets": ["", ""], "Content": "", "VisualPrompt": "", "Transcript": "" },
-    { "SlideNumber": 10, "Title": "", "Bullets": ["", ""], "Content": "", "VisualPrompt": "", "Transcript": "" }
-  ]
-}
-Requirements:
-- Produce EXACTLY 10 slides numbered 1 to 10.
-- Each slide MUST include Title, Bullets (3-6 items), Content (short paragraph), VisualPrompt (clear visual description), and Transcript.
-- TRANSCRIPT RULES — CRITICAL (this text is fed directly to a professional TTS engine for a commercial-grade voicebook):
-
-  CHARACTER LENGTH — transcripts MUST follow these EXACT character count targets based on the slide's topic. You MUST automatically read and evaluate the topic to determine the length. Do NOT write the same length for every slide:
-    • Introductions, Conclusions, or Transitional Slides: 600–900 characters. Keep it punchy and energetic. Set the scene, build anticipation, or summarize reflectively with emotional resonance.
-    • Core Concepts, Deep Dives, and Complex Topics (Slides requiring more explanation): 1800–2500+ characters EACH. This is mandatory for professional educational depth. Do NOT be brief. Write as if this is the core of a best-selling audiobook. Fully explain the concept, provide multiple layered examples, walk through complex implications, and use analogies that simplify the abstract.
-    • Case Studies or Scenarios: 1500–2000 characters. Present the scenario in detail, introduce characters, walk through it step-by-step, and draw the lesson clearly.
-    • Quiz / Knowledge Check: 500–800 characters. Read the question, list options with a pause cue ("..."), reveal and provide a deep explanation for the answer.
-
-  CHARACTER-DRIVEN NARRATION (CRITICAL):
-    • Every script MUST feature a character or persona (e.g., an expert mentor, a relatable learner like 'Alex', or a professional advisor).
-    • The narration must feel like a "journey" or a "consultancy session", not a textbook reading.
-    • Even for formal styles, use a "Professional Advisor" persona who shares insights and real-world wisdom.
-    • Incorporate the character's perspective into every slide's transcript to maintain engagement and continuity.
-
-  STYLE:
-    • Write NATURAL SPOKEN PROSE only — no bullet reading, no numbered lists, no headers, no markdown.
-    • Vary sentence length deliberately: short punchy sentences for emphasis, longer flowing ones for explanation.
-    • Use smooth spoken transitions BETWEEN sentences: (e.g. "Think about it this way...", "Here's what makes this so powerful...", "Let's bring this to life with a real example...", "Building on that idea...", "Now, this is where most people miss the point...").
-    • Never start two consecutive slides with the same opening word or phrase.
-    • Tone MUST match the Course Style: ${course.courseStyle || 'Academic / Formal Style'}.
-      - Academic/Formal: authoritative yet conversational advisor, evidence-grounded, no slang.
-      - Storytelling: immersive narrative, vivid language, emotional beats, character-led.
-      - Scenario-based: a named character drives the narration — every concept is a plot moment in their journey.
-    • No slide numbers, no labels like "In this slide" or "As shown here" in the Transcript text.
-
-- Use professional, educational language appropriate for ${course.level} learners.
-- Stay strictly on the topic of Module ${moduleNumber}.
-- Every slide title and bullet set MUST be different from previous modules.
-- Do NOT include any text outside the JSON object.
-`;
+                const prompt1 = buildModuleContentPrompt({
+                    title: course.title,
+                    description: course.description,
+                    audience: course.audience,
+                    level: course.level,
+                    industry: course.industry,
+                    standards: course.standards || course.country,
+                    courseStyle: course.courseStyle || 'Academic / Formal Style',
+                    previousModulesText,
+                    refineText,
+                    moduleNumber,
+                    courseData: course
+                });
+                const prompt2 = buildSlidePrompt({
+                    title: course.title,
+                    courseStyle: course.courseStyle || 'Academic / Formal Style',
+                    previousModulesText,
+                    refineText,
+                    moduleNumber,
+                    level: course.level,
+                    courseData: course
+                });
                 const instructions1 = refinePrompt
                     ? `Update the module content according to this request: "${refinePrompt}". Return the full module object in the specified JSON format.`
                     : 'Return a JSON object with the specified structure.';
@@ -210,7 +130,7 @@ Requirements:
                         Bullets: Array.isArray(sl.Bullets) ? sl.Bullets : Array.isArray(sl.BulletPoints) ? sl.BulletPoints : [],
                         Content: typeof sl.Content === 'string' ? sl.Content : '',
                         VisualPrompt: typeof sl.VisualPrompt === 'string' ? sl.VisualPrompt : '',
-                        Transcript: typeof sl.Transcript === 'string' ? sl.Transcript : ''
+                        Transcript: ''
                     }));
                     if (s.length < 10) {
                         for (let i = s.length; i < 10; i++) {
@@ -220,7 +140,7 @@ Requirements:
                                 Bullets: ["Key concept reinforcement", "Detailed analysis point", "Practical application example"],
                                 Content: "This slide provides further detail and practical context for the module topics, ensuring a comprehensive understanding of the core learning objectives.",
                                 VisualPrompt: "Educational infographic or diagram showing the relationship between module concepts.",
-                                Transcript: "This slide provides further detail and practical context for the module topics, ensuring a comprehensive understanding of the core learning objectives."
+                                Transcript: ''
                             });
                         }
                     }
@@ -247,6 +167,7 @@ Requirements:
                 if (finalIdx === -1)
                     return;
                 const mod = finalCourse.modules[finalIdx];
+                content = sanitizeModuleContent(content);
                 if (content) {
                     mod.Title = content.Title || content.title || `Module ${moduleNumber}`;
                     mod.Objectives = content.Objectives || content.objectives || [];
@@ -271,7 +192,7 @@ Requirements:
                             Bullets: ["Important module concept", "Practical implementation step", "Final review point"],
                             Content: "Reviewing the critical components of this module section to solidify the learner's understanding and prepare for the next phase of the course.",
                             VisualPrompt: "A summary graphic or conceptual illustration representing the module's key learning outcomes.",
-                            Transcript: "Reviewing the critical components of this module section to solidify the learner's understanding and prepare for the next phase of the course."
+                            Transcript: ''
                         });
                     }
                 }

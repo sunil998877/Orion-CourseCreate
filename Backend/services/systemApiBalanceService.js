@@ -32,6 +32,14 @@ const PROVIDER_DEFAULTS = {
         rechargeUrl: 'https://platform.openai.com/settings/organization/billing/overview',
         envKey: 'OPENAI_API_KEY',
     },
+    heygen: {
+        displayName: 'HeyGen (Avatar Video)',
+        unit: 'credits',
+        defaultBalance: 10,
+        lowCreditThreshold: 3,
+        rechargeUrl: 'https://app.heygen.com/settings?nav=Billing',
+        envKey: 'HEYGEN_API_KEY',
+    },
 };
 
 function getEffectiveKey(provider, doc = null) {
@@ -57,47 +65,62 @@ async function checkElevenLabsLive(record) {
 
     try {
         const start = Date.now();
+        let subData = null;
+
         const subRes = await fetch('https://api.elevenlabs.io/v1/user/subscription', {
             headers: { 'xi-api-key': key }
         });
-        const latency = Date.now() - start;
 
         if (subRes.ok) {
-            const data = await subRes.json();
-            const count = data.character_count ?? 0;
-            const limit = data.character_limit ?? 0;
+            subData = await subRes.json();
+        } else {
+            const userRes = await fetch('https://api.elevenlabs.io/v1/user', {
+                headers: { 'xi-api-key': key }
+            });
+            if (userRes.ok) {
+                const uJson = await userRes.json();
+                subData = uJson.subscription || uJson;
+            }
+        }
+
+        const latency = Date.now() - start;
+
+        if (subData && typeof subData.character_count === 'number') {
+            const count = subData.character_count ?? 0;
+            const limit = subData.character_limit ?? 10000;
             const remaining = Math.max(0, limit - count);
 
             record.balance = remaining;
             record.quotaLimit = limit;
             record.unit = 'characters';
             record.liveCheckSuccess = true;
-            record.liveCheckMessage = `Live quota synced (${latency}ms). Next reset: ${data.next_character_count_reset_unix ? new Date(data.next_character_count_reset_unix * 1000).toLocaleDateString() : 'N/A'}`;
+            record.liveCheckMessage = `Live quota synced (${latency}ms). Used ${count.toLocaleString()} / ${limit.toLocaleString()} chars`;
             record.status = remaining < record.lowCreditThreshold ? (remaining === 0 ? 'exhausted' : 'low_credits') : 'healthy';
             record.meta = {
-                tier: data.tier,
+                tier: subData.tier,
                 usedCharacters: count,
                 characterLimit: limit,
-                status: data.status,
-                voiceLimit: data.voice_limit,
+                status: subData.status,
+                voiceLimit: subData.voice_limit,
                 latencyMs: latency
             };
             return record;
         }
 
-        const errJson = await subRes.json().catch(() => ({}));
-        const isMissingPermissions = errJson.detail?.status === 'missing_permissions' ||
-            String(errJson.detail?.message || '').toLowerCase().includes('user_read');
+        const voiceRes = await fetch('https://api.elevenlabs.io/v1/voices', {
+            headers: { 'xi-api-key': key }
+        });
 
-        if (isMissingPermissions) {
+        if (voiceRes.ok) {
+            const vData = await voiceRes.json();
             record.liveCheckSuccess = true;
-            record.liveCheckMessage = "API key active for TTS. Grant 'user_read' permission in ElevenLabs console for live quota counter.";
-            if (record.balance === null || record.balance === undefined) {
-                record.balance = PROVIDER_DEFAULTS.elevenlabs.defaultBalance;
+            record.unit = 'characters';
+            if (record.balance === null || record.balance === undefined || record.balance <= 0) {
+                record.balance = 10000;
+                record.quotaLimit = 10000;
             }
-            record.status = (record.balance !== null && record.balance < record.lowCreditThreshold)
-                ? (record.balance <= 0 ? 'exhausted' : 'low_credits')
-                : 'healthy';
+            record.liveCheckMessage = `API key active & verified for TTS (${vData.voices?.length || 0} voices ready). Set exact quota via Edit Balance or grant 'user_read' in ElevenLabs console.`;
+            record.status = record.balance < record.lowCreditThreshold ? (record.balance <= 0 ? 'exhausted' : 'low_credits') : 'healthy';
             record.meta = {
                 ...record.meta,
                 hasUserReadScope: false,
@@ -107,6 +130,7 @@ async function checkElevenLabsLive(record) {
             return record;
         }
 
+        const errJson = await subRes.json().catch(() => ({}));
         record.liveCheckSuccess = false;
         record.liveCheckMessage = errJson.detail?.message || `ElevenLabs HTTP ${subRes.status}`;
         record.status = 'action_required';
@@ -177,23 +201,196 @@ async function checkOpenAILive(record) {
         record.status = 'not_configured';
         record.liveCheckSuccess = false;
         record.liveCheckMessage = 'OpenAI API key is not configured';
+        record.balance = 0;
         return record;
     }
 
     try {
         const start = Date.now();
+
+        // 1. Verify API key authentication with /v1/models
         const testRes = await fetch('https://api.openai.com/v1/models', {
             headers: { Authorization: `Bearer ${key}` }
         });
         const latency = Date.now() - start;
 
-        if (testRes.ok) {
-            record.liveCheckSuccess = true;
-            record.liveCheckMessage = `OpenAI API key active & authenticated (${latency}ms)`;
-            if (record.balance === null || record.balance === undefined) {
-                record.balance = PROVIDER_DEFAULTS.openai.defaultBalance;
+        if (!testRes.ok) {
+            const errJson = await testRes.json().catch(() => ({}));
+            record.liveCheckSuccess = false;
+            record.liveCheckMessage = errJson.error?.message || `OpenAI HTTP ${testRes.status}`;
+            record.status = 'action_required';
+            record.balance = 0;
+            return record;
+        }
+
+        // 2. Perform a live generation quota probe (1-token test) to check if credits are remaining
+        let quotaExhausted = false;
+        let quotaErrorMessage = '';
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 7000);
+            const probeRes = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${key}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    messages: [{ role: 'user', content: 'ping' }],
+                    max_tokens: 1
+                }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!probeRes.ok) {
+                const probeErr = await probeRes.json().catch(() => ({}));
+                const code = probeErr.error?.code || '';
+                const msg = probeErr.error?.message || '';
+                const isQuota = probeRes.status === 429 || 
+                                code === 'insufficient_quota' || 
+                                /credit|quota|billing/i.test(msg);
+                if (isQuota) {
+                    quotaExhausted = true;
+                    quotaErrorMessage = msg || '429: You have no credits remaining. Please recharge on OpenAI billing.';
+                }
             }
-            record.status = record.balance < record.lowCreditThreshold ? (record.balance <= 0 ? 'exhausted' : 'low_credits') : 'healthy';
+        } catch (probeErr) {
+            console.warn('[OpenAI Probe] Warning:', probeErr.message);
+        }
+
+        record.unit = 'tokens';
+
+        if (quotaExhausted) {
+            record.balance = 0;
+            record.quotaLimit = record.quotaLimit || 1000000;
+            record.status = 'exhausted';
+            record.liveCheckSuccess = false;
+            record.liveCheckMessage = quotaErrorMessage;
+            record.meta = {
+                ...record.meta,
+                latencyMs: latency,
+                authenticated: true,
+                quotaExhausted: true
+            };
+            return record;
+        }
+
+        // Key is active and has credits remaining
+        record.liveCheckSuccess = true;
+        record.liveCheckMessage = `OpenAI API key active & authenticated (${latency}ms)`;
+
+        if (record.balance === null || record.balance === undefined) {
+            record.balance = PROVIDER_DEFAULTS.openai.defaultBalance || 100000;
+            record.quotaLimit = 1000000;
+        }
+
+        record.status = record.balance < record.lowCreditThreshold 
+            ? (record.balance <= 0 ? 'exhausted' : 'low_credits') 
+            : 'healthy';
+
+        record.meta = {
+            ...record.meta,
+            latencyMs: latency,
+            authenticated: true,
+            quotaExhausted: false
+        };
+        return record;
+    } catch (err) {
+        record.liveCheckSuccess = false;
+        record.liveCheckMessage = `Network check failed: ${err.message}`;
+        record.status = 'action_required';
+    }
+
+    return record;
+}
+
+async function checkHeyGenLive(record) {
+    const key = getEffectiveKey('heygen', record);
+    record.keyConfigured = Boolean(key);
+    record.keyMasked = maskApiKey(key);
+    record.rechargeUrl = PROVIDER_DEFAULTS.heygen.rechargeUrl;
+
+    if (!key) {
+        record.status = 'not_configured';
+        record.liveCheckSuccess = false;
+        record.liveCheckMessage = 'HeyGen API key is not configured';
+        return record;
+    }
+
+    try {
+        const start = Date.now();
+        let remainingCredits = null;
+        let creditLimit = null;
+        let authOk = false;
+
+        try {
+            const meRes = await fetch('https://api.heygen.com/v3/users/me', {
+                headers: { 'X-Api-Key': key }
+            });
+            if (meRes.ok) {
+                authOk = true;
+                const meData = await meRes.json().catch(() => ({}));
+                const userObj = meData.data || meData;
+                if (userObj.wallet && typeof userObj.wallet.remaining_balance === 'number') {
+                    remainingCredits = userObj.wallet.remaining_balance;
+                } else if (userObj.subscription?.credits) {
+                    const creds = userObj.subscription.credits;
+                    remainingCredits = creds.premium_credits?.remaining ?? creds.remaining ?? creds.total;
+                    creditLimit = creds.premium_credits?.quota ?? creds.quota ?? creds.total;
+                }
+            }
+        } catch (_) {}
+
+        if (remainingCredits === null) {
+            try {
+                const qRes = await fetch('https://api.heygen.com/v2/user/remaining_quota', {
+                    headers: { 'X-Api-Key': key }
+                });
+                if (qRes.ok) {
+                    authOk = true;
+                    const qData = await qRes.json().catch(() => ({}));
+                    const val = qData.data?.remaining_quota ?? qData.remaining_quota;
+                    if (typeof val === 'number') {
+                        remainingCredits = val;
+                    }
+                }
+            } catch (_) {}
+        }
+
+        if (!authOk) {
+            try {
+                const avRes = await fetch('https://api.heygen.com/v2/avatars', {
+                    headers: { 'X-Api-Key': key }
+                });
+                if (avRes.ok) {
+                    authOk = true;
+                }
+            } catch (_) {}
+        }
+
+        const latency = Date.now() - start;
+
+        if (authOk) {
+            record.liveCheckSuccess = true;
+            record.unit = 'credits';
+
+            if (typeof remainingCredits === 'number') {
+                record.balance = remainingCredits;
+                if (creditLimit) record.quotaLimit = creditLimit;
+                record.liveCheckMessage = `Live HeyGen credits synced (${latency}ms)`;
+            } else {
+                if (record.balance === null || record.balance === undefined) {
+                    record.balance = PROVIDER_DEFAULTS.heygen.defaultBalance;
+                }
+                record.liveCheckMessage = `HeyGen API key active & verified (${latency}ms)`;
+            }
+
+            record.status = record.balance < record.lowCreditThreshold
+                ? (record.balance <= 0 ? 'exhausted' : 'low_credits')
+                : 'healthy';
+
             record.meta = {
                 ...record.meta,
                 latencyMs: latency,
@@ -202,9 +399,8 @@ async function checkOpenAILive(record) {
             return record;
         }
 
-        const errJson = await testRes.json().catch(() => ({}));
         record.liveCheckSuccess = false;
-        record.liveCheckMessage = errJson.error?.message || `OpenAI HTTP ${testRes.status}`;
+        record.liveCheckMessage = 'HeyGen API key authentication failed';
         record.status = 'action_required';
     } catch (err) {
         record.liveCheckSuccess = false;
@@ -216,7 +412,7 @@ async function checkOpenAILive(record) {
 }
 
 export async function ensureSystemApiBalances() {
-    const providers = ['gamma', 'openai', 'elevenlabs'];
+    const providers = ['gamma', 'openai', 'elevenlabs', 'heygen'];
     for (const provider of providers) {
         const existing = await SystemApiBalance.findOne({ provider });
         if (!existing) {
@@ -234,9 +430,54 @@ export async function ensureSystemApiBalances() {
                 keyMasked: maskApiKey(envVal),
                 keyConfigured: Boolean(envVal),
             });
-        } else if (existing.balance === null || existing.balance === undefined) {
-            existing.balance = PROVIDER_DEFAULTS[provider].defaultBalance;
-            await existing.save();
+        } else {
+            let changed = false;
+            if (existing.provider === 'openai') {
+                if (existing.balance === 500000 || existing.balance === null || existing.balance === undefined || existing.meta?.quotaExhausted) {
+                    await checkOpenAILive(existing);
+                    changed = true;
+                }
+                if (existing.unit !== 'tokens') {
+                    existing.unit = 'tokens';
+                    changed = true;
+                }
+                if (existing.status === 'low_credits' && existing.balance >= existing.lowCreditThreshold) {
+                    existing.status = 'healthy';
+                    changed = true;
+                }
+            } else if (existing.provider === 'elevenlabs') {
+                if (existing.unit !== 'characters') {
+                    existing.unit = 'characters';
+                    changed = true;
+                }
+                if (existing.balance === null || existing.balance === undefined) {
+                    existing.balance = 10000;
+                    existing.quotaLimit = 10000;
+                    changed = true;
+                }
+            } else if (existing.provider === 'gamma') {
+                if (existing.unit !== 'credits') {
+                    existing.unit = 'credits';
+                    changed = true;
+                }
+                if (existing.balance === null || existing.balance === undefined) {
+                    existing.balance = 400;
+                    changed = true;
+                }
+            } else if (existing.provider === 'heygen') {
+                if (existing.unit !== 'credits') {
+                    existing.unit = 'credits';
+                    changed = true;
+                }
+                if (existing.balance === null || existing.balance === undefined) {
+                    existing.balance = 10;
+                    existing.quotaLimit = 10;
+                    changed = true;
+                }
+            }
+            if (changed) {
+                await existing.save();
+            }
         }
     }
 }
@@ -248,12 +489,26 @@ export async function getAllApiBalances(runLiveCheck = false) {
     if (!runLiveCheck) {
         return records.map(r => {
             const fullKey = getEffectiveKey(r.provider, r);
+            let bal = r.balance !== null && r.balance !== undefined ? r.balance : PROVIDER_DEFAULTS[r.provider]?.defaultBalance ?? 0;
+            let unit = r.unit;
+            let stat = r.status;
+
+            if (r.provider === 'openai') {
+                unit = 'tokens';
+                if (stat === 'exhausted' || r.meta?.quotaExhausted || bal <= 0) {
+                    bal = 0;
+                    stat = 'exhausted';
+                }
+            }
+
             return {
                 ...r,
                 keyFull: fullKey,
                 keyConfigured: Boolean(fullKey),
                 keyMasked: maskApiKey(fullKey),
-                balance: r.balance !== null && r.balance !== undefined ? r.balance : PROVIDER_DEFAULTS[r.provider]?.defaultBalance ?? 0
+                unit,
+                balance: bal,
+                status: stat,
             };
         });
     }
@@ -269,6 +524,8 @@ export async function getAllApiBalances(runLiveCheck = false) {
             await checkGammaLive(doc);
         } else if (doc.provider === 'openai') {
             await checkOpenAILive(doc);
+        } else if (doc.provider === 'heygen') {
+            await checkHeyGenLive(doc);
         }
 
         if (doc.balance === null || doc.balance === undefined) {
@@ -355,6 +612,8 @@ export async function updateProviderApiKey(provider, apiKey) {
         await checkGammaLive(doc);
     } else if (doc.provider === 'openai') {
         await checkOpenAILive(doc);
+    } else if (doc.provider === 'heygen') {
+        await checkHeyGenLive(doc);
     }
 
     doc.lastCheckedAt = new Date();
@@ -363,3 +622,27 @@ export async function updateProviderApiKey(provider, apiKey) {
     obj.keyFull = trimmed;
     return obj;
 }
+
+export async function recordOpenAiQuotaExhausted(errorMessage = '') {
+    try {
+        await ensureSystemApiBalances();
+        const doc = await SystemApiBalance.findOne({ provider: 'openai' });
+        if (doc) {
+            doc.balance = 0;
+            doc.status = 'exhausted';
+            doc.liveCheckSuccess = false;
+            doc.liveCheckMessage = errorMessage || '429: You have no credits remaining. Please recharge on OpenAI billing.';
+            doc.lastSyncSource = 'generation_hook';
+            doc.lastCheckedAt = new Date();
+            doc.meta = {
+                ...doc.meta,
+                quotaExhausted: true,
+                lastQuotaExhaustedAt: new Date()
+            };
+            await doc.save();
+        }
+    } catch (err) {
+        console.warn('[OpenAI Exhaustion Sync] Failed to update balance record:', err.message);
+    }
+}
+

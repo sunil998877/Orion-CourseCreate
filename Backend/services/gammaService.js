@@ -99,7 +99,7 @@ SLIDE COUNT:
                     statusData.output?.creditsUsed ??
                     statusData.output?.creditCost ??
                     null;
-                
+
                 try {
                     const remaining = statusData.credits?.remaining ?? statusData.creditsRemaining ?? (typeof credits === 'object' ? credits?.remaining : null);
                     const deducted = statusData.credits?.deducted ?? (typeof credits === 'number' ? credits : credits?.deducted);

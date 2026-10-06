@@ -5,3 +5,4 @@ export * from './course/deleteCourse.Controller.js';
 export * from './course/getCourseModules.Controller.js';
 export * from './course/searchCourses.Controller.js';
 export * from './course/getUserCourseData.Controller.js';
+export * from './course/generateCourseHero.Controller.js';

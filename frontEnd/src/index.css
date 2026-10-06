@@ -662,3 +662,56 @@ body::-webkit-scrollbar {
     color: #e5e7eb;
   }
 }
+
+input.no-focus-outline,
+input.no-focus-outline:focus,
+input.no-focus-outline:focus-visible {
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: textfield !important;
+}
+
+input.no-focus-outline::-webkit-outer-spin-button,
+input.no-focus-outline::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+/* Hide scrollbar completely while keeping full scroll functionality */
+.step-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.step-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Course Video Slide Transitions */
+@keyframes slideInFromLeft {
+  0% { transform: translate3d(-100%, 0, 0); opacity: 0.6; }
+  100% { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+
+@keyframes slideOutToRight {
+  0% { transform: translate3d(0, 0, 0); opacity: 1; }
+  100% { transform: translate3d(100%, 0, 0); opacity: 0; }
+}
+
+@keyframes slideInFromRight {
+  0% { transform: translate3d(100%, 0, 0); opacity: 0.6; }
+  100% { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+
+@keyframes slideOutToLeft {
+  0% { transform: translate3d(0, 0, 0); opacity: 1; }
+  100% { transform: translate3d(-100%, 0, 0); opacity: 0; }
+}

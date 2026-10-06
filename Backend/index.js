@@ -102,6 +102,14 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000,
     },
 }));
+app.use((req, res, next) => {
+    if (req.path.startsWith('/audio/') || req.path.endsWith('.mp3')) {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    }
+    next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/courses', express.static(path.join(process.cwd(), 'courses')));
 app.use('/api', authRoutes);
@@ -126,7 +134,7 @@ app.use((err, req, res, next) => {
     if (res.headersSent)
         return next(err);
     if (err?.code === 'LIMIT_FILE_SIZE') {
-        return res.status(413).json({ message: 'File is too large. Maximum size is 2MB.' });
+        return res.status(413).json({ message: 'File is too large. Maximum size is 15MB.' });
     }
     console.error('Unhandled request error:', err);
     res.status(err.status || 500).json({
@@ -154,11 +162,16 @@ if (!process.env.VERCEL) {
                 const { renewAllDueSubscriptions } = await import('./services/creditService/planService.js');
                 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
                 const TIMEOUT_MINUTES = parseInt(process.env.RESERVATION_TIMEOUT_MINUTES) || 15;
-                cleanupStaleReservations({ maxAgeMinutes: TIMEOUT_MINUTES }).catch(e => console.error('[Cleanup Job Error]:', e.message));
-                setInterval(() => {
+                const runCreditMaintenance = () => {
+                    if (mongoose.connection.readyState !== 1) {
+                        console.warn('[Cleanup Job] Skipped: MongoDB is not connected');
+                        return;
+                    }
                     cleanupStaleReservations({ maxAgeMinutes: TIMEOUT_MINUTES }).catch(e => console.error('[Cleanup Job Error]:', e.message));
                     renewAllDueSubscriptions().catch(e => console.error('[Plan Renewal Job Error]:', e.message));
-                }, CLEANUP_INTERVAL_MS);
+                };
+                runCreditMaintenance();
+                setInterval(runCreditMaintenance, CLEANUP_INTERVAL_MS);
                 console.log(`Credit maintenance worker scheduled (Stale reservation cleanup every 5m, timeout: ${TIMEOUT_MINUTES}m)`);
             }
             catch (workerErr) {

@@ -21,4 +21,3 @@ router.get('/user', authenticateJWT, getUserProfile);
 router.post('/profile/avatar', upload.single('avatar'), authenticateJWT, updateAvatar);
 router.post('/logout', logout);
 export default router;
-

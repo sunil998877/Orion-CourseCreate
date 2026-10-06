@@ -174,7 +174,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex pt-16">
         <Sidebar />
 
-        <main className="flex-1 p-4 sm:p-6 min-w-0 md:ml-64">
+        <main className="min-w-0 flex-1 p-4 sm:p-6 md:ml-[250px]">
           <div className="w-full space-y-8">{children}</div>
         </main>
       </div>

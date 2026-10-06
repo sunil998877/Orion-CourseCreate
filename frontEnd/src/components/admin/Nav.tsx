@@ -75,13 +75,11 @@ export default function Nav() {
           <Menu className="h-4 w-4"/>
         </button>
 
-
         <div className="hidden md:flex">
           <SidebarTrigger className="h-9 w-9 rounded-lg border border-slate-200 bg-slate-100 text-slate-700 transition-all hover:border-lime-500/40 hover:bg-lime-500/10 hover:text-lime-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-lime-400/40 dark:hover:bg-lime-400/10 dark:hover:text-lime-400"/>
         </div>
 
         <div className="hidden h-5 w-[1px] bg-slate-200 dark:bg-white/10 md:block"/>
-
 
         <nav className="hidden items-center gap-1 sm:flex md:gap-2 max-md:hidden">
           {quickNavItems.map((item) => {
@@ -95,7 +93,6 @@ export default function Nav() {
         </nav>
       </div>
 
-
       <div className="flex items-center gap-3">
 
         <div className="relative flex items-center max-md:hidden">
@@ -106,23 +103,19 @@ export default function Nav() {
           </div>
         </div>
 
-
         <button type="button" onClick={() => toggleTheme()} aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"} aria-pressed={isDark} title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"} className="flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-2.5 text-slate-700 transition-colors hover:border-lime-500/40 hover:bg-lime-500/10 hover:text-lime-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-lime-400/40 dark:hover:bg-lime-400/10 dark:hover:text-lime-400 cursor-pointer max-md:h-9 max-md:w-9 max-md:justify-center max-md:px-0">
           {isDark ? (<Sun className="h-4 w-4 text-amber-400"/>) : (<Moon className="h-4 w-4 text-slate-700"/>)}
           <span className="hidden text-[11px] font-semibold sm:inline max-md:hidden">{isDark ? "Light" : "Dark"}</span>
         </button>
 
-
         <button type="button" onClick={() => navigate("/admin/settings")} title="Settings" className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-700 transition-colors hover:border-lime-500/40 hover:bg-lime-500/10 hover:text-lime-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-lime-400/40 dark:hover:bg-lime-400/10 dark:hover:text-lime-400 cursor-pointer max-md:hidden">
           <Settings className="h-4 w-4 transition-transform duration-200 hover:rotate-45"/>
         </button>
-
 
         <div className="relative" ref={dropdownRef}>
           <button type="button" onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-xs font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-200 hover:ring-2 hover:ring-slate-300 cursor-pointer dark:border-white/15 dark:bg-white/[0.06] dark:text-white/80 dark:hover:bg-white/10 dark:hover:ring-white/20">
             {initials}
           </button>
-
 
           {profileDropdownOpen && (<div className="absolute right-0 mt-2 w-56 origin-top-right rounded-2xl border border-slate-200 bg-white p-2 text-slate-800 shadow-2xl backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150 z-50 dark:border-white/10 dark:bg-[#0b1220]/95 dark:text-white">
 
@@ -140,7 +133,6 @@ export default function Nav() {
                   Orion System Settings
                 </button>
               </div>
-
 
               <div className="border-t border-slate-200 pt-1 dark:border-white/10">
                 <button type="button" onClick={handleLogout} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-red-500 transition-colors hover:bg-red-500/10 hover:text-red-600 cursor-pointer dark:text-red-400 dark:hover:text-red-300">

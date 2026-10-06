@@ -64,7 +64,6 @@ export const googleLogin = async (req, res) => {
             });
         }
 
-
         const email = String(googleProfile.email).trim().toLowerCase();
         const googleId = googleProfile.sub;
         const name = googleProfile.name || googleProfile.given_name || email.split('@')[0];

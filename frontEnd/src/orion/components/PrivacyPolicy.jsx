@@ -5,7 +5,7 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-6 py-12 max-w-4xl">
-        
+
         <div className="mb-8">
           <Link
             to="/"
@@ -29,7 +29,6 @@ const PrivacyPolicy = () => {
           </p>
         </div>
 
-        
         <div className="prose prose-lg max-w-none text-gray-700">
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Introduction</h2>
@@ -161,4 +160,3 @@ const PrivacyPolicy = () => {
 };
 
 export default PrivacyPolicy;
-

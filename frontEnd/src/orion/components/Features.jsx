@@ -173,7 +173,7 @@ const Features = () => {
 
         <div ref={containerRef} className="mt-20 max-w-6xl mx-auto animate-on-scroll fade-in">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            
+
             <div className="lg:col-span-4 animate-on-scroll fade-in-left delay-100">
               <div className="space-y-3" id="feature-list">
                 {Object.keys(featureData).map((key) => {
@@ -192,7 +192,6 @@ const Features = () => {
               </div>
             </div>
 
-            
             <div className="lg:col-span-8 animate-on-scroll fade-in-right delay-100">
               <div className="feature-content-wrapper min-h-[400px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -233,4 +232,3 @@ const Features = () => {
 };
 
 export default Features;
-

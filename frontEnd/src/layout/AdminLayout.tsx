@@ -15,7 +15,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </Sidebar>
         <div className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto bg-[var(--admin-page)] text-[var(--admin-text)]">
           <AdminNav />
-          <main className="flex-1 p-4 md:p-6 lg:p-8 text-[var(--admin-text)]">{children}</main>
+          <main className="w-full flex-1 p-4 md:p-6 lg:p-8 text-[var(--admin-text)]">{children}</main>
         </div>
       </SidebarProvider>
     </div>);

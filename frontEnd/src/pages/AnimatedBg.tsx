@@ -28,7 +28,6 @@ const AnimatedBackground: React.FC = () => {
             animation: 'move-grid 20s linear infinite'
         }}></div>
 
-
         <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-lime-500/20 rounded-full blur-[120px] animate-pulse-slow"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow delay-1000"></div>
         <div className="absolute top-[20%] left-[20%] w-[40%] h-[40%] bg-lime-400/10 rounded-full blur-[100px] animate-pulse-slow delay-500"></div>

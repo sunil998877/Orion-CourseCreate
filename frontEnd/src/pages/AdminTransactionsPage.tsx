@@ -56,7 +56,6 @@ export default function AdminTransactionsPage() {
       Notice: {error}
     </div>)}
 
-
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="relative flex-1 max-w-md">
         <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-white/40" />
@@ -71,7 +70,6 @@ export default function AdminTransactionsPage() {
         </button>))}
       </div>
     </div>
-
 
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
       <div className="overflow-x-auto">

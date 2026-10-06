@@ -401,7 +401,7 @@ export const deleteAdminContact = async (id: string) => {
 
 export interface AdminApiBalanceItem {
     _id?: string;
-    provider: 'gamma' | 'openai' | 'elevenlabs';
+    provider: 'gamma' | 'openai' | 'elevenlabs' | 'heygen';
     displayName: string;
     balance: number | null;
     unit: string;

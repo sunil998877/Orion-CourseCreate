@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Building2, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -237,7 +237,6 @@ function RegistrationPage() {
               <div className="w-full">
                 <div className="mt-3 rounded-2xl bg-black shadow-2xl ring-1 ring-white/5 transition-transform duration-300 hover:shadow-2xl border border-white/5 flex flex-col md:flex-row">
 
-
                   <div className="flex md:w-2/5 w-full items-center justify-center p-6">
                     <img src={HeroImage} alt="Character" className="max-w-[300px] max-h-[300px] max-md:max-w-[160px] max-md:max-h-[160px] w-auto h-auto rounded-xl object-contain"/>
                   </div>
@@ -282,7 +281,6 @@ function RegistrationPage() {
                         {errors.username && (<p className="mt-1.5 text-sm text-red-300">{errors.username}</p>)}
                       </div>
 
-
                       <div>
                         <label htmlFor="organisation" className="mb-1.5 block text-sm font-medium text-white">
                           Organisation Name
@@ -301,7 +299,6 @@ function RegistrationPage() {
                         {errors.organisation && (<p className="mt-1.5 text-sm text-red-300">{errors.organisation}</p>)}
                       </div>
 
-
                       <div>
                         <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-white">
                           Email address
@@ -319,7 +316,6 @@ function RegistrationPage() {
                         </div>
                         {errors.email && (<p className="mt-1.5 text-sm text-red-300">{errors.email}</p>)}
                       </div>
-
 
                       <div>
                         <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-white">
@@ -342,7 +338,6 @@ function RegistrationPage() {
                         {errors.password && (<p className="mt-1.5 text-sm text-red-300">{errors.password}</p>)}
                       </div>
 
-
                       <div className="w-full mt-6 flex items-center justify-center">
                         <button type="submit" disabled={isLoading} className={`
                           relative w-full rounded-lg
@@ -362,9 +357,9 @@ function RegistrationPage() {
                         <span>Already have an account?</span>
                       </div>
                       <div className="text-center">
-                        <a href="/" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
+                        <Link to="/login" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
                           Sign in to your account
-                        </a>
+                        </Link>
                       </div>
                     </form>) : (<div className="p-6 md:w-3/5 w-full flex flex-col justify-center">
                       <div className="space-y-1 mb-6">

@@ -13,18 +13,36 @@ import { isStepComplete } from '../utils/courseValidation';
 import { handleCreditApiFailure, handleCreditThrowable } from '../utils/creditErrors';
 import { containerVariants, itemVariants, stepVariants } from './courseCreatorAnimations';
 import { useCredits } from './CreditsContext';
+import { ensure20AssessmentQuestions } from '../utils/defaultAssessment';
 export const CourseCreatorContext = createContext<any>(null);
 export const useCourseCreator = () => {
     const context = useContext(CourseCreatorContext);
     if (!context) {
-        throw new Error('useCourseCreator must be used inside CourseCreatorProvider');
+        return {} as any;
     }
     return context;
 };
 export const CourseCreatorProvider: React.FC<{
     children: React.ReactNode;
 }> = ({ children }) => {
-    const [step, setStep] = useState(1);
+    const creatorSession = (() => {
+        try {
+            if (sessionStorage.getItem('resetCourseData') === 'true')
+                return null;
+            const raw = sessionStorage.getItem('orion_creator_session');
+            return raw ? JSON.parse(raw) : null;
+        }
+        catch {
+            return null;
+        }
+    })();
+    const [step, setStepState] = useState(() => {
+        const saved = Number(creatorSession?.step);
+        return [1, 2, 4, 5].includes(saved) ? saved : 1;
+    });
+    const setStep = (value: number | ((prev: number) => number)) => {
+        setStepState((prev) => typeof value === 'function' ? value(prev) : value);
+    };
     const [showValidation, setShowValidation] = useState(false);
     const { courseData, updateCourseData, resetCourseData } = useCourseData();
     const { refreshWallet } = useCredits();
@@ -33,8 +51,9 @@ export const CourseCreatorProvider: React.FC<{
     const [isGeneratingSlides, setIsGeneratingSlides] = useState(false);
     const [isGeneratingContent, setIsGeneratingContent] = useState(false);
     const [isBlueprinting, setIsBlueprinting] = useState(false);
-    const [hasBlueprint, setHasBlueprint] = useState(false);
-    const [previewModules, setPreviewModules] = useState<PreviewModule[]>([]);
+    const [courseForgeBusy, setCourseForgeBusy] = useState('');
+    const [hasBlueprint, setHasBlueprint] = useState(Boolean(creatorSession?.hasBlueprint));
+    const [previewModules, setPreviewModules] = useState<PreviewModule[]>(Array.isArray(creatorSession?.previewModules) ? creatorSession.previewModules : []);
     const [selectedModule, setSelectedModule] = useState<ModuleState | null>(null);
     const [selectedSlide, setSelectedSlide] = useState<ModuleState | null>(null);
     const [isPreviewLoading, setIsPreviewLoading] = useState(false);
@@ -46,9 +65,9 @@ export const CourseCreatorProvider: React.FC<{
     const [refinePromptText, setRefinePromptText] = useState('');
     const [urlInput, setUrlInput] = useState('');
     const [urlError, setUrlError] = useState<string | null>(null);
-    const [prefetchedContentMap, setPrefetchedContentMap] = useState<Record<number, any>>({});
-    const [prefetchedSlidesMap, setPrefetchedSlidesMap] = useState<Record<number, any>>({});
-    const [orionUrlByModule, setOrionUrlByModule] = useState<Record<number, string>>({});
+    const [prefetchedContentMap, setPrefetchedContentMap] = useState<Record<number, any>>(creatorSession?.prefetchedContentMap || {});
+    const [prefetchedSlidesMap, setPrefetchedSlidesMap] = useState<Record<number, any>>(creatorSession?.prefetchedSlidesMap || {});
+    const [orionUrlByModule, setOrionUrlByModule] = useState<Record<number, string>>(creatorSession?.orionUrlByModule || {});
     const [generatingSlidesModuleId, setGeneratingSlidesModuleId] = useState<number | null>(null);
     const [blueprintingProgress, setBlueprintingProgress] = useState(0);
     const [completedModules, setCompletedModules] = useState(0);
@@ -61,7 +80,7 @@ export const CourseCreatorProvider: React.FC<{
     const [refineProgress, setRefineProgress] = useState(0);
     const [themeFilter, setThemeFilter] = useState('All');
     const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-    const [themeByModule, setThemeByModule] = useState<Record<number, string>>({});
+    const [themeByModule, setThemeByModule] = useState<Record<number, string>>(creatorSession?.themeByModule || {});
     const [selectedModuleForTheme, setSelectedModuleForTheme] = useState<number | null>(null);
     const [isCustomAudience, setIsCustomAudience] = useState(false);
     const [isAudienceDropdownOpen, setIsAudienceDropdownOpen] = useState(false);
@@ -361,9 +380,33 @@ export const CourseCreatorProvider: React.FC<{
         if (shouldReset) {
             resetCourseData();
             setSavedCourseId(null);
+            setStepState(1);
+            setHasBlueprint(false);
+            setPreviewModules([]);
             sessionStorage.removeItem('resetCourseData');
+            sessionStorage.removeItem('orion_creator_session');
         }
     }, [resetCourseData]);
+    useEffect(() => {
+        if (sessionStorage.getItem('resetCourseData') === 'true')
+            return;
+        try {
+            const current = JSON.parse(sessionStorage.getItem('orion_creator_session') || '{}');
+            sessionStorage.setItem('orion_creator_session', JSON.stringify({
+                ...current,
+                step,
+                hasBlueprint,
+                previewModules,
+                orionUrlByModule,
+                prefetchedContentMap,
+                prefetchedSlidesMap,
+                themeByModule
+            }));
+        }
+        catch {
+
+        }
+    }, [step, hasBlueprint, previewModules, orionUrlByModule, prefetchedContentMap, prefetchedSlidesMap, themeByModule]);
     useEffect(() => {
         const updates: any = {};
         if (!courseData.standards)
@@ -395,8 +438,23 @@ export const CourseCreatorProvider: React.FC<{
                 else if (!courseData.level) {
                     toast.warn("Please select an experience level.");
                 }
-                else if (courseData.standards === 'Regional (EU/US Standards)' && !courseData.country) {
-                    toast.warn("Please select a specific region/country.");
+                else if (!courseData.standards) {
+                    toast.warn("Please select an industry standard.");
+                }
+                else if (courseData.standards === 'Regional' && !courseData.country) {
+                    toast.warn("Please select a specific region or country.");
+                }
+                else if (courseData.standards === 'Industry Specific' && !courseData.industry) {
+                    toast.warn("Please select an industry.");
+                }
+                else if (!String(courseData.courseForge?.language || '').trim() && !(Array.isArray(courseData.courseForge?.languages) && courseData.courseForge.languages.length)) {
+                    toast.warn("Please select at least one language.");
+                }
+                else if (!String(courseData.courseForge?.purpose || '').trim()) {
+                    toast.warn("Please write the primary purpose.");
+                }
+                else if (!String(courseData.courseForge?.approvedOutcomes || '').trim()) {
+                    toast.warn("Please write the professional outcome.");
                 }
             }
             else if (step === 2) {
@@ -596,6 +654,279 @@ export const CourseCreatorProvider: React.FC<{
             setRefinePromptText('');
         }
     };
+    const patchForge = (partial: Record<string, any>) => {
+        updateCourseData({
+            courseForge: { ...(courseData.courseForge || {}), ...partial }
+        });
+    };
+    const forgeRequest = async (path: string, body: any) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return null;
+        }
+        const resp = await fetch(`${API_BASE}${path}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(body)
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) {
+            if (!handleCreditApiFailure(resp.status, data)) {
+                toast.error(data.message || 'Orion request failed');
+            }
+            return null;
+        }
+        return data;
+    };
+    const generateResearchDossier = async () => {
+        setCourseForgeBusy('research');
+        try {
+            const data = await forgeRequest('/generate-research-dossier', { courseData });
+            if (data?.dossier) {
+                patchForge({ researchDossier: data.dossier, researchApproved: false, blueprint: null, blueprintApproved: false });
+                toast.success('Research dossier is ready for review.');
+            }
+        }
+        finally {
+            setCourseForgeBusy('');
+        }
+    };
+    const approveResearchDossier = () => {
+        if (!courseData.courseForge?.researchDossier) {
+            toast.error('Generate the research dossier first.');
+            return;
+        }
+        patchForge({ researchApproved: true });
+        toast.success('Research dossier approved.');
+    };
+    const saveResearchDossier = (dossier: any) => {
+        if (!dossier)
+            return;
+        patchForge({ researchDossier: dossier, researchApproved: false });
+        toast.success('Course scope and dossier updated.');
+    };
+    const generateCourseBlueprint = async () => {
+        setCourseForgeBusy('blueprint');
+        try {
+            const data = await forgeRequest('/generate-course-blueprint', { courseData });
+            if (data?.blueprint) {
+                patchForge({ blueprint: data.blueprint, blueprintApproved: false });
+                toast.success('Course blueprint is ready for review.');
+            }
+        }
+        finally {
+            setCourseForgeBusy('');
+        }
+    };
+    const approveCourseBlueprint = () => {
+        if (!courseData.courseForge?.blueprint) {
+            toast.error('Generate the blueprint first.');
+            return;
+        }
+        patchForge({ blueprintApproved: true });
+        toast.success('Blueprint approved. Slides can be generated.');
+    };
+    const uploadCourseSource = async (file: File | null, meta: { title: string; level: string; text: string; forbidden: boolean; url?: string }) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+        setCourseForgeBusy('source');
+        try {
+            const form = new FormData();
+            if (file)
+                form.append('file', file);
+            form.append('title', meta.title);
+            form.append('level', meta.level);
+            form.append('date', '');
+            form.append('text', meta.text || '');
+            form.append('url', meta.url || '');
+            form.append('forbidden', meta.forbidden ? 'true' : 'false');
+            const resp = await fetch(`${API_BASE}/course-sources`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: form
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok) {
+                toast.error(data.message || 'Could not read that source');
+                return null;
+            }
+            const course = data.course && typeof data.course === 'object' ? data.course : {};
+            const source = data.source || {};
+            const filled = (value: unknown) => typeof value === 'string' && value.trim().length > 0;
+            const audience = Array.isArray(course.audience) ? course.audience.map((item: unknown) => String(item || '').trim()).filter(Boolean) : [];
+            const moduleCount = Number(course.moduleCount);
+            const hours = Number(course.durationHours);
+            const sources = Array.isArray(courseData.courseForge?.sources) ? courseData.courseForge.sources : [];
+            const forge = { ...(courseData.courseForge || {}) };
+            if (filled(course.purpose))
+                forge.purpose = String(course.purpose).trim();
+            if (filled(course.approvedOutcomes))
+                forge.approvedOutcomes = String(course.approvedOutcomes).trim();
+            if (filled(course.language)) {
+                forge.language = String(course.language).trim();
+                forge.languages = String(course.language).split(',').map((part: string) => part.trim()).filter(Boolean);
+            }
+            if (filled(course.archetype))
+                forge.archetype = String(course.archetype).trim();
+            if (filled(course.deliveryMode))
+                forge.deliveryMode = String(course.deliveryMode).trim();
+            forge.sources = [...sources, { ...source, profile: course }];
+            const next: Record<string, unknown> = { courseForge: forge };
+            if (filled(course.title))
+                next.title = String(course.title).trim();
+            if (filled(course.description))
+                next.description = String(course.description).trim();
+            if (audience.length)
+                next.audience = audience;
+            if (filled(course.level))
+                next.level = String(course.level).trim();
+            if (moduleCount > 0)
+                next.module = Math.min(20, Math.max(1, Math.round(moduleCount)));
+            if (filled(course.industry))
+                next.industry = String(course.industry).trim();
+            if (filled(course.country))
+                next.country = String(course.country).trim();
+            if (filled(course.standards))
+                next.standards = String(course.standards).trim();
+            else if (filled(course.country))
+                next.standards = 'Regional';
+            else if (filled(course.industry))
+                next.standards = 'Industry Specific';
+            if (filled(course.courseStyle))
+                next.courseStyle = String(course.courseStyle).trim();
+            if (hours > 0)
+                next.duration = { value: hours, unit: 'Hours' };
+            updateCourseData(next);
+            toast.success('Course details imported.');
+            return { source, course };
+        }
+        catch {
+            toast.error('Could not read that source');
+            return null;
+        }
+        finally {
+            setCourseForgeBusy('');
+        }
+    };
+    const generateNarration = async () => {
+        setCourseForgeBusy('narration');
+        try {
+            let approved = true;
+            for (const mod of previewModules) {
+                const deck = prefetchedSlidesMap[mod.id];
+                const slides = deck?.Slides || [];
+                if (!slides.length)
+                    continue;
+                const data = await forgeRequest('/generate-narration', {
+                    courseData,
+                    moduleNumber: mod.id,
+                    slides
+                });
+                if (!data?.slides) {
+                    approved = false;
+                    break;
+                }
+                const merged = slides.map((slide: any) => {
+                    const match = data.slides.find((item: any) => Number(item.SlideNumber) === Number(slide.SlideNumber));
+                    return match ? { ...slide, Transcript: match.Transcript || '', CueCard: match.CueCard || [] } : slide;
+                });
+                setPrefetchedSlidesMap((prev) => ({
+                    ...prev,
+                    [mod.id]: { ...(prev[mod.id] || {}), Slides: merged }
+                }));
+            }
+            if (approved) {
+                patchForge({ narrationApproved: true });
+                toast.success('Trainer narration is ready.');
+            }
+        }
+        finally {
+            setCourseForgeBusy('');
+        }
+    };
+    const generateAssessment = async () => {
+        setCourseForgeBusy('assessment');
+        try {
+            const modules = previewModules.map((mod) => ({
+                id: mod.id,
+                title: mod.title,
+                content: prefetchedContentMap[mod.id] || null
+            }));
+            const data = await forgeRequest('/generate-assessment', { courseData, modules });
+            if (data?.assessment) {
+                const completeAssessment = ensure20AssessmentQuestions(data.assessment, courseData, previewModules);
+                patchForge({ assessment: completeAssessment, assessmentApproved: false });
+                toast.success('20 assessment questions are ready for review.');
+            }
+        }
+        finally {
+            setCourseForgeBusy('');
+        }
+    };
+    const approveAssessment = () => {
+        if (!courseData.courseForge?.assessment) {
+            toast.error('Generate the assessment first.');
+            return;
+        }
+        patchForge({ assessmentApproved: true });
+        toast.success('Assessment approved.');
+    };
+    const saveAssessment = (assessment: any) => {
+        if (!assessment)
+            return;
+        patchForge({ assessment });
+        toast.success('Assessment updated.');
+    };
+    const generateWorkbook = async () => {
+        setCourseForgeBusy('workbook');
+        try {
+            const chapters: any[] = [];
+            for (const mod of previewModules) {
+                const data = await forgeRequest('/generate-workbook', {
+                    courseData,
+                    moduleNumber: mod.id,
+                    moduleContent: prefetchedContentMap[mod.id] || null
+                });
+                if (!data?.workbook) {
+                    return;
+                }
+                chapters.push({ moduleNumber: mod.id, ...data.workbook });
+            }
+            patchForge({ workbook: { chapters }, workbookApproved: true });
+            toast.success('E-workbook chapters are ready.');
+        }
+        finally {
+            setCourseForgeBusy('');
+        }
+    };
+    const runCourseAudit = async () => {
+        setCourseForgeBusy('audit');
+        try {
+            const modules = previewModules.map((mod) => ({
+                id: mod.id,
+                title: mod.title,
+                content: prefetchedContentMap[mod.id] || null,
+                slides: prefetchedSlidesMap[mod.id] || null
+            }));
+            const data = await forgeRequest('/audit-course', {
+                courseData,
+                modules,
+                assessment: courseData.courseForge?.assessment || null,
+                workbook: courseData.courseForge?.workbook || null
+            });
+            if (data?.audit) {
+                patchForge({ audit: data.audit, auditDecision: data.audit.decision || 'DO NOT APPROVE' });
+                toast.success(`Audit decision: ${data.audit.decision}`);
+            }
+        }
+        finally {
+            setCourseForgeBusy('');
+        }
+    };
     const generateOrionPreview = async () => {
         setIsBlueprinting(true);
         setHasBlueprint(false);
@@ -616,7 +947,8 @@ export const CourseCreatorProvider: React.FC<{
                 standards: courseData.standards,
                 country: courseData.country,
                 industry: courseData.industry,
-                courseStyle: courseData.courseStyle || 'Academic / Formal Style'
+                courseStyle: courseData.courseStyle || 'Academic / Formal Style',
+                courseForge: courseData.courseForge
             };
             const contentMap: Record<number, any> = {};
             const slidesMap: Record<number, any> = {};
@@ -681,6 +1013,9 @@ export const CourseCreatorProvider: React.FC<{
             setPreviewModules(preview);
             setThemeByModule(initialThemes);
             setHasBlueprint(true);
+            const currentAssessment = courseData?.courseForge?.assessment;
+            const updatedAssessment = ensure20AssessmentQuestions(currentAssessment, courseData, preview);
+            patchForge({ assessment: updatedAssessment });
         }
         catch (err) {
             if (!handleCreditThrowable(err)) {
@@ -708,7 +1043,8 @@ export const CourseCreatorProvider: React.FC<{
                 standards: courseData.standards,
                 country: courseData.country,
                 industry: courseData.industry,
-                courseStyle: courseData.courseStyle || 'Academic / Formal Style'
+                courseStyle: courseData.courseStyle || 'Academic / Formal Style',
+                courseForge: courseData.courseForge
             };
             const moduleTheme = themeByModule[moduleId] || GAMMA_THEMES[Math.floor(Math.random() * GAMMA_THEMES.length)].id;
             if (!themeByModule[moduleId]) {
@@ -726,10 +1062,10 @@ export const CourseCreatorProvider: React.FC<{
                     previousModules: previewModules
                         .filter(m => m.id !== moduleId)
                         .map(m => ({
-                        moduleNumber: m.id,
-                        title: m.title,
-                        lessons: m.lessons.map(l => l.title)
-                    })),
+                            moduleNumber: m.id,
+                            title: m.title,
+                            lessons: m.lessons.map(l => l.title)
+                        })),
                     themeId: moduleTheme
                 })
             });
@@ -774,6 +1110,36 @@ export const CourseCreatorProvider: React.FC<{
             setRefineProgress(0);
         }
     };
+    const deleteModule = (moduleId: number) => {
+        if (previewModules.length <= 1) {
+            toast.error('A course must have at least one module.');
+            return;
+        }
+        const remaining = previewModules.filter(m => m.id !== moduleId);
+        const reindexed = remaining.map((m, idx) => ({
+            ...m,
+            id: idx + 1,
+        }));
+        const newContentMap: Record<number, any> = {};
+        const newSlidesMap: Record<number, any> = {};
+        const newOrionMap: Record<number, string> = {};
+        const newThemeMap: Record<number, string> = {};
+        remaining.forEach((m, idx) => {
+            const newId = idx + 1;
+            const oldId = m.id;
+            if (prefetchedContentMap[oldId]) newContentMap[newId] = prefetchedContentMap[oldId];
+            if (prefetchedSlidesMap[oldId]) newSlidesMap[newId] = prefetchedSlidesMap[oldId];
+            if (orionUrlByModule[oldId]) newOrionMap[newId] = orionUrlByModule[oldId];
+            if (themeByModule[oldId]) newThemeMap[newId] = themeByModule[oldId];
+        });
+        setPrefetchedContentMap(newContentMap);
+        setPrefetchedSlidesMap(newSlidesMap);
+        setOrionUrlByModule(newOrionMap);
+        setThemeByModule(newThemeMap);
+        setPreviewModules(reindexed);
+        updateCourseData({ module: reindexed.length });
+        toast.success(`Module ${moduleId} deleted`);
+    };
     const triggerBatchSlideGeneration = async () => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -810,11 +1176,11 @@ export const CourseCreatorProvider: React.FC<{
         const modulesToGenerate = previewModules
             .filter(m => !orionUrlByModule[m.id])
             .map(m => ({
-            moduleNumber: m.id,
-            moduleContent: prefetchedContentMap[m.id],
-            slideContent: prefetchedSlidesMap[m.id],
-            gammaTheme: themeByModule[m.id] || 'aurora'
-        }));
+                moduleNumber: m.id,
+                moduleContent: prefetchedContentMap[m.id],
+                slideContent: prefetchedSlidesMap[m.id],
+                gammaTheme: themeByModule[m.id] || 'aurora'
+            }));
         if (modulesToGenerate.length === 0) {
             setIsContinuing(false);
             setStep(5);
@@ -924,7 +1290,8 @@ export const CourseCreatorProvider: React.FC<{
                 standards: courseData.standards,
                 country: courseData.country,
                 industry: courseData.industry,
-                courseStyle: courseData.courseStyle || 'Academic / Formal Style'
+                courseStyle: courseData.courseStyle || 'Academic / Formal Style',
+                courseForge: courseData.courseForge
             };
             const resp = await fetch(`${API_BASE}/generate-module-draft`, {
                 method: 'POST',
@@ -939,10 +1306,10 @@ export const CourseCreatorProvider: React.FC<{
                     previousModules: previewModules
                         .filter(m => m.id !== moduleId)
                         .map(m => ({
-                        moduleNumber: m.id,
-                        title: m.title,
-                        lessons: m.lessons.map(l => l.title)
-                    }))
+                            moduleNumber: m.id,
+                            title: m.title,
+                            lessons: m.lessons.map(l => l.title)
+                        }))
                 })
             });
             if (!resp.ok) {
@@ -1036,10 +1403,10 @@ export const CourseCreatorProvider: React.FC<{
             const qz = input.quizzes;
             const qs = Array.isArray(qz.questions) ? qz.questions : [];
             Quizzes = [{
-                    QuizDescription: qz.title || 'Module Quiz',
-                    Questions: qs.map((q: any) => q?.question || ''),
-                    Answers: qs.map((q: any) => q?.answer || '')
-                }];
+                QuizDescription: qz.title || 'Module Quiz',
+                Questions: qs.map((q: any) => q?.question || ''),
+                Answers: qs.map((q: any) => q?.answer || '')
+            }];
         }
         let VisualDescriptions = Array.isArray(input.VisualDescriptions) ? input.VisualDescriptions : null;
         if (!VisualDescriptions && input.visualDescriptions) {
@@ -1307,7 +1674,8 @@ export const CourseCreatorProvider: React.FC<{
                     slideContent: slideContent || undefined,
                     moduleContent: moduleContent || undefined,
                     gammaTheme: themeByModule[moduleId] || courseData.orionTheme || 'aurora',
-                    courseStyle: courseData.courseStyle || 'Academic / Formal Style'
+                    courseStyle: courseData.courseStyle || 'Academic / Formal Style',
+                    courseForge: courseData.courseForge
                 })
             });
             const data = await resp.json().catch(() => ({}));
@@ -1479,6 +1847,11 @@ export const CourseCreatorProvider: React.FC<{
         }
     };
     const handleLaunchCourse = async () => {
+        const forge = courseData.courseForge;
+        if (forge?.auditDecision === 'DO NOT APPROVE') {
+            toast.error('Quality audit did not approve this course. Correct it and run the audit again.');
+            return;
+        }
         const token = localStorage.getItem('token');
         if (!token) {
             navigate('/login');
@@ -1488,14 +1861,26 @@ export const CourseCreatorProvider: React.FC<{
         try {
             const mCount = courseData.module ?? 0;
             const hasDraft = mCount > 0 && previewModules.length >= mCount &&
-                previewModules.every(m => prefetchedContentMap[m.id]);
+                previewModules.every(m => prefetchedContentMap[m.id] || prefetchedSlidesMap[m.id]?.Slides?.length || orionUrlByModule[m.id]);
             if (hasDraft) {
+                const completeAssessment = ensure20AssessmentQuestions(
+                    courseData.courseForge?.assessment,
+                    courseData,
+                    previewModules
+                );
+                const finalCourseData = {
+                    ...courseData,
+                    courseForge: {
+                        ...(courseData.courseForge || {}),
+                        assessment: completeAssessment
+                    }
+                };
                 let courseId = savedCourseId || courseData.courseId;
                 if (!courseId) {
                     const courseResp = await fetch(`${API_BASE}/courses`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                        body: JSON.stringify({ courseData })
+                        body: JSON.stringify({ courseData: finalCourseData })
                     });
                     if (!courseResp.ok) {
                         const errData = await courseResp.json().catch(() => ({}));
@@ -1528,7 +1913,7 @@ export const CourseCreatorProvider: React.FC<{
                             moduleNumber: mod.id,
                             content: content || undefined,
                             slides: slides || undefined,
-                            orionUrl: orionUrlByModule[mod.id] || undefined
+                            gammaUrl: orionUrlByModule[mod.id] || undefined
                         })
                     });
                     if (!saveResp.ok) {
@@ -1540,12 +1925,12 @@ export const CourseCreatorProvider: React.FC<{
                     }
                 }
                 toast.success('Course launched and saved.');
-                refreshWallet().catch(() => {});
+                refreshWallet().catch(() => { });
                 fetch(`${API_BASE}/notifications/course-launched`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                     body: JSON.stringify({ courseTitle: courseData.title }),
-                }).catch(() => {});
+                }).catch(() => { });
                 resetCourseData();
                 setSavedCourseId(null);
                 navigate('/course-dashboard', { replace: true });
@@ -1726,7 +2111,7 @@ export const CourseCreatorProvider: React.FC<{
             else {
                 toast.success('Slides generated successfully!');
                 setIsGeneratingSlides(false);
-                refreshWallet().catch(() => {});
+                refreshWallet().catch(() => { });
             }
         }
         catch (error) {
@@ -1739,9 +2124,16 @@ export const CourseCreatorProvider: React.FC<{
     const isStepComplete = (s: number) => {
         switch (s) {
             case 1: {
-                const baseComplete = !!(courseData.title?.trim() && hasAudience(courseData.audience) && courseData.level);
+                const forge = courseData.courseForge || {};
+                const languageList = Array.isArray(forge.languages) && forge.languages.length
+                    ? forge.languages
+                    : String(forge.language || '').split(',').map((part: string) => part.trim()).filter(Boolean);
+                const baseComplete = !!(courseData.title?.trim() && hasAudience(courseData.audience) && courseData.level && courseData.standards && String(forge.purpose || '').trim() && String(forge.approvedOutcomes || '').trim() && languageList.length);
                 if (courseData.standards === 'Regional') {
                     return baseComplete && !!courseData.country;
+                }
+                if (courseData.standards === 'Industry Specific') {
+                    return baseComplete && !!courseData.industry;
                 }
                 return baseComplete;
             }
@@ -1785,159 +2177,173 @@ export const CourseCreatorProvider: React.FC<{
         }
     };
     return (<CourseCreatorContext.Provider value={{
-            step,
-            setStep,
-            showValidation,
-            setShowValidation,
-            courseData,
-            updateCourseData,
-            resetCourseData,
-            formStatus,
-            savedCourseId,
-            setSavedCourseId,
-            isGeneratingSlides,
-            setIsGeneratingSlides,
-            isGeneratingContent,
-            setIsGeneratingContent,
-            isBlueprinting,
-            setIsBlueprinting,
-            hasBlueprint,
-            setHasBlueprint,
-            previewModules,
-            setPreviewModules,
-            selectedModule,
-            setSelectedModule,
-            selectedSlide,
-            setSelectedSlide,
-            isPreviewLoading,
-            setIsPreviewLoading,
-            isGeneratingDescription,
-            setIsGeneratingDescription,
-            isDescriptionEditable,
-            setIsDescriptionEditable,
-            isDescriptionModalOpen,
-            setIsDescriptionModalOpen,
-            isRefiningDescription,
-            setIsRefiningDescription,
-            refinePromptOpen,
-            setRefinePromptOpen,
-            refinePromptText,
-            setRefinePromptText,
-            urlInput,
-            setUrlInput,
-            urlError,
-            setUrlError,
-            prefetchedContentMap,
-            setPrefetchedContentMap,
-            prefetchedSlidesMap,
-            setPrefetchedSlidesMap,
-            orionUrlByModule,
-            setOrionUrlByModule,
-            generatingSlidesModuleId,
-            setGeneratingSlidesModuleId,
-            blueprintingProgress,
-            setBlueprintingProgress,
-            completedModules,
-            setCompletedModules,
-            slideGenerationProgress,
-            setSlideGenerationProgress,
-            isBatchGenerating,
-            setIsBatchGenerating,
-            batchSlidesProgress,
-            setBatchSlidesProgress,
-            batchSlidesDisplayProgress,
-            setBatchSlidesDisplayProgress,
-            batchGeneratingModuleId,
-            setBatchGeneratingModuleId,
-            batchSelectedModuleIdForPreview,
-            setBatchSelectedModuleIdForPreview,
-            refineProgress,
-            setRefineProgress,
-            themeFilter,
-            setThemeFilter,
-            isThemeModalOpen,
-            setIsThemeModalOpen,
-            themeByModule,
-            setThemeByModule,
-            selectedModuleForTheme,
-            setSelectedModuleForTheme,
-            isCustomAudience,
-            setIsCustomAudience,
-            isAudienceDropdownOpen,
-            setIsAudienceDropdownOpen,
-            customAudienceInput,
-            setCustomAudienceInput,
-            audienceDropdownRef,
-            isCustomIndustry,
-            setIsCustomIndustry,
-            isCustomCountry,
-            setIsCustomCountry,
-            downloadingModuleId,
-            setDownloadingModuleId,
-            showScrollArrow,
-            setShowScrollArrow,
-            showScrollArrowModules,
-            setShowScrollArrowModules,
-            showGenerateWarning,
-            setShowGenerateWarning,
-            highlightedModuleId,
-            setHighlightedModuleId,
-            moduleRefs,
-            scrollRefGuidance,
-            scrollRefModules,
-            notifDropdownRef,
-            avatarUrl,
-            setAvatarUrl,
-            userInfo,
-            setUserInfo,
-            notifOpen,
-            setNotifOpen,
-            notifications,
-            setNotifications,
-            containerVariants,
-            itemVariants,
-            stepVariants,
-            navigate,
-            totalSteps,
-            moduleCredits,
-            fetchNotifications,
-            markAllRead,
-            removeAllNotifications,
-            removeSingleNotification,
-            handleLogout,
-            handleGuidanceScroll,
-            handleModulesScroll,
-            goToNextStep,
-            isValidUrl,
-            handleAddUrl,
-            handleRemoveUrl,
-            goToPrevStep,
-            handleAutoGenerateDescription,
-            handleRefineDescription,
-            generateOrionPreview,
-            regenerateSingleModule,
-            triggerBatchSlideGeneration,
-            refineSingleModule,
-            normalizeModuleContent,
-            openContentPreview,
-            downloadModulePPTX,
-            handleGenerateSlidesOrion,
-            openSlidesPreview,
-            handleLaunchCourse,
-            isLaunchingCourse,
-            handleExitArchitect,
-            isExitingArchitect,
-            isContinuing,
-            setIsContinuing,
-            handleGenerateContent,
-            isStepComplete,
-            handleStepClick,
-            hasAudience,
-            formatAudience,
-            AUDIENCE_OPTIONS,
-            INDUSTRIES,
-            GAMMA_THEMES
-        }}>
-            {children}
-        </CourseCreatorContext.Provider>);
+        step,
+        setStep,
+        showValidation,
+        setShowValidation,
+        courseData,
+        updateCourseData,
+        resetCourseData,
+        formStatus,
+        savedCourseId,
+        setSavedCourseId,
+        isGeneratingSlides,
+        setIsGeneratingSlides,
+        isGeneratingContent,
+        setIsGeneratingContent,
+        isBlueprinting,
+        setIsBlueprinting,
+        hasBlueprint,
+        setHasBlueprint,
+        previewModules,
+        setPreviewModules,
+        selectedModule,
+        setSelectedModule,
+        selectedSlide,
+        setSelectedSlide,
+        isPreviewLoading,
+        setIsPreviewLoading,
+        isGeneratingDescription,
+        setIsGeneratingDescription,
+        isDescriptionEditable,
+        setIsDescriptionEditable,
+        isDescriptionModalOpen,
+        setIsDescriptionModalOpen,
+        isRefiningDescription,
+        setIsRefiningDescription,
+        refinePromptOpen,
+        setRefinePromptOpen,
+        refinePromptText,
+        setRefinePromptText,
+        urlInput,
+        setUrlInput,
+        urlError,
+        setUrlError,
+        prefetchedContentMap,
+        setPrefetchedContentMap,
+        prefetchedSlidesMap,
+        setPrefetchedSlidesMap,
+        orionUrlByModule,
+        setOrionUrlByModule,
+        generatingSlidesModuleId,
+        setGeneratingSlidesModuleId,
+        blueprintingProgress,
+        setBlueprintingProgress,
+        completedModules,
+        setCompletedModules,
+        slideGenerationProgress,
+        setSlideGenerationProgress,
+        isBatchGenerating,
+        setIsBatchGenerating,
+        batchSlidesProgress,
+        setBatchSlidesProgress,
+        batchSlidesDisplayProgress,
+        setBatchSlidesDisplayProgress,
+        batchGeneratingModuleId,
+        setBatchGeneratingModuleId,
+        batchSelectedModuleIdForPreview,
+        setBatchSelectedModuleIdForPreview,
+        refineProgress,
+        setRefineProgress,
+        themeFilter,
+        setThemeFilter,
+        isThemeModalOpen,
+        setIsThemeModalOpen,
+        themeByModule,
+        setThemeByModule,
+        selectedModuleForTheme,
+        setSelectedModuleForTheme,
+        isCustomAudience,
+        setIsCustomAudience,
+        isAudienceDropdownOpen,
+        setIsAudienceDropdownOpen,
+        customAudienceInput,
+        setCustomAudienceInput,
+        audienceDropdownRef,
+        isCustomIndustry,
+        setIsCustomIndustry,
+        isCustomCountry,
+        setIsCustomCountry,
+        downloadingModuleId,
+        setDownloadingModuleId,
+        showScrollArrow,
+        setShowScrollArrow,
+        showScrollArrowModules,
+        setShowScrollArrowModules,
+        showGenerateWarning,
+        setShowGenerateWarning,
+        highlightedModuleId,
+        setHighlightedModuleId,
+        moduleRefs,
+        scrollRefGuidance,
+        scrollRefModules,
+        notifDropdownRef,
+        avatarUrl,
+        setAvatarUrl,
+        userInfo,
+        setUserInfo,
+        notifOpen,
+        setNotifOpen,
+        notifications,
+        setNotifications,
+        containerVariants,
+        itemVariants,
+        stepVariants,
+        navigate,
+        totalSteps,
+        moduleCredits,
+        fetchNotifications,
+        markAllRead,
+        removeAllNotifications,
+        removeSingleNotification,
+        handleLogout,
+        handleGuidanceScroll,
+        handleModulesScroll,
+        goToNextStep,
+        isValidUrl,
+        handleAddUrl,
+        handleRemoveUrl,
+        goToPrevStep,
+        handleAutoGenerateDescription,
+        handleRefineDescription,
+        generateOrionPreview,
+        generateResearchDossier,
+        approveResearchDossier,
+        saveResearchDossier,
+        generateCourseBlueprint,
+        approveCourseBlueprint,
+        uploadCourseSource,
+        generateNarration,
+        generateAssessment,
+        approveAssessment,
+        saveAssessment,
+        generateWorkbook,
+        runCourseAudit,
+        courseForgeBusy,
+        regenerateSingleModule,
+        triggerBatchSlideGeneration,
+        refineSingleModule,
+        normalizeModuleContent,
+        openContentPreview,
+        downloadModulePPTX,
+        handleGenerateSlidesOrion,
+        openSlidesPreview,
+        handleLaunchCourse,
+        isLaunchingCourse,
+        handleExitArchitect,
+        isExitingArchitect,
+        isContinuing,
+        setIsContinuing,
+        handleGenerateContent,
+        isStepComplete,
+        handleStepClick,
+        hasAudience,
+        formatAudience,
+        AUDIENCE_OPTIONS,
+        INDUSTRIES,
+        GAMMA_THEMES,
+        deleteModule
+    }}>
+        {children}
+    </CourseCreatorContext.Provider>);
 };

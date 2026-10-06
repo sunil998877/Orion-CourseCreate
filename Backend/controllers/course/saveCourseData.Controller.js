@@ -19,7 +19,9 @@ export const saveCourseData = async (req, res) => {
             },
             country: courseData?.country || '',
             standards: courseData?.standards || '',
-            courseStyle: courseData?.courseStyle || 'Academic / Formal Style'
+            courseStyle: courseData?.courseStyle || 'Academic / Formal Style',
+            industry: courseData?.industry || '',
+            courseForge: courseData?.courseForge && typeof courseData.courseForge === 'object' ? courseData.courseForge : {}
         };
         await user.save();
         res.json({ saved: true });

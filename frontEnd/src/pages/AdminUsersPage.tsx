@@ -311,7 +311,6 @@ export default function AdminUsersPage() {
               </div>
             </div>
 
-
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-6 border-b border-slate-200 dark:border-white/10 bg-slate-50/25 dark:bg-white/[0.01]">
               <div className="rounded-2xl border border-slate-200 bg-white p-3.5 dark:border-white/10 dark:bg-white/[0.03]">
                 <div className="text-[11px] font-semibold text-slate-400 dark:text-white/40 flex items-center gap-1.5">

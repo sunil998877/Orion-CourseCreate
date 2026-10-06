@@ -1,213 +1,308 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Plus, Presentation, Headphones, BookOpen, Download, Music, Zap } from 'lucide-react';
-import avatarImg from '../assests/avtar1.png';
+import {
+  Sparkles,
+  ArrowRight,
+  LayoutGrid,
+  Rocket,
+  FileText,
+  Presentation,
+  Headphones,
+  BookOpen,
+  Download,
+  Music,
+  Zap,
+} from 'lucide-react';
+import heroBgImg from '../assets/homepage-hero-bg.jpg';
+import heroAvatarMobile from '../assets/hero-avatar-mobile.png';
 import PageTransition from '../components/PageTransition';
 import { motion } from 'framer-motion';
+
 const HomePage: React.FC = () => {
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2
-            }
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  const [username, setUsername] = useState<string>('');
+  const navigate = useNavigate();
+
+  const handleCreateNew = () => {
+    sessionStorage.setItem('resetCourseData', 'true');
+    navigate('/create-course');
+  };
+
+  useEffect(() => {
+    const localUser = localStorage.getItem('username');
+    if (localUser) {
+      setUsername(localUser);
+    }
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+        const payload = JSON.parse(atob(padded));
+        if (payload?.username) {
+          setUsername(String(payload.username));
         }
-    };
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
-    };
-    const [username, setUsername] = useState<string>('');
-    const navigate = useNavigate();
-    const handleCreateNew = () => {
-        sessionStorage.setItem('resetCourseData', 'true');
-        navigate('/create-course');
-    };
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token)
-            return;
-        try {
-            const parts = token.split('.');
-            if (parts.length === 3) {
-                const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-                const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-                const payload = JSON.parse(atob(padded));
-                if (payload?.username) {
-                    setUsername(String(payload.username));
-                }
-            }
-        }
-        catch { }
-    }, []);
-    return (<PageTransition>
-      <div className="space-y-8 animate-fade-in  ">
+      }
+    } catch { }
+  }, []);
 
-        <section className="relative w-full rounded-[2rem] max-md:rounded-2xl overflow-hidden bg-[#0b100f] border border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.28)] group isolate transition-all duration-700 hover:shadow-emerald-900/20">
-          <div className="absolute inset-0 opacity-20 brightness-100 contrast-150 mix-blend-overlay bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E')]"/>
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-lime-500/10 blur-[150px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3 opacity-50"/>
-          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none translate-y-1/3 -translate-x-1/4 opacity-50"/>
+  const displayName = username
+    ? username.charAt(0).toUpperCase() + username.slice(1).split('@')[0]
+    : 'Sunil';
 
-          <div className="relative z-10  bottom-6  flex flex-col md:flex-row items-center md:items-end justify-between px-8 pt-10 pb-0 md:px-14 md:pt-14 gap-6 md:gap-8 min-h-[450px] max-md:px-4 max-md:pt-6 max-md:min-h-0">
-            <div className="relative flex-1 space-y-5 md:space-y-6 max-w-[620px] text-center md:text-left pb-6 md:pb-16 self-center max-md:w-full">
-              <div className="absolute -inset-10 bg-lime-500/5 blur-3xl rounded-full -z-10 pointer-events-none mix-blend-screen opacity-50"/>
+  return (
+    <PageTransition>
+      <div className="space-y-10 animate-fade-in">
+        {/* Main Hero Card - Exactly matches the reference image */}
+        <section className="relative w-full rounded-[2.5rem] max-md:rounded-2xl overflow-hidden bg-[#070d0a] border border-[#1a3324] shadow-[0_24px_80px_rgba(0,0,0,0.6)] group isolate transition-all duration-700 min-h-[560px] lg:min-h-[600px] flex items-stretch">
+          
+          {/* Full-width 3D Stage Room Background (Desktop only - 100% unchanged) */}
+          <div className="absolute inset-0 pointer-events-none select-none z-0 hidden lg:block">
+            <img
+              src={heroBgImg}
+              alt="Orion AI Course Creator Studio"
+              className="w-full h-full object-cover object-right md:object-center"
+            />
+          </div>
 
-              <div className="space-y-4 md:space-y-5 relative">
-                <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold tracking-wide text-lime-400 w-fit mx-auto md:mx-0 uppercase backdrop-blur-md shadow-lg shadow-lime-900/10">
-                  <Sparkles className="w-3 h-3 mr-2"/>
-                  AI-Powered Learning
+          {/* Clean dark studio background for mobile (prevents avatar collision behind text) */}
+          <div className="absolute inset-0 pointer-events-none select-none z-0 lg:hidden bg-[#070d0a]">
+            <div className="absolute top-0 right-0 w-72 h-72 bg-lime-500/10 blur-[100px] rounded-full" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 blur-[90px] rounded-full" />
+          </div>
+
+          {/* Foreground Content */}
+          <div className="relative z-10 w-full flex flex-col lg:flex-row items-stretch justify-between px-4 pt-6 pb-6 sm:px-10 sm:pt-10 sm:pb-10 lg:px-12 lg:pt-12 lg:pb-12 gap-6 lg:gap-8">
+            
+            {/* Left Column: Badge, Headline, CTA buttons, and Quick start stepper */}
+            <div className="flex-1 flex flex-col justify-between max-w-[540px] space-y-6 sm:space-y-7">
+              
+              {/* Heading & Subtitle Block */}
+              <div className="space-y-3.5 sm:space-y-4">
+                {/* AI Badge */}
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#122218]/90 border border-lime-400/25 text-[11px] font-bold tracking-wider text-[#a3e635] uppercase backdrop-blur-md shadow-[0_0_20px_rgba(163,230,53,0.15)]">
+                  <Sparkles className="w-3.5 h-3.5 text-[#a3e635] fill-lime-400/30" />
+                  <span>AI-POWERED LEARNING</span>
                 </div>
-                <h1 className="text-4xl sm:text-5xl md:text-[clamp(3.8rem,6vw,6.5rem)] font-black text-white tracking-[-0.04em] leading-[0.94] md:leading-[0.88] mb-2 md:mb-4">
-                  Welcome back, <br className="hidden md:block"/>
-                  <span className="text-transparent bg-clip-text bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-lime-300 via-emerald-400 to-teal-500 animate-gradient-x px-1">
-                    {username || 'Creator'}
+
+                {/* Big Headline */}
+                <h1 className="text-3xl sm:text-5xl lg:text-[3.85rem] font-black text-white tracking-[-0.03em] leading-[1.06] lg:leading-[1.04]">
+                  Welcome back,<br />
+                  <span className="text-[#a3e635] font-black drop-shadow-[0_0_30px_rgba(163,230,53,0.35)]">
+                    {displayName}!
                   </span>
                 </h1>
 
-                <div className="mt-5 space-y-6 text-left w-full max-w-[560px] mx-auto md:mx-0">
-                  <div className="relative p-5 md:p-5 rounded-2xl bg-[#141d18]/90 border border-lime-300/15 backdrop-blur-xl shadow-2xl overflow-hidden group/guide">
-                    <div className="absolute inset-0 bg-gradient-to-br from-lime-500/[0.05] via-transparent to-transparent opacity-0 group-hover/guide:opacity-100 transition-opacity duration-500"/>
-                    <div className="relative z-10 space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-lime-500/20 flex items-center justify-center border border-lime-500/30">
-                          <Sparkles className="w-4 h-4 text-lime-400"/>
-                        </div>
-                        <h3 className="text-lg font-bold text-white tracking-tight">First-Time User Guidance</h3>
+                {/* Subtitle */}
+                <p className="text-gray-300 text-xs sm:text-base font-normal leading-relaxed max-w-[460px]">
+                  Build, launch, and scale high-quality courses with the power of AI.
+                </p>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center gap-3 pt-1 sm:pt-2">
+                  {/* Start Creating Button */}
+                  <button
+                    onClick={handleCreateNew}
+                    className="group relative inline-flex items-center gap-2.5 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full bg-[#a3e635] hover:bg-[#b4f636] text-black font-extrabold text-xs sm:text-base tracking-tight transition-all duration-300 shadow-[0_0_35px_rgba(163,230,53,0.4)] hover:shadow-[0_0_45px_rgba(163,230,53,0.6)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-black/15 flex items-center justify-center font-black text-sm">
+                      +
+                    </div>
+                    <span>Start Creating</span>
+                    <ArrowRight className="w-4 h-4 stroke-[2.5] text-black transition-transform duration-300 group-hover:translate-x-1" />
+                  </button>
+
+                  {/* Explore Dashboard Button */}
+                  <button
+                    onClick={() => navigate('/course-dashboard')}
+                    className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-[#111c16]/80 hover:bg-[#18291f] border border-white/10 hover:border-lime-500/30 text-white font-bold text-xs sm:text-base tracking-tight backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg"
+                  >
+                    <LayoutGrid className="w-4 h-4 text-gray-200" />
+                    <span>Explore Dashboard</span>
+                  </button>
+                </div>
+
+                {/* Mobile-Only Dedicated 3D Avatar Scene Showcase - 100% visible, crisp & uncropped */}
+                <div className="relative w-full rounded-2xl overflow-hidden border border-[#1b3425] bg-[#070e0a] shadow-xl lg:hidden mt-2 mb-1">
+                  <img
+                    src={heroAvatarMobile}
+                    alt="Orion AI Course Architect"
+                    className="w-full h-auto object-contain block"
+                  />
+                </div>
+              </div>
+
+              {/* Quick start Stepper Card */}
+              <div className="rounded-2xl sm:rounded-[1.75rem] bg-[#0c1410]/85 border border-[#1b3123] backdrop-blur-xl p-4 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.45)] space-y-3.5 sm:space-y-4">
+                {/* Header */}
+                <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] pb-3.5">
+                  <div className="flex items-center gap-2">
+                    <Rocket className="w-4 h-4 text-[#a3e635]" />
+                    <span className="text-white font-bold text-sm sm:text-base tracking-tight">Quick start</span>
+                  </div>
+                  <span className="text-[10px] sm:text-[11px] font-bold tracking-wider text-gray-400 uppercase">
+                    GET STARTED IN 3 SIMPLE STEPS
+                  </span>
+                </div>
+
+                {/* Steps List */}
+                <div className="space-y-3.5">
+                  {/* Step 1 */}
+                  <div
+                    onClick={handleCreateNew}
+                    className="group flex items-start gap-3.5 cursor-pointer transition-all hover:translate-x-1"
+                  >
+                    <div className="flex flex-col items-center self-stretch shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-[#111e16] border border-[#203a29] text-[#a3e635] text-[11px] font-bold flex items-center justify-center group-hover:border-lime-400 group-hover:scale-105 transition-all">
+                        1
                       </div>
-                      <div className="space-y-3">
-                        <p className="text-gray-300 font-medium italic">New here? Let's get you started.</p>
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-lime-400 mt-0.5">1</div>
-                          <p className="text-gray-400 text-sm leading-relaxed">
-                            Check out the section immediately below: <span className="text-white font-semibold">"Ready to build your next Masterpiece?"</span>
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-lime-400 mt-0.5">2</div>
-                          <p className="text-gray-400 text-sm leading-relaxed">
-                            Click on <button onClick={handleCreateNew} className="text-lime-400 font-bold underline underline-offset-4 decoration-lime-500/30 hover:text-lime-300 transition-colors cursor-pointer">"Start Creating"</button> to begin your journey.
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-lime-400 mt-0.5">3</div>
-                          <p className="text-gray-400 text-sm leading-relaxed">
-                            Click on <span className="text-white font-semibold">"Create New Course"</span> to get started by <button onClick={() => navigate('/course-dashboard')} className="text-emerald-400 font-medium hover:text-emerald-300 transition-colors cursor-pointer underline underline-offset-4 decoration-emerald-500/30">on the course dashboard</button>.
-                          </p>
-                        </div>
+                      <div className="w-[1.5px] grow border-l-2 border-dashed border-[#203a29] my-1" />
+                    </div>
+
+                    <div className="w-9 h-9 rounded-xl bg-[#122318] border border-lime-400/20 flex items-center justify-center shrink-0 group-hover:border-lime-400/50 group-hover:shadow-[0_0_12px_rgba(163,230,53,0.25)] transition-all">
+                      <Sparkles className="w-4 h-4 text-[#a3e635]" />
+                    </div>
+
+                    <div className="min-w-0 pt-0.5">
+                      <h4 className="text-white font-bold text-xs sm:text-sm tracking-tight group-hover:text-lime-300 transition-colors">
+                        Create New Course
+                      </h4>
+                      <p className="text-gray-400 text-[11px] sm:text-xs leading-relaxed">
+                        Tell us your idea and let AI generate the structure.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div
+                    onClick={() => navigate('/course-dashboard')}
+                    className="group flex items-start gap-3.5 cursor-pointer transition-all hover:translate-x-1"
+                  >
+                    <div className="flex flex-col items-center self-stretch shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-[#111e16] border border-[#203a29] text-[#a3e635] text-[11px] font-bold flex items-center justify-center group-hover:border-lime-400 group-hover:scale-105 transition-all">
+                        2
                       </div>
+                      <div className="w-[1.5px] grow border-l-2 border-dashed border-[#203a29] my-1" />
+                    </div>
+
+                    <div className="w-9 h-9 rounded-xl bg-[#122318] border border-lime-400/20 flex items-center justify-center shrink-0 group-hover:border-lime-400/50 group-hover:shadow-[0_0_12px_rgba(163,230,53,0.25)] transition-all">
+                      <FileText className="w-4 h-4 text-[#a3e635]" />
+                    </div>
+
+                    <div className="min-w-0 pt-0.5">
+                      <h4 className="text-white font-bold text-xs sm:text-sm tracking-tight group-hover:text-lime-300 transition-colors">
+                        Customize & Enhance
+                      </h4>
+                      <p className="text-gray-400 text-[11px] sm:text-xs leading-relaxed">
+                        Edit content, add media and assessments.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div
+                    onClick={() => navigate('/course-dashboard')}
+                    className="group flex items-start gap-3.5 cursor-pointer transition-all hover:translate-x-1"
+                  >
+                    <div className="flex flex-col items-center self-stretch shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-[#111e16] border border-[#203a29] text-[#a3e635] text-[11px] font-bold flex items-center justify-center group-hover:border-lime-400 group-hover:scale-105 transition-all">
+                        3
+                      </div>
+                    </div>
+
+                    <div className="w-9 h-9 rounded-xl bg-[#122318] border border-lime-400/20 flex items-center justify-center shrink-0 group-hover:border-lime-400/50 group-hover:shadow-[0_0_12px_rgba(163,230,53,0.25)] transition-all">
+                      <Rocket className="w-4 h-4 text-[#a3e635]" />
+                    </div>
+
+                    <div className="min-w-0 pt-0.5">
+                      <h4 className="text-white font-bold text-xs sm:text-sm tracking-tight group-hover:text-lime-300 transition-colors">
+                        Launch & Share
+                      </h4>
+                      <p className="text-gray-400 text-[11px] sm:text-xs leading-relaxed">
+                        Publish your course and reach learners worldwide.
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="shrink-0 w-full md:w-auto flex justify-center md:justify-end">
-              <div className="relative w-[300px] md:w-[430px] h-[370px] md:h-[445px] flex items-end justify-center perspective-[1200px] group/scene max-md:w-[260px] max-md:h-[340px]">
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-full bg-gradient-to-t from-lime-500/10 via-emerald-500/5 to-transparent blur-3xl opacity-60 pointer-events-none mix-blend-screen"/>
-                <div className="absolute top-10 left-6 right-6 bottom-16 bg-gray-900/60 backdrop-blur-md border border-white/10 rounded-2xl -z-10 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.5)] flex flex-col gap-4 p-6 transition-all duration-700 ease-out transform-gpu group-hover/scene:rotate-y-[-5deg] group-hover/scene:rotate-x-[5deg] group-hover/scene:translate-x-2" style={{ transform: 'rotateY(-12deg) rotateX(5deg) scale(0.95)' }}>
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent rounded-2xl pointer-events-none"/>
-                  <div className="flex gap-2 mb-2 opacity-50">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/50"/>
-                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50"/>
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/50"/>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="flex-1 h-28 bg-white/5 rounded-xl border border-white/5 relative overflow-hidden">
-                      <div className="absolute bottom-0 inset-x-0 h-12 bg-gradient-to-t from-lime-500/20 to-transparent"/>
-                    </div>
-                    <div className="flex-1 h-28 bg-white/5 rounded-xl border border-white/5 relative overflow-hidden">
-                      <div className="absolute bottom-0 inset-x-0 h-8 bg-gradient-to-t from-emerald-500/20 to-transparent"/>
-                    </div>
-                  </div>
-                  <div className="space-y-3 mt-auto">
-                    <div className="h-2 w-3/4 bg-white/10 rounded-full"/>
-                    <div className="h-2 w-1/2 bg-white/10 rounded-full"/>
-                  </div>
-                </div>
-
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[280px] h-[80px] pointer-events-none" style={{ transform: 'rotateX(60deg)' }}>
-                  <div className="absolute inset-0 border-[3px] border-lime-500/20 rounded-full animate-[spin_10s_linear_infinite]"/>
-                  <div className="absolute inset-2 border-[2px] border-dashed border-emerald-400/30 rounded-full animate-[spin_15s_linear_infinite_reverse]"/>
-                  <div className="absolute inset-8 bg-lime-400/20 blur-xl rounded-full animate-pulse"/>
-                </div>
-
-                <div className="relative z-20 w-full h-full flex items-end justify-center pointer-events-none">
-                  <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 1, duration: 0.8, ease: "easeOut" }} className="hidden md:block absolute top-0 z-30 animate-float-slow" style={{ right: '-36px' }}>
-                    <div className="relative bg-[#0F172A]/90 backdrop-blur-2xl border border-lime-500/30 rounded-[2rem] rounded-br-lg px-4 py-4 md:px-6 md:py-5 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(132,204,22,0.1)] max-w-[180px] md:max-w-[220px]">
-                      <div className="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-lime-400 to-transparent"/>
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-2 h-2 rounded-full bg-lime-400 shadow-[0_0_10px_#a3e635] animate-pulse"/>
-                        <span className="text-[10px] font-black text-lime-400 tracking-[0.2em] uppercase">Status: Online</span>
-                      </div>
-                      <p className="text-xs text-white/80 leading-relaxed font-medium">
-                        I've prepared your architecture. <span className="text-lime-400 font-bold italic">Ready to build?</span>
-                      </p>
-                      <div className="absolute -bottom-2 right-6 w-5 h-5 bg-[#0F172A]/90 border-r border-b border-lime-500/20 rotate-45"/>
-                    </div>
-                  </motion.div>
-
-                  <img src={avatarImg} alt="Orion — AI Course Architect" className="w-auto h-[110%] max-md:h-[95%] object-contain object-bottom drop-shadow-[0_40px_60px_rgba(0,0,0,0.8)] animate-float-medium transition-transform duration-700 group-hover/scene:scale-105" style={{
-            maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)'
-        }}/>
-                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-48 h-12 bg-lime-500/20 blur-3xl rounded-full -z-10"/>
-                </div>
-
-                <div className="absolute inset-0 z-30 pointer-events-none">
-                  <motion.div animate={{ y: [0, -20, 0], x: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }} className="absolute top-1/4 left-0 w-16 h-16 bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl flex items-center justify-center rotate-12">
-                    <Sparkles className="w-7 h-7 text-lime-400"/>
-                  </motion.div>
-                  <motion.div animate={{ y: [0, 20, 0], x: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 12, ease: "easeInOut" }} className="absolute bottom-1/3 right-0 w-14 h-14 bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[1.25rem] shadow-2xl flex items-center justify-center -rotate-12">
-                    <div className="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_15px_#34d399] animate-pulse"/>
-                  </motion.div>
-                  <div className="absolute bottom-20 left-1/2 -translate-x-1/2 scale-110">
-                    <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-[#0F172A]/80 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.4)] ring-1 ring-lime-500/20">
-                      <div className="w-2.5 h-2.5 rounded-full bg-lime-400 shadow-[0_0_12px_rgba(163,230,53,1)] animate-pulse"/>
-                      <span className="text-[10px] font-black text-white tracking-[0.3em] uppercase">Orion Architect</span>
-                    </div>
-                  </div>
-                </div>
+            {/* Right Column Interactive Hotspots (Desktop only - aligned with the 4 feature pills) */}
+            <div className="hidden lg:flex relative flex-1 w-full lg:w-1/2 items-center justify-end self-stretch pointer-events-none">
+              <div
+                className="absolute right-0 sm:right-4 lg:right-6 top-[34%] bottom-[30%] w-[130px] sm:w-[155px] flex flex-col justify-between pointer-events-auto"
+                aria-label="Platform Quick Actions"
+              >
+                <button
+                  onClick={handleCreateNew}
+                  title="Generate with AI"
+                  className="h-[22%] w-full rounded-2xl cursor-pointer hover:bg-lime-400/10 hover:ring-1 hover:ring-lime-400/40 transition-all opacity-0 hover:opacity-100"
+                />
+                <button
+                  onClick={() => navigate('/create-course')}
+                  title="Add Media"
+                  className="h-[22%] w-full rounded-2xl cursor-pointer hover:bg-lime-400/10 hover:ring-1 hover:ring-lime-400/40 transition-all opacity-0 hover:opacity-100"
+                />
+                <button
+                  onClick={() => navigate('/course-dashboard')}
+                  title="Create Assessments"
+                  className="h-[22%] w-full rounded-2xl cursor-pointer hover:bg-lime-400/10 hover:ring-1 hover:ring-lime-400/40 transition-all opacity-0 hover:opacity-100"
+                />
+                <button
+                  onClick={() => navigate('/course-dashboard')}
+                  title="Publish and Share"
+                  className="h-[22%] w-full rounded-2xl cursor-pointer hover:bg-lime-400/10 hover:ring-1 hover:ring-lime-400/40 transition-all opacity-0 hover:opacity-100"
+                />
               </div>
             </div>
           </div>
         </section>
 
-        <div className="relative overflow-hidden rounded-[2.5rem] max-md:rounded-2xl bg-[#0F0F0F] border border-white/10 p-12 max-md:p-6 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-10 group">
-          <div className="absolute inset-0 bg-gradient-to-r from-lime-500/5 to-emerald-500/5 opacity-50"/>
-          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2"/>
-          <div className="relative z-10 max-w-2xl space-y-3">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
-              Ready to build your next <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-400">Masterpiece?</span>
-            </h2>
-            <p className="text-gray-400 text-base md:text-lg">
-              Join thousands of creators sharing their knowledge. It only takes a few clicks to get started.
-            </p>
-          </div>
-          <div className="relative z-10">
-            <button onClick={handleCreateNew} className="group/btn relative px-7 py-3.5 bg-gradient-to-r from-lime-300 to-emerald-400 rounded-xl text-black font-bold text-base hover:brightness-110 transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(132,204,22,0.3)] flex items-center gap-3">
-              <Plus className="w-6 h-6"/>
-              <span>Start Creating</span>
-              <div className="absolute inset-0 rounded-2xl ring-2 ring-white/20 group-hover/btn:ring-white/40 transition-all"/>
-            </button>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center text-center space-y-3   animate-fade-in-up">
-          <div className="inline-flex items-center px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+        {/* Section Divider & Heading */}
+        <div className="flex flex-col items-center text-center space-y-3 animate-fade-in-up pt-4">
+          <div className="inline-flex items-center px-3.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
             Platform Capabilities
           </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Engineered for Modern Course Creation
+          </h2>
+          <p className="text-gray-400 text-sm max-w-lg">
+            Everything you need to turn knowledge into high-converting multimedia learning experiences.
+          </p>
         </div>
 
-        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-md:gap-4 pb-12">
-
-          <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-fuchsia-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(217,70,239,0.1)] overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
+        {/* Capabilities Grid */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 pb-12"
+        >
+          <motion.div
+            variants={itemVariants}
+            className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-fuchsia-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(217,70,239,0.1)] overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
               <div className="w-14 h-14 bg-gradient-to-br from-fuchsia-500/20 to-purple-500/10 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-white/10 group-hover:scale-110 transition-transform duration-500">
-                <Zap className="w-7 h-7 text-fuchsia-400"/>
+                <Zap className="w-7 h-7 text-fuchsia-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3 tracking-tight">Procedural Wizard Guidance</h3>
               <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
@@ -216,11 +311,14 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-lime-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(132,204,22,0.1)] overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-lime-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
+          <motion.div
+            variants={itemVariants}
+            className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-lime-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(132,204,22,0.1)] overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-lime-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
               <div className="w-14 h-14 bg-gradient-to-br from-lime-500/20 to-emerald-500/10 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-white/10 group-hover:scale-110 transition-transform duration-500">
-                <Presentation className="w-7 h-7 text-lime-400"/>
+                <Presentation className="w-7 h-7 text-lime-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3 tracking-tight">AI Slide Orchestration</h3>
               <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
@@ -229,11 +327,14 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-rose-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(244,63,94,0.1)] overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
+          <motion.div
+            variants={itemVariants}
+            className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-rose-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(244,63,94,0.1)] overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
               <div className="w-14 h-14 bg-gradient-to-br from-rose-500/20 to-pink-500/10 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-white/10 group-hover:scale-110 transition-transform duration-500">
-                <Download className="w-7 h-7 text-rose-400"/>
+                <Download className="w-7 h-7 text-rose-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3 tracking-tight">Structured PPTX Exports</h3>
               <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
@@ -242,11 +343,14 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-indigo-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(99,102,241,0.1)] overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
+          <motion.div
+            variants={itemVariants}
+            className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-indigo-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(99,102,241,0.1)] overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
               <div className="w-14 h-14 bg-gradient-to-br from-indigo-500/20 to-violet-500/10 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-white/10 group-hover:scale-110 transition-transform duration-500">
-                <Headphones className="w-7 h-7 text-indigo-400"/>
+                <Headphones className="w-7 h-7 text-indigo-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3 tracking-tight">Narrative Audiobooks</h3>
               <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
@@ -255,11 +359,14 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-cyan-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(6,182,212,0.1)] overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
+          <motion.div
+            variants={itemVariants}
+            className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-cyan-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(6,182,212,0.1)] overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
               <div className="w-14 h-14 bg-gradient-to-br from-cyan-500/20 to-sky-500/10 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-white/10 group-hover:scale-110 transition-transform duration-500">
-                <Music className="w-7 h-7 text-cyan-400"/>
+                <Music className="w-7 h-7 text-cyan-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3 tracking-tight">Production-Ready Scripts</h3>
               <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
@@ -268,11 +375,14 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-amber-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(245,158,11,0.1)] overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
+          <motion.div
+            variants={itemVariants}
+            className="group relative p-8 max-md:p-5 rounded-3xl bg-gray-900/40 backdrop-blur-xl border border-white/5 hover:border-amber-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(245,158,11,0.1)] overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
               <div className="w-14 h-14 bg-gradient-to-br from-amber-500/20 to-orange-500/10 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-white/10 group-hover:scale-110 transition-transform duration-500">
-                <BookOpen className="w-7 h-7 text-amber-400"/>
+                <BookOpen className="w-7 h-7 text-amber-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3 tracking-tight">Polished Ebook Publishing</h3>
               <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
@@ -282,16 +392,8 @@ const HomePage: React.FC = () => {
           </motion.div>
         </motion.div>
       </div>
-      <style>{`
-        @keyframes float-medium {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-15px); }
-        }
-        @keyframes float-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-      `}</style>
-    </PageTransition>);
+    </PageTransition>
+  );
 };
+
 export default HomePage;

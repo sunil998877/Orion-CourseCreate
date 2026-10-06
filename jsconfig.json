@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": false,
+    "forceConsistentCasingInFileNames": false
+  },
+  "exclude": [
+    "node_modules",
+    "frontEnd/node_modules",
+    "Backend/node_modules"
+  ]
+}

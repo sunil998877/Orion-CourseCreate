@@ -140,14 +140,14 @@ const AddCreditsContent: React.FC<Props> = ({ onPurchase }) => {
 
     return (
         <div className="space-y-12">
-            <section id="plans" className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-8 max-md:rounded-2xl max-md:p-4">
+            <section id="plans">
                 <PlanCards
                     onSelectPlan={handleSelectPlan}
                     onCancelPlan={handlePromptCancelActivePlan}
                 />
             </section>
 
-            <section id="recharge" className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-8 max-md:rounded-2xl max-md:p-4">
+            <section id="recharge">
                 <CreditPackages
                     onSelectPackage={handleSelectPackage}
                     selectedPackageId={selectedPackage?.id}

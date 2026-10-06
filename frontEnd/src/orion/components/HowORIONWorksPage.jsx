@@ -61,99 +61,85 @@ const HowORIONWorksPage = () => {
 
   return (
     <section id="working" className="py-20 bg-[#0A0A0A] relative overflow-hidden">
-      
-      
+
       <div className="absolute top-[10%] left-[3%] w-14 h-14 text-lime-500/50 animate-revolve-1 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow">
           <Upload className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute top-[12%] right-[3%] w-12 h-12 text-lime-600/50 animate-revolve-2 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow-reverse">
           <Brain className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute bottom-[10%] left-[4%] w-16 h-16 text-lime-500/45 animate-revolve-3 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow">
           <Folder className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute bottom-[12%] right-[4%] w-13 h-13 text-lime-600/50 animate-revolve-4 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow-reverse">
           <Rocket className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute top-[8%] left-[20%] w-11 h-11 text-lime-500/40 animate-revolve-5 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow">
           <FileText className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute bottom-[8%] right-[20%] w-14 h-14 text-lime-600/45 animate-revolve-6 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow-reverse">
           <Server className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute top-[6%] right-[18%] w-12 h-12 text-lime-500/45 animate-revolve-7 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow">
           <Cpu className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
-      
-      
+
       <div className="absolute top-[5%] left-[15%] w-12 h-12 text-lime-500/50 animate-revolve-1 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow">
           <BarChart3 className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute top-[25%] right-[8%] w-14 h-14 text-lime-600/50 animate-revolve-2 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow-reverse">
           <Brain className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute bottom-[22%] left-[8%] w-13 h-13 text-lime-500/45 animate-revolve-3 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow">
           <Mail className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute bottom-[8%] right-[12%] w-11 h-11 text-lime-600/50 animate-revolve-4 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow-reverse">
           <Zap className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute top-[18%] left-[5%] w-10 h-10 text-lime-500/40 animate-revolve-5 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow">
           <Folder className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute bottom-[15%] right-[25%] w-14 h-14 text-lime-600/45 animate-revolve-6 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow-reverse">
           <Server className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
         </div>
       </div>
 
-      
       <div className="absolute top-[35%] right-[5%] w-13 h-13 text-lime-500/45 animate-revolve-7 hidden lg:block pointer-events-none z-0">
         <div className="w-full h-full animate-spin-slow">
           <Settings className="w-full h-full drop-shadow-[0_0_8px_rgba(74,242,161,0.6)]" strokeWidth={1.5} />
@@ -161,7 +147,7 @@ const HowORIONWorksPage = () => {
       </div>
 
       <div className="container mx-auto px-6 relative z-10">
-        
+
         <div ref={titleRef} className="text-center max-w-3xl mx-auto animate-on-scroll fade-in-up mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: "'Outfit', sans-serif" }}>
             How <span className="bg-gradient-to-r from-lime-400 to-lime-600 bg-clip-text text-transparent">ORION</span> Works
@@ -171,16 +157,14 @@ const HowORIONWorksPage = () => {
           </p>
         </div>
 
-        
         <div className="max-w-7xl mx-auto">
           <div className="relative">
 
-            
             <div className="grid grid-cols-1 gap-8 md:gap-12 relative z-10">
               {steps.map((step, index) => {
                 const delay = `delay-${(index + 1) * 100}`;
                 const isEven = index % 2 === 1;
-                
+
                 const animationClass = index === 1 ? 'fade-in-right' : 'fade-in-left';
 
                 return (
@@ -194,7 +178,7 @@ const HowORIONWorksPage = () => {
                     }}
                   >
                     <div className="relative flex flex-col md:flex-row p-2 sm:p-4 md:p-6 lg:p-8 items-stretch h-full transform transition-all duration-500 gap-0 overflow-hidden rounded-2xl border border-gray-800 hover:border-lime-500/70 transition-all duration-500 hover:shadow-2xl hover:shadow-lime-500/30 bg-gradient-to-br from-[#121212] via-[#0F0F0F] to-[#121212]">
-                      
+
                       <div className={`relative w-full md:w-1/2 h-[300px] sm:h-[300px] md:h-[300px] lg:h-[350px] overflow-hidden ${isEven ? 'md:order-2' : 'md:order-1'}`}>
                         <>
                           <img
@@ -205,19 +189,12 @@ const HowORIONWorksPage = () => {
                         </>
                       </div>
 
-                      
                       <div className="hidden md:block absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0.5 h-3/4 bg-gradient-to-b from-lime-500 via-lime-400 to-lime-500 z-10"></div>
 
-                      
                       <div className="relative w-full md:w-1/2 p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-center">
-                        
-                        
-
-                        
-                        
 
                         <div className="relative z-10">
-                          
+
                           <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-lime-500/20 to-lime-600/20 border border-lime-500/30 mb-4 text-lime-400 font-bold text-base">
                             {step.number}
                           </div>

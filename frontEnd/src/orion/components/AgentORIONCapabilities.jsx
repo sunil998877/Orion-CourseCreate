@@ -64,7 +64,7 @@ const AgentORIONCapabilities = () => {
                 className={`animate-on-scroll fade-in-up ${delay} group`}
               >
                 <div className="flex flex-col rounded-2xl overflow-hidden border border-gray-800 hover:border-lime-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-lime-500/20 bg-[#1A1A1A]">
-                  
+
                   <div className="p-4 sm:p-6 md:p-8 flex-1">
                     <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4" style={{ fontFamily: "'Outfit', sans-serif" }}>
                       {capability.title}
@@ -74,14 +74,13 @@ const AgentORIONCapabilities = () => {
                     </p>
                   </div>
 
-                  
                   <div className="relative h-[200px] sm:h-[250px] md:h-[300px] lg:h-[350px] overflow-hidden">
                     <img
                       src={capability.image}
                       alt={capability.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                    
+
                     <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
                   </div>
                 </div>
@@ -90,7 +89,6 @@ const AgentORIONCapabilities = () => {
           })}
         </div>
 
-        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto mt-8">
           <div
             ref={card5Ref}

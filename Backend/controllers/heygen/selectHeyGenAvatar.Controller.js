@@ -20,7 +20,6 @@ export const selectHeyGenAvatar = async (req, res) => {
 
         const saved = await saveMasterAvatar(dataToSave);
 
-        // Optionally synchronize courses for this user to immediately point to this master avatar
         if (req.user?.id) {
             await Course.updateMany(
                 { userId: req.user.id },

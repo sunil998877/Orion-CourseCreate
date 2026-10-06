@@ -1,5 +1,6 @@
 import { OpenAI } from 'openai';
 import { handleOpenAIError } from '../../utils/openaiErrorHandler.js';
+import { COURSEFORGE_RULES } from '../../utils/courseForgePrompt.js';
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'dummy-key' });
 export const chatWithAI = async (req, res) => {
     console.log("Controller Hit - chatWithAI");
@@ -9,9 +10,7 @@ export const chatWithAI = async (req, res) => {
             const messages = [
                 {
                     role: "system",
-                    content: `You are an AI Course Architect. Your goal is to help the user refine their course modules.
-          You should be professional, technical where needed, and always focus on instructional design best practices.
-          Current Module Context: ${JSON.stringify(moduleContext)}`
+                    content: `You are CourseForge, a senior instructional designer. Accuracy comes before aesthetics. Never invent citations, clause numbers, or statistics. Separate requirements, guidance, industry practice, and trainer recommendations. Current Module Context: ${JSON.stringify(moduleContext)}`
                 },
                 ...(history || []),
                 { role: "user", content: prompt }
@@ -99,7 +98,7 @@ export const chatWithAI = async (req, res) => {
                 console.log("[DEBUG] Calling OpenAI for Prompt 2 (Slides)...");
                 const r2 = await openai.chat.completions.create({
                     model: "gpt-4o",
-                    messages: [{ role: "user", content: prompt2 + "\nProduce exactly 10 slides. Return JSON: { \"Slides\": [...] }" }],
+                    messages: [{ role: "user", content: COURSEFORGE_RULES + '\n' + prompt2 + '\nDo not write narration. Every Transcript must be an empty string. Produce exactly 10 slides. Return JSON: { "Slides": [...] }' }],
                     temperature: 0.3,
                     response_format: { type: "json_object" }
                 });

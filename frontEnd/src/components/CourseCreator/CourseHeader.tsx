@@ -30,16 +30,16 @@ const CourseHeader: React.FC = () => {
                         whileTap={{ scale: isExitingArchitect ? 1 : 0.95 }}
                         onClick={handleExitArchitect}
                         disabled={isExitingArchitect}
-                        className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white hover:border-lime-500/30 transition-all text-xs font-bold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-gray-400 hover:text-white hover:border-lime-500/30 transition-all text-[11px] font-semibold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         {isExitingArchitect ? (
                             <>
-                                <Loader2 size={14} className="animate-spin text-lime-500"/>
+                                <Loader2 size={12} className="animate-spin text-lime-500"/>
                                 Please wait…
                             </>
                         ) : (
                             <>
-                                <ChevronLeft size={16} strokeWidth={2.5} className="text-lime-500"/>
+                                <ChevronLeft size={13} strokeWidth={2.5} className="text-lime-500"/>
                                 Exit Architect
                             </>
                         )}
@@ -50,11 +50,11 @@ const CourseHeader: React.FC = () => {
                         onClick={handleExitArchitect}
                         disabled={isExitingArchitect}
                         aria-label="Exit Architect"
-                        className="md:hidden flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/5 text-lime-400 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="md:hidden flex items-center justify-center h-8 w-8 rounded-lg border border-white/10 bg-white/5 text-lime-400 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         {isExitingArchitect
-                            ? <Loader2 size={18} className="animate-spin"/>
-                            : <ChevronLeft size={18} strokeWidth={2.5}/>
+                            ? <Loader2 size={14} className="animate-spin"/>
+                            : <ChevronLeft size={14} strokeWidth={2.5}/>
                         }
                     </motion.button>
 

@@ -120,9 +120,12 @@ export const generateModuleSlidesGamma = async (req, res) => {
                         courseToUpdate.modules = [];
                     }
                     const modIndex = courseToUpdate.modules.findIndex(m => Number(m.moduleNumber) === Number(moduleNumber));
+                    const savedSlides = Array.isArray(slideContent?.Slides) ? slideContent.Slides : [];
                     if (modIndex >= 0) {
                         courseToUpdate.modules[modIndex].gammaUrl = gammaUrl;
                         courseToUpdate.modules[modIndex].gammaGenerationId = gammaGenerationId;
+                        if (savedSlides.length)
+                            courseToUpdate.modules[modIndex].slides = savedSlides;
                     }
                     else {
                         const fallbackTitle = String((moduleContent && (moduleContent.Title || moduleContent.title)) ||
@@ -138,7 +141,7 @@ export const generateModuleSlidesGamma = async (req, res) => {
                             Quizzes: [],
                             VisualDescriptions: [],
                             FurtherStudy: {},
-                            slides: [],
+                            slides: savedSlides,
                             gammaUrl,
                             gammaGenerationId,
                             status: 'completed'
@@ -265,9 +268,12 @@ export const generateAllSlidesGamma = async (req, res) => {
                 console.error(`[Credits] Reconcile error on module ${moduleNumber}:`, recErr.message);
             }
             const modIdx = course.modules.findIndex(m => Number(m.moduleNumber) === Number(moduleNumber));
+            const savedSlides = Array.isArray(slideContent?.Slides) ? slideContent.Slides : [];
             if (modIdx >= 0) {
                 course.modules[modIdx].gammaUrl = gammaOutput.gammaLink;
                 course.modules[modIdx].gammaGenerationId = gammaOutput.generationId;
+                if (savedSlides.length)
+                    course.modules[modIdx].slides = savedSlides;
             }
             else {
                 const fallbackTitle = String((moduleContent && (moduleContent.Title || moduleContent.title)) ||
@@ -277,6 +283,7 @@ export const generateAllSlidesGamma = async (req, res) => {
                     moduleId: randomUUID(),
                     moduleNumber: Number(moduleNumber),
                     Title: fallbackTitle.trim(),
+                    slides: savedSlides,
                     gammaUrl: gammaOutput.gammaLink,
                     gammaGenerationId: gammaOutput.generationId,
                     status: 'completed'

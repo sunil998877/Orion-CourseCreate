@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Coins, TrendingUp, Clock, Sparkles, RefreshCw, Layers, FileText, Mic, ArrowUpRight, Users, KeyRound, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Coins, TrendingUp, Clock, Sparkles, RefreshCw, Layers, FileText, Mic, ArrowUpRight, Users, KeyRound, ExternalLink, CheckCircle2, Video, XCircle } from 'lucide-react';
 import { getAdminDashboardStats } from '../services/adminService';
 import { cn } from '../lib/utils';
 export default function AdminPage() {
@@ -68,11 +68,13 @@ export default function AdminPage() {
     const gammaCredits = stats?.providerBreakdown?.gamma?.totalCreditsCharged || gammaCreditsSpent;
     const openaiCredits = stats?.providerBreakdown?.openai?.totalCreditsCharged || 0;
     const audioCredits = stats?.providerBreakdown?.elevenlabs?.totalCreditsCharged || 0;
+    const heygenCredits = stats?.providerBreakdown?.heygen?.totalCreditsCharged || 0;
     const gammaJobs = stats?.gammaJobsCount || stats?.providerBreakdown?.gamma?.count || 0;
     const openaiJobs = stats?.providerBreakdown?.openai?.count || 0;
     const audioJobs = stats?.providerBreakdown?.elevenlabs?.count || 0;
-    const providerTotal = Math.max(gammaCredits + openaiCredits + audioCredits, 1);
-    const billedProviderCredits = gammaCredits + openaiCredits + audioCredits;
+    const heygenJobs = stats?.providerBreakdown?.heygen?.count || 0;
+    const billedProviderCredits = gammaCredits + openaiCredits + audioCredits + heygenCredits;
+    const providerTotal = Math.max(billedProviderCredits, 1);
     const providerWorkload = [
         {
             provider: "Gamma AI",
@@ -106,6 +108,17 @@ export default function AdminPage() {
             borderColor: "border-amber-500/30",
             bgLight: "bg-amber-500/10",
             icon: Mic,
+        },
+        {
+            provider: "HeyGen (Avatar)",
+            costPerUnit: "30 cr / min video",
+            jobCount: heygenJobs,
+            credits: heygenCredits,
+            color: "from-blue-500 to-indigo-600",
+            textColor: "text-indigo-600 dark:text-indigo-400",
+            borderColor: "border-indigo-500/30",
+            bgLight: "bg-indigo-500/10",
+            icon: Video,
         },
     ];
     const recentTransactions = stats?.recentTransactions || [];
@@ -195,7 +208,7 @@ export default function AdminPage() {
           </Link>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -249,18 +262,27 @@ export default function AdminPage() {
                     <h3 className="font-bold text-sm text-slate-900 dark:text-white">OpenAI (GPT-4o)</h3>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="h-3 w-3" /> Active
+                <span className={cn(
+                  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold",
+                  (stats?.apiBalances?.find((b: any) => b.provider === 'openai')?.balance ?? 0) <= 0 || stats?.apiBalances?.find((b: any) => b.provider === 'openai')?.status === 'exhausted'
+                    ? "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400"
+                    : "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                )}>
+                  {(stats?.apiBalances?.find((b: any) => b.provider === 'openai')?.balance ?? 0) <= 0 || stats?.apiBalances?.find((b: any) => b.provider === 'openai')?.status === 'exhausted' ? (
+                    <><XCircle className="h-3 w-3" /> Out of Credits</>
+                  ) : (
+                    <><CheckCircle2 className="h-3 w-3" /> Active</>
+                  )}
                 </span>
               </div>
 
               <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3 dark:border-white/5 dark:bg-white/[0.02]">
                 <span className="text-[10px] text-slate-500 dark:text-white/50 font-medium">Generation Quota</span>
                 <div className="mt-1 text-2xl font-mono font-extrabold text-slate-900 dark:text-white">
-                  {(stats?.apiBalances?.find((b: any) => b.provider === 'openai')?.balance ?? 100000).toLocaleString()} <span className="text-xs uppercase font-bold text-slate-500">tokens</span>
+                  {(stats?.apiBalances?.find((b: any) => b.provider === 'openai')?.balance ?? 0).toLocaleString()} <span className="text-xs uppercase font-bold text-slate-500">tokens</span>
                 </div>
                 <span className="text-[10px] text-slate-400 dark:text-white/40 mt-0.5 block">
-                  Outlines, syllabus & narration script writing
+                  Outlines, syllabus & narration scripts
                 </span>
               </div>
             </div>
@@ -315,6 +337,48 @@ export default function AdminPage() {
                 className="inline-flex items-center gap-1 text-xs font-bold text-lime-600 hover:text-lime-700 dark:text-lime-400 dark:hover:underline"
               >
                 Recharge ElevenLabs <ExternalLink className="h-3 w-3" />
+              </a>
+              <Link to="/admin/api-credits" className="text-[11px] text-slate-500 hover:underline dark:text-white/50">
+                Manage / Key
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                    <Video className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">HeyGen (Avatar)</h3>
+                  </div>
+                </div>
+                <span className="inline-flex items-center gap-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <CheckCircle2 className="h-3 w-3" /> Active
+                </span>
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3 dark:border-white/5 dark:bg-white/[0.02]">
+                <span className="text-[10px] text-slate-500 dark:text-white/50 font-medium">Avatar Video Quota</span>
+                <div className="mt-1 text-2xl font-mono font-extrabold text-slate-900 dark:text-white">
+                  {(stats?.apiBalances?.find((b: any) => b.provider === 'heygen')?.balance ?? 10).toLocaleString()} <span className="text-xs uppercase font-bold text-slate-500">credits</span>
+                </div>
+                <span className="text-[10px] text-slate-400 dark:text-white/40 mt-0.5 block">
+                  ~1 credit per video minute
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between gap-2">
+              <a
+                href="https://app.heygen.com/settings?nav=Billing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-bold text-lime-600 hover:text-lime-700 dark:text-lime-400 dark:hover:underline"
+              >
+                Recharge HeyGen <ExternalLink className="h-3 w-3" />
               </a>
               <Link to="/admin/api-credits" className="text-[11px] text-slate-500 hover:underline dark:text-white/50">
                 Manage / Key

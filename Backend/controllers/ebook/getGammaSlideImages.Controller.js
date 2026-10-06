@@ -120,7 +120,11 @@ export const getGammaSlideImages = async (req, res) => {
         }
 
         const { courseId, moduleNumber } = req.params;
-        const course = await Course.findOne({ userId: req.user.id, courseId: String(courseId) });
+        const courseKey = String(courseId);
+        let course = await Course.findOne({ userId: req.user.id, courseId: courseKey });
+        if (!course && /^[a-f0-9]{24}$/i.test(courseKey)) {
+            course = await Course.findOne({ userId: req.user.id, _id: courseKey });
+        }
         if (!course) return res.status(404).json({ message: 'Course not found' });
 
         const mod = (course.modules || []).find((m) => Number(m.moduleNumber) === Number(moduleNumber));
@@ -150,7 +154,7 @@ export const getGammaSlideImages = async (req, res) => {
         if (mod.gammaGenerationId) {
             const resolved = await resolveGammaId(mod.gammaGenerationId);
             gammaId = resolved.gammaId;
-            // If generation already had a png export zip, use it
+
             if (resolved.exportUrl && /\.zip($|\?)/i.test(resolved.exportUrl)) {
                 await unzipPngsToDir(resolved.exportUrl, cacheDir);
                 images = await listCachedImages(cacheDir, publicPrefix);
@@ -166,7 +170,7 @@ export const getGammaSlideImages = async (req, res) => {
         }
 
         if (!gammaId && mod.gammaUrl) {
-            // Best-effort extract from URL (g_xxx or docs slug)
+
             const match = String(mod.gammaUrl).match(/\/(g_[a-z0-9]+)/i);
             if (match) gammaId = match[1];
         }

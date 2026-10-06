@@ -141,7 +141,7 @@ export default function PricingSection() {
                 : 'bg-[#121212] border-[#2A2A2A]'
             }`}
           >
-            
+
             <div>
               {card.tag && (
                 <span
@@ -184,7 +184,6 @@ export default function PricingSection() {
               </ul>
             </div>
 
-            
             <div className="mt-auto pt-5 flex flex-col gap-2">
               {card.price ? (
                 <div className="py-2 bg-[#0A0A0A] rounded-lg text-center">
@@ -207,7 +206,6 @@ export default function PricingSection() {
         ))}
       </motion.div>
 
-      
       {isModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"

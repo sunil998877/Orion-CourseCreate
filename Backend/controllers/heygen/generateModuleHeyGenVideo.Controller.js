@@ -72,7 +72,7 @@ async function createModuleStudioVideo(mod, narrations) {
         }
         return videoId;
     } catch (studioErr) {
-        // Fallback: legacy multi-scene avatar video (still one credit / one video id)
+
         console.warn('HeyGen studio create failed, falling back to v2 generate:', studioErr.message);
         const payload = await heygenFetch('/v2/video/generate', {
             method: 'POST',

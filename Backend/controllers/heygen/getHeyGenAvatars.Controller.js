@@ -21,7 +21,6 @@ export const getHeyGenAvatars = async (_req, res) => {
                         voiceId: a.default_voice_id || master?.voiceId || '1bd001e7e50f421d891986aad5158bc8',
                     }));
 
-                // Deduplicate with curated list first
                 const seen = new Set(list.map((c) => c.avatarId));
                 for (const item of liveAvatars) {
                     if (!seen.has(item.avatarId)) {

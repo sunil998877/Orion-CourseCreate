@@ -175,6 +175,11 @@ export const SlideContent: React.FC<SlideContentProps> = ({ moduleData, onClose 
                         : [];
                     const visualPrompt = (slide as any).VisualPrompt || (slide as any).visualPrompt || '';
                     const transcriptText = (slide as any).Transcript || (slide as any).transcript || '';
+                    const cueCardItems = Array.isArray((slide as any).CueCard)
+                        ? (slide as any).CueCard
+                        : Array.isArray((slide as any).cueCard)
+                        ? (slide as any).cueCard
+                        : [];
                     return (<div key={i} className="group bg-white/[0.02] hover:bg-white/[0.04] p-8 rounded-[2rem] border border-white/5 hover:border-lime-500/20 transition-all duration-300 max-md:p-4 max-md:rounded-2xl">
                                                         <div className="flex items-center justify-between mb-8 max-md:mb-4 max-md:flex-col max-md:items-start max-md:gap-3">
                                                             <div className="flex items-center gap-4">
@@ -215,6 +220,18 @@ export const SlideContent: React.FC<SlideContentProps> = ({ moduleData, onClose 
                                                                         <p className="text-sm text-lime-400 font-medium bg-lime-500/5 p-5 rounded-2xl border border-lime-500/10 italic leading-relaxed">
                                                                             "{transcriptText}"
                                                                         </p>
+                                                                    </div>)}
+
+                                                                {cueCardItems.length > 0 && (<div>
+                                                                        <div className="text-[10px] font-black text-sky-400 uppercase tracking-[0.2em] mb-3">Trainer Cue Cards & Prompts</div>
+                                                                        <div className="space-y-2 bg-sky-500/5 p-4 rounded-2xl border border-sky-500/10">
+                                                                            {cueCardItems.map((cue: string, cIdx: number) => (
+                                                                                <div key={cIdx} className="flex items-start gap-2.5 text-xs text-gray-300">
+                                                                                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 mt-1.5 shrink-0" />
+                                                                                    <span>{cue}</span>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
                                                                     </div>)}
 
                                                                 <div>

@@ -102,7 +102,6 @@ const CourseDescriptionModal: React.FC = () => {
                 )}
               </div>
 
-              
               <div className="flex items-center justify-between px-8 py-5 border-t border-white/5 bg-white/[0.01]">
                 <button
                   type="button"

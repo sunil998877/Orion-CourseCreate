@@ -49,7 +49,7 @@ export const getModuleHeyGenVideoStatus = async (req, res) => {
         try {
             payload = await heygenFetch(`/v3/videos/${encodeURIComponent(mod.heygenModuleVideoId)}`);
         } catch (v3Err) {
-            // Fallback for older video ids created via legacy endpoints
+
             payload = await heygenFetch(
                 `/v1/video_status.get?video_id=${encodeURIComponent(mod.heygenModuleVideoId)}`
             );
@@ -73,7 +73,7 @@ export const getModuleHeyGenVideoStatus = async (req, res) => {
                 slide.videoId = mod.heygenModuleVideoId;
                 slide.error = null;
             });
-            // Scale estimated slide durations to real video length when available
+
             if (duration && Number(duration) > 0 && mod.heygenSlideVideos?.length) {
                 const estimates = mod.heygenSlideVideos.map((s) => Number(s.duration) || 3);
                 const sum = estimates.reduce((a, b) => a + b, 0) || 1;

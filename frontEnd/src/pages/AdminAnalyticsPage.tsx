@@ -58,7 +58,6 @@ export default function AdminAnalyticsPage() {
           Notice: {error}
         </div>)}
 
-
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
           <div className="text-xs font-medium text-slate-500 dark:text-white/60">Total Orion Credits Issued</div>
@@ -93,7 +92,6 @@ export default function AdminAnalyticsPage() {
           <div className="mt-1 text-xs text-emerald-600/80 dark:text-emerald-300">Profitable at scale</div>
         </div>
       </div>
-
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
         <h2 className="text-base font-bold text-slate-900 dark:text-white">Provider Workload Split</h2>

@@ -59,11 +59,10 @@ const AnimatedRoutes = () => {
         '/login',
         '/register',
         '/registration',
-        '/create-course',
-        '/course-basic-info',
         '/admin/login',
     ].includes(location.pathname);
     const isAdminPage = location.pathname.startsWith('/admin');
+    const isFullScreenPage = ['/create-course', '/course-basic-info'].includes(location.pathname);
     const routes = (<Suspense fallback={<PageFallback />}>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
@@ -104,7 +103,7 @@ const AnimatedRoutes = () => {
         </Routes>
       </AnimatePresence>
     </Suspense>);
-    if (isAuthPage || isAdminPage) {
+    if (isAuthPage || isAdminPage || isFullScreenPage) {
         return routes;
     }
     return <AppLayout>{routes}</AppLayout>;

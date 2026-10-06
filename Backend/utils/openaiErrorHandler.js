@@ -10,7 +10,12 @@ export function handleOpenAIError(err, res, label = 'openai') {
         });
     }
     if (status === 429 || code === 'rate_limit_exceeded' || code === 'insufficient_quota') {
-        const isQuota = code === 'insufficient_quota' || /quota|billing/i.test(String(err.message || ''));
+        const isQuota = code === 'insufficient_quota' || /quota|billing|credit/i.test(String(err.message || ''));
+        if (isQuota) {
+            import('../services/systemApiBalanceService.js')
+                .then(m => m.recordOpenAiQuotaExhausted(err.message))
+                .catch(() => {});
+        }
         return res.status(isQuota ? 402 : 503).json({
             error: isQuota ? 'OpenAI credits are exhausted.' : 'AI service is temporarily unavailable.',
             details: isQuota

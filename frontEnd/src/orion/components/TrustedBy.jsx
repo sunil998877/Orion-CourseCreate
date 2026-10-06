@@ -38,21 +38,21 @@ const TrustedBy = () => {
         </div>
         <div ref={ref} className="marquee animate-on-scroll fade-in">
           <div className="marquee-content">
-            
+
             {[...companies, ...companies, ...companies, ...companies, ...companies, ...companies].map((company, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="marquee-item flex flex-col items-center justify-center gap-3 group"
               >
-                
+
                 <div className="relative w-12 h-16 md:w-16 md:h-16 flex items-center justify-center transition-all duration-300 group-hover:scale-125 bg-white rounded-lg p-1.5 md:p-2 group-hover:bg-gray-100 shadow-md group-hover:shadow-lg">
-                  <img 
-                    src={company.logo} 
+                  <img
+                    src={company.logo}
                     alt={company.name}
                     className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
                   />
                 </div>
-                
+
                 <div className="text-gray-400 text-sm md:text-base font-semibold text-center whitespace-nowrap group-hover:text-gray-300 transition-colors duration-300">
                   {
                     company.displayName
@@ -68,4 +68,3 @@ const TrustedBy = () => {
 };
 
 export default TrustedBy;
-

@@ -56,7 +56,6 @@ const Testimonials = () => {
     },
   ];
 
-  
   const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (

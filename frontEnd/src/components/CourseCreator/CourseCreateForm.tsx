@@ -19,8 +19,8 @@ const CourseCreatorContent: React.FC = () => {
   if (isGeneratingContent) return <Loading />;
 
   return (
-    <div className="min-h-screen bg-black text-gray-100 font-sans selection:bg-lime-500 selection:text-black">
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+    <div className="relative min-h-screen bg-black text-gray-100 font-sans selection:bg-lime-500 selection:text-black">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-900/20 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-lime-900/10 blur-[120px] rounded-full" />
       </div>
@@ -60,7 +60,17 @@ const CourseCreatorContent: React.FC = () => {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #4d7c0f; }
-        
+
+        .step-scrollbar {
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
+        }
+        .step-scrollbar::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+
         @keyframes blink-lime {
           0%, 100% { border-color: rgba(132, 204, 22, 0.3); box-shadow: 0 0 0 rgba(132, 204, 22, 0); }
           50% { border-color: rgba(132, 204, 22, 0.8); box-shadow: 0 0 20px rgba(132, 204, 22, 0.2); }

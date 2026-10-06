@@ -1,3 +1,4 @@
+import { workbookAddendum } from '../../utils/courseForgePrompt.js';
 import Course from '../../models/courseModel.js';
 import EbookGeneration from '../../models/ebookGenerationModel.js';
 import User from '../../models/userModel.js';
@@ -296,7 +297,7 @@ ${JSON.stringify(modulesForPrompt)}
                     model: 'gpt-4o',
                     messages: [
                         { role: 'system', content: 'You are an elite instructional designer and professional author. You generate publication-grade, beautifully structured eBooks in valid JSON following the requested schema.' },
-                        { role: 'user', content: ebookPrompt }
+                        { role: 'user', content: ebookPrompt + workbookAddendum(course) }
                     ],
                     temperature: 0.4,
                     response_format: { type: 'json_object' }

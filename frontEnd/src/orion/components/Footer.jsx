@@ -9,7 +9,7 @@ const Footer = () => {
     <footer className="bg-[#0A0A0A] border-t border-gray-800/50 py-12 md:py-16">
       <div ref={ref} className="container mx-auto px-6 ">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 mb-8 animate-on-scroll fade-in-up">
-          
+
           <div className="space-y-4">
             <h3
               className="text-2xl font-bold text-white"
@@ -30,7 +30,6 @@ const Footer = () => {
             </div>
           </div>
 
-          
           <div className="pl-8">
             <h4
               className="text-white font-semibold mb-4 text-lg"
@@ -39,46 +38,57 @@ const Footer = () => {
               Quick Links
             </h4>
             <ul className="space-y-3">
-              {[{ href: '#meet-orion', label: 'Meet ORION' },
-              { href: '#working', label: 'How ORION Works' },
-              { href: '#delightful-service', label: 'Why Choose ORION' },
-              { href: '#pricingSection', label: 'Pricing' },
-              { href: '#testimonials', label: 'Testimonials' },
-              { href: '#faqs', label: 'FAQs' },
-              { href: '#contact', label: 'Get Started' },
+              {[
+                { href: '/login', label: 'Log In' },
+                { href: '#working', label: 'How ORION Works' },
+                { href: '#delightful-service', label: 'Why Choose ORION' },
+                { href: '#pricingSection', label: 'Pricing' },
+                { href: '#testimonials', label: 'Testimonials' },
+                { href: '#faqs', label: 'FAQs' },
+                { href: '#contact', label: 'Get Started' },
               ].map((link) => {
+                const isInternalRoute = link.href.startsWith('/');
                 const handleClick = (e) => {
-                  e.preventDefault();
-                  const element = document.querySelector(link.href);
-                  if (element) {
-                    const headerOffset = 100;
-                    const elementPosition = element.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                    window.scrollTo({
-                      top: offsetPosition,
-                      behavior: 'smooth'
-                    });
+                  if (link.href.startsWith('#')) {
+                    e.preventDefault();
+                    const element = document.querySelector(link.href);
+                    if (element) {
+                      const headerOffset = 100;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
                   }
                 };
+
+                const linkClass = "text-gray-400 hover:text-lime-500 transition-colors duration-300 text-sm flex items-center group";
+
                 return (
                   <li key={link.href}>
-                    <a
-                      href={link.href}
-                      onClick={handleClick}
-                      className="text-gray-400 hover:text-lime-500 transition-colors duration-300 text-sm flex items-center group"
-                    >
-                      <span className="mr-2 group-hover:translate-x-1 transition-transform duration-300">→</span>
-                      {link.label}
-                    </a>
+                    {isInternalRoute ? (
+                      <Link to={link.href} className={linkClass}>
+                        <span className="mr-2 group-hover:translate-x-1 transition-transform duration-300">→</span>
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <a
+                        href={link.href}
+                        onClick={handleClick}
+                        className={linkClass}
+                      >
+                        <span className="mr-2 group-hover:translate-x-1 transition-transform duration-300">→</span>
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 );
               })}
             </ul>
           </div>
 
-          
-
-          
           <div>
             <h4
               className="text-white font-semibold mb-4 text-lg"
@@ -130,14 +140,14 @@ const Footer = () => {
                 </a>
               </li>
             </ul>
-            
+
             <div className="max-w-fit rounded-[15px] flex flex-row items-center justify-center gap-4 backdrop-blur-[15px] transition-all duration-500 hover:bg-white/5"
               style={{
                 boxShadow: 'inset 0 0 20px rgba(255, 255, 255, 0.192), inset 0 0 5px rgba(255, 255, 255, 0.274), 0 5px 5px rgba(0, 0, 0, 0.164)'
               }}
             >
               <ul className="p-4 flex flex-row gap-4 items-center justify-center">
-                
+
                 <li className="relative cursor-pointer group iso-pro-item">
                   <span className="absolute opacity-0 group-hover:opacity-20 transition-all duration-300 rounded-full h-[60px] w-[60px] border border-lime-500"
                     style={{
@@ -177,7 +187,6 @@ const Footer = () => {
                   </div>
                 </li>
 
-                
                 <li className="relative cursor-pointer group iso-pro-item">
                   <span className="absolute opacity-0 group-hover:opacity-20 transition-all duration-300 rounded-full h-[60px] w-[60px] border border-lime-500"
                     style={{
@@ -221,7 +230,6 @@ const Footer = () => {
           </div>
         </div>
 
-        
         <div className="border-t border-gray-800/50 pt-8 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-500 text-sm">
@@ -242,4 +250,3 @@ const Footer = () => {
 };
 
 export default Footer;
-

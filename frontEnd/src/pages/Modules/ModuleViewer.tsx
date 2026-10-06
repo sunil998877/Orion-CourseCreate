@@ -2,6 +2,8 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { BookOpen, Sparkles, CheckCircle, Loader2 } from 'lucide-react';
 import { ModuleState, cleanTitle } from './ModuleGen';
+import { useCourseData } from '../../contextAPI/courseAPI';
+import { ModuleAssessmentTask } from '../../components/CourseCreator/ModuleAssessmentTask';
 interface ModuleViewerProps {
     moduleData: ModuleState;
     onClose: () => void;
@@ -16,6 +18,7 @@ interface ModuleViewerProps {
     duration?: string;
 }
 export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose, onRegenerate, onRefine, isRegenerating, refineProgress, credit, duration }) => {
+    const { courseData } = useCourseData();
     const [customPrompt, setCustomPrompt] = React.useState('');
     const [messages, setMessages] = React.useState<{
         role: 'user' | 'assistant';
@@ -28,7 +31,6 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
 
         <div className="absolute -top-20 -left-20 w-64 h-64 bg-lime-500/10 rounded-full blur-[80px] pointer-events-none"/>
         <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none"/>
-
 
         <div className="relative px-8 py-10 shrink-0 border-b border-white/5 bg-white/[0.02] max-md:px-4 max-md:py-5">
           <div className="relative flex items-center justify-between max-md:flex-col max-md:items-stretch max-md:gap-4">
@@ -61,7 +63,6 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
           </div>
         </div>
 
-
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-transparent max-md:p-4">
           {!moduleData || !moduleData.Content ? (<div className="flex flex-col items-center justify-center py-20 animate-in fade-in duration-700">
               <div className="relative">
@@ -84,7 +85,6 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
                 </div>
               </div>
 
-
               <div className="flex items-center justify-between border-b border-white/5 pb-8 max-md:flex-col max-md:items-start max-md:gap-4 max-md:pb-4">
                 <div>
                   <div className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Module Overview</div>
@@ -103,7 +103,6 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
                   </div>
                 </div>
               </div>
-
 
               <div className="grid grid-cols-1 gap-12">
                 <section>
@@ -209,8 +208,16 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
                     </p>
                   </div>
                 </section>
+                <div className="mt-8">
+                  <ModuleAssessmentTask
+                    assessment={courseData?.courseForge?.assessment}
+                    moduleIndex={Math.max(0, Number(moduleData.id) - 1)}
+                    moduleCount={Number(courseData?.module) || 0}
+                    moduleTitle={moduleData.Content?.Title || moduleData.Module}
+                    moduleContent={moduleData.Content}
+                  />
+                </div>
               </div>
-
 
               {onRefine && (<div className="mt-20 pt-16 border-t border-white/5 relative">
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 border border-white/5 px-6 py-2 rounded-full text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">
@@ -221,7 +228,6 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ moduleData, onClose,
                       <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Refine Your Architecture</h3>
                       <p className="text-gray-500 font-medium">Instruction the AI to modify specific knowledge points or adjust the narrative style.</p>
                     </div>
-
 
                     {messages.length > 0 && (<div className="space-y-6 max-h-[400px] overflow-y-auto px-4 custom-scrollbar">
                         {messages.map((msg: {
