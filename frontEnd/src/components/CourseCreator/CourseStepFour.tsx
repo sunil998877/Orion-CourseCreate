@@ -7,7 +7,7 @@ import ThemeModal from './ThemeModal';
 import ModuleList from './ModuleList';
 import CourseForgeGates from './CourseForgeGates';
 import { toast } from 'react-toastify';
-import { ChevronRight, ChevronLeft, Zap, Sparkles, AlertTriangle, Construction, Lightbulb, RefreshCw, Layers, Rocket, Loader2, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ChevronDown, Zap, Sparkles, AlertTriangle, Construction, Lightbulb, RefreshCw, Layers, Rocket, Loader2, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const CourseStepFour: React.FC = () => {
     const { courseData, isBlueprinting, hasBlueprint, previewModules, blueprintingProgress, setThemeByModule, showGenerateWarning, setShowGenerateWarning, goToNextStep, goToPrevStep, generateOrionPreview, stepVariants, containerVariants, itemVariants, isContinuing, isBatchGenerating } = useCourseCreator();
@@ -226,7 +226,7 @@ const CourseStepFour: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             className="mb-5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent p-4 sm:p-4.5 backdrop-blur-xl relative overflow-hidden shadow-lg shadow-amber-500/5"
                         >
-                            <div className="flex max-sm:flex-col items-start justify-between gap-4 min-w-0">
+                            <div className="hidden md:flex max-sm:flex-col items-start justify-between gap-4 min-w-0" id="desktop-mobile-action-req-wrap">
                                 <div className="flex items-start gap-3.5 min-w-0 w-full">
                                     <div className="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 shrink-0 mt-0.5">
                                         <AlertCircle className="w-5 h-5 animate-pulse" />
@@ -250,8 +250,8 @@ const CourseStepFour: React.FC = () => {
                                                     <div
                                                         key={stepName}
                                                         className={`flex shrink-0 items-center gap-1 max-sm:px-1.5 max-sm:py-0.5 max-sm:text-[9px] px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${isDone
-                                                                ? 'bg-lime-500/10 border-lime-500/30 text-lime-400'
-                                                                : 'bg-black/40 border-amber-500/30 text-amber-200'
+                                                            ? 'bg-lime-500/10 border-lime-500/30 text-lime-400'
+                                                            : 'bg-black/40 border-amber-500/30 text-amber-200'
                                                             }`}
                                                     >
                                                         {isDone ? (
@@ -276,6 +276,67 @@ const CourseStepFour: React.FC = () => {
                                 >
                                     {productionOpen ? 'Hide Steps' : 'Open Steps'}
                                 </button>
+                            </div>
+
+                            {/* MOBILE LAYOUT (Matching Screenshot) */}
+                            <div className="flex md:hidden flex-col min-w-0 w-full relative">
+                                <div className="flex items-start gap-3 w-full mb-3">
+                                    <div className="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 shrink-0">
+                                        <AlertCircle className="w-6 h-6 animate-pulse" />
+                                    </div>
+                                    <div className="flex-1 min-w-0 pt-0.5">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <h4 className="text-[13px] font-bold text-amber-400 uppercase tracking-widest leading-[1.3] pr-2">
+                                                Action Required<br />Complete Orion Production
+                                            </h4>
+                                            <button
+                                                type="button"
+                                                onClick={() => setProductionOpen((prev) => !prev)}
+                                                className="shrink-0 px-2.5 py-1.5 rounded-xl border border-amber-500/40 text-amber-300 text-[10px] font-bold transition-all flex items-center gap-1 self-start"
+                                            >
+                                                {productionOpen ? 'Hide' : 'Show'}
+                                                <ChevronDown size={12} className={`transition-transform ${productionOpen ? "rotate-180" : ""}`} />
+                                            </button>
+                                        </div>
+                                        <div className="mt-2.5">
+                                            <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300">
+                                                {pendingSteps.length} {pendingSteps.length === 1 ? 'Step' : 'Steps'} Pending
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <p className="text-gray-300 text-[12px] leading-[1.5] mb-4">
+                                    You must create and approve <span className="text-white font-bold">{pendingSteps.join(', ')}</span> in the Orion Production section below. The <span className="text-lime-400 font-bold">'Looks Good, Continue'</span> button remains locked until all steps are approved.
+                                </p>
+                                
+                                <div className="flex flex-col gap-2">
+                                    {['Trainer script', 'E-workbook', 'Assessment'].map((stepName) => {
+                                        const isDone = !pendingSteps.includes(stepName);
+                                        return (
+                                            <div
+                                                key={stepName}
+                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border ${isDone
+                                                        ? 'bg-[#152010] border-lime-500/30 text-lime-400'
+                                                        : 'bg-[#1a1710] border-amber-500/30 text-amber-300'
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    {isDone ? (
+                                                        <CheckCircle2 size={16} className="text-lime-400" />
+                                                    ) : (
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                                                    )}
+                                                    <span className="text-[13px] font-bold text-white">{stepName}</span>
+                                                    <span className="text-[12px] opacity-60">
+                                                        {isDone ? '(Approved)' : '(Pending)'}
+                                                    </span>
+                                                </div>
+                                                <ChevronRight size={16} className="opacity-50" />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </motion.div>
                     ) : (

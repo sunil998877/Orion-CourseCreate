@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Check, ChevronDown, Edit3, Loader2, RotateCcw, Sparkles, X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Check, ChevronDown, Edit3, Loader2, RotateCcw, Sparkles, X, CheckCircle2, AlertCircle, FileText, Layers, ListChecks, ChevronRight } from 'lucide-react';
 import { useCourseCreator } from '../../contextAPI/CourseCreatorContext';
 import { API_BASE } from '../../utils/api';
 import { toast } from 'react-toastify';
@@ -148,7 +148,8 @@ const CourseForgeGates: React.FC<{ stage: 'build' | 'review'; open?: boolean; on
     const approvedCount = steps.filter((item) => item.state === 'Approved').length;
     return (
         <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03]">
-            <button type="button" data-expand-toggle onClick={toggle} className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left">
+            {/* DESKTOP HEADER */}
+            <button type="button" data-expand-toggle onClick={toggle} className="hidden md:flex w-full items-center justify-between gap-3 px-5 py-4 text-left">
                 <span>
                     <span className="flex items-center gap-2.5">
                         <span className="text-sm font-semibold uppercase tracking-wider text-lime-400">Orion production</span>
@@ -165,6 +166,26 @@ const CourseForgeGates: React.FC<{ stage: 'build' | 'review'; open?: boolean; on
                     <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-gray-500">{steps.length} steps to create and approve · {approvedCount} approved</span>
                 </span>
                 <ChevronDown className={`h-5 w-5 shrink-0 text-gray-500 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* MOBILE HEADER */}
+            <button type="button" data-expand-toggle onClick={toggle} className="flex md:hidden w-full flex-col gap-2 px-5 py-4 text-left relative">
+                <div className="flex items-center gap-2.5">
+                    <span className="text-[15px] font-black uppercase tracking-widest text-white">Orion production</span>
+                    {approvedCount < steps.length ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/20 border border-amber-500/40 text-amber-300">
+                            {steps.length - approvedCount} Pending
+                        </span>
+                    ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-lime-500/20 border border-lime-500/40 text-lime-400">
+                            Approved
+                        </span>
+                    )}
+                </div>
+                <span className="block text-xs font-normal text-gray-400">{steps.length} steps to create and approve · {approvedCount} approved</span>
+                <div className="absolute right-5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center bg-white/5">
+                    <ChevronDown className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+                </div>
             </button>
             {!expanded && (
                 <ul className="space-y-2 px-5 pb-4">
@@ -197,164 +218,190 @@ const CourseForgeGates: React.FC<{ stage: 'build' | 'review'; open?: boolean; on
                 </ul>
             )}
             {expanded && <div className="space-y-4 px-5 pb-5">
-            <div className="flex flex-wrap gap-2">
-                {buttons.map((item) => {
-                    const canClick = item.open && !busy;
-                    const className = item.done ? (item.kind === 'approve' ? done : sealed) : canClick ? (item.kind === 'approve' ? solid : quiet) : locked;
-                    return (
-                        <button key={item.label} type="button" disabled={!canClick} onClick={item.onClick} className={className}>
-                            {item.label}
-                        </button>
-                    );
-                })}
-            </div>
-            {courseForgeBusy && <p className="text-xs text-lime-400">Orion is working on {courseForgeBusy}...</p>}
-            {forge.researchDossier?.scope && (
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5 transition-all">
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                        <span className="text-xs font-bold uppercase tracking-wider text-lime-400">
-                            Scope
-                        </span>
-                        {!editingScope && (
-                            <button
-                                type="button"
-                                onClick={startScopeEdit}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-lime-500/30 bg-lime-500/10 px-2.5 py-1 text-xs font-semibold text-lime-300 hover:border-lime-500/60 hover:bg-lime-500/20 hover:text-lime-200 transition-all"
-                            >
-                                <Edit3 className="h-3 w-3" />
-                                Edit scope
+                {/* DESKTOP BUTTONS */}
+                <div className="hidden md:flex flex-wrap gap-2">
+                    {buttons.map((item) => {
+                        const canClick = item.open && !busy;
+                        const className = item.done ? (item.kind === 'approve' ? done : sealed) : canClick ? (item.kind === 'approve' ? solid : quiet) : locked;
+                        return (
+                            <button key={item.label} type="button" disabled={!canClick} onClick={item.onClick} className={className}>
+                                {item.label}
                             </button>
-                        )}
-                    </div>
-                    {editingScope ? (
-                        <div className="space-y-3">
-                            <div className="flex flex-wrap items-center justify-between gap-2 bg-black/20 p-2.5 rounded-xl border border-white/5">
-                                <span className="text-xs text-gray-400">
-                                    Let AI analyze the auditor findings and rewrite the scope:
-                                </span>
+                        );
+                    })}
+                </div>
+
+                {/* MOBILE LIST */}
+                <div className="flex md:hidden flex-col gap-2.5">
+                    {steps.map((step) => {
+                        const isApproved = step.state === 'Approved';
+                        const isCurrent = step.state === 'Create' || step.state === 'Ready to approve';
+                        return (
+                            <div key={step.label} className="flex items-center justify-between px-4 py-3 rounded-xl border border-white/5 bg-[#12131a]">
+                                <div className="flex items-center gap-3">
+                                    <div className="text-gray-400">
+                                        {step.label.toLowerCase().includes('assessment') ? <ListChecks size={18} /> : step.label.toLowerCase().includes('blueprint') ? <Layers size={18} /> : <FileText size={18} />}
+                                    </div>
+                                    <span className="text-[13px] font-bold text-white">{step.label}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${isApproved ? 'bg-[#152010] border border-lime-500/20 text-lime-400' : isCurrent ? 'bg-[#1a1710] border border-amber-500/20 text-amber-400' : 'bg-transparent text-gray-500'}`}>
+                                        {isApproved && <CheckCircle2 size={14} className="text-lime-400" />}
+                                        {step.state}
+                                    </span>
+                                    <ChevronRight size={16} className="text-gray-600" />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+                {courseForgeBusy && <p className="text-xs text-lime-400">Orion is working on {courseForgeBusy}...</p>}
+                {forge.researchDossier?.scope && (
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5 transition-all">
+                        <div className="mb-2 flex items-center justify-between gap-3">
+                            <span className="text-xs font-bold uppercase tracking-wider text-lime-400">
+                                Scope
+                            </span>
+                            {!editingScope && (
                                 <button
                                     type="button"
-                                    onClick={handleAIFixScope}
-                                    disabled={fixingScope}
-                                    className="inline-flex items-center gap-1.5 rounded-lg border border-lime-400/40 bg-gradient-to-r from-lime-500/20 to-emerald-500/20 px-3 py-1.5 text-xs font-bold text-lime-300 hover:from-lime-500/30 hover:to-emerald-500/30 hover:text-white transition-all shadow-sm disabled:opacity-50"
+                                    onClick={startScopeEdit}
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-lime-500/30 bg-lime-500/10 px-2.5 py-1 text-xs font-semibold text-lime-300 hover:border-lime-500/60 hover:bg-lime-500/20 hover:text-lime-200 transition-all"
                                 >
-                                    {fixingScope ? (
-                                        <>
-                                            <Loader2 className="h-3.5 w-3.5 animate-spin text-lime-400" />
-                                            <span>AI analyzing problems & correcting…</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Sparkles className="h-3.5 w-3.5 text-lime-400" />
-                                            <span>AI Auto-Fix Scope (Resolve Audit Problems)</span>
-                                        </>
-                                    )}
+                                    <Edit3 className="h-3 w-3" />
+                                    Edit scope
                                 </button>
-                            </div>
+                            )}
+                        </div>
+                        {editingScope ? (
+                            <div className="space-y-3">
+                                <div className="flex flex-wrap items-center justify-between gap-2 bg-black/20 p-2.5 rounded-xl border border-white/5">
+                                    <span className="text-xs text-gray-400">
+                                        Let AI analyze the auditor findings and rewrite the scope:
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={handleAIFixScope}
+                                        disabled={fixingScope}
+                                        className="inline-flex items-center gap-1.5 rounded-lg border border-lime-400/40 bg-gradient-to-r from-lime-500/20 to-emerald-500/20 px-3 py-1.5 text-xs font-bold text-lime-300 hover:from-lime-500/30 hover:to-emerald-500/30 hover:text-white transition-all shadow-sm disabled:opacity-50"
+                                    >
+                                        {fixingScope ? (
+                                            <>
+                                                <Loader2 className="h-3.5 w-3.5 animate-spin text-lime-400" />
+                                                <span>AI analyzing problems & correcting…</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Sparkles className="h-3.5 w-3.5 text-lime-400" />
+                                                <span>AI Auto-Fix Scope (Resolve Audit Problems)</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
 
-                            {fixExplanation && (
-                                <div className="rounded-xl border border-lime-500/30 bg-lime-500/10 p-3 text-xs text-lime-200 flex items-start gap-2.5 animate-in fade-in duration-200">
-                                    <Sparkles className="h-4 w-4 shrink-0 text-lime-400 mt-0.5" />
-                                    <div>
-                                        <p className="font-bold text-lime-300">Auditor Observations Resolved by AI:</p>
-                                        <p className="mt-0.5 leading-relaxed text-gray-200">{fixExplanation}</p>
+                                {fixExplanation && (
+                                    <div className="rounded-xl border border-lime-500/30 bg-lime-500/10 p-3 text-xs text-lime-200 flex items-start gap-2.5 animate-in fade-in duration-200">
+                                        <Sparkles className="h-4 w-4 shrink-0 text-lime-400 mt-0.5" />
+                                        <div>
+                                            <p className="font-bold text-lime-300">Auditor Observations Resolved by AI:</p>
+                                            <p className="mt-0.5 leading-relaxed text-gray-200">{fixExplanation}</p>
+                                        </div>
                                     </div>
+                                )}
+
+                                <textarea
+                                    value={scopeDraft}
+                                    onChange={(e) => setScopeDraft(e.target.value)}
+                                    rows={5}
+                                    className="w-full rounded-xl border border-gray-700 bg-gray-900/90 p-3 text-sm text-white placeholder-gray-500 outline-none transition focus:border-lime-400 focus:ring-1 focus:ring-lime-400 leading-relaxed"
+                                    placeholder="Edit course scope..."
+                                />
+                                <div className="flex items-center justify-end gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={cancelScopeEdit}
+                                        className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:bg-white/5 hover:text-white transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={saveScopeEdit}
+                                        className="inline-flex items-center gap-1.5 rounded-lg bg-lime-500 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider text-black hover:bg-lime-400 transition-all shadow-sm"
+                                    >
+                                        <Check className="h-3.5 w-3.5" />
+                                        Save scope
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-300 leading-relaxed">
+                                {forge.researchDossier.scope}
+                            </p>
+                        )}
+                    </div>
+                )}
+                {forge.blueprint?.empowermentPromise && (
+                    <p className="text-sm text-gray-300 leading-relaxed"><span className="text-lime-400 font-semibold">Promise. </span>{String(forge.blueprint.empowermentPromise).slice(0, 420)}</p>
+                )}
+                {assessmentReady && (
+                    <button type="button" onClick={() => setBlueprintOpen(true)} className={quiet}>
+                        View assessment blueprint
+                    </button>
+                )}
+                {forge.auditDecision && (
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <p className="text-sm font-bold text-white flex items-center gap-2">
+                                <span>Audit decision:</span>
+                                <span className={forge.auditDecision === 'APPROVED' ? 'text-lime-400 font-black' : 'text-amber-400 font-black'}>
+                                    {forge.auditDecision}
+                                </span>
+                            </p>
+                            {forge.auditDecision === 'DO NOT APPROVE' && (
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={runCourseAudit}
+                                        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800/80 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:border-lime-500/40 hover:text-white transition-all"
+                                    >
+                                        <RotateCcw className="h-3.5 w-3.5" />
+                                        Re-run Audit
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            updateCourseData({
+                                                courseForge: {
+                                                    ...(courseData.courseForge || {}),
+                                                    auditDecision: 'APPROVED'
+                                                }
+                                            });
+                                        }}
+                                        className="inline-flex items-center gap-1.5 rounded-lg bg-lime-500 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider text-black hover:bg-lime-400 transition-all shadow-sm"
+                                    >
+                                        <Check className="h-3.5 w-3.5" />
+                                        Approve & Unlock Launch
+                                    </button>
                                 </div>
                             )}
-
-                            <textarea
-                                value={scopeDraft}
-                                onChange={(e) => setScopeDraft(e.target.value)}
-                                rows={5}
-                                className="w-full rounded-xl border border-gray-700 bg-gray-900/90 p-3 text-sm text-white placeholder-gray-500 outline-none transition focus:border-lime-400 focus:ring-1 focus:ring-lime-400 leading-relaxed"
-                                placeholder="Edit course scope..."
-                            />
-                            <div className="flex items-center justify-end gap-2">
-                                <button
-                                    type="button"
-                                    onClick={cancelScopeEdit}
-                                    className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:bg-white/5 hover:text-white transition-all"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={saveScopeEdit}
-                                    className="inline-flex items-center gap-1.5 rounded-lg bg-lime-500 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider text-black hover:bg-lime-400 transition-all shadow-sm"
-                                >
-                                    <Check className="h-3.5 w-3.5" />
-                                    Save scope
-                                </button>
-                            </div>
                         </div>
-                    ) : (
-                        <p className="text-sm text-gray-300 leading-relaxed">
-                            {forge.researchDossier.scope}
-                        </p>
-                    )}
-                </div>
-            )}
-            {forge.blueprint?.empowermentPromise && (
-                <p className="text-sm text-gray-300 leading-relaxed"><span className="text-lime-400 font-semibold">Promise. </span>{String(forge.blueprint.empowermentPromise).slice(0, 420)}</p>
-            )}
-            {assessmentReady && (
-                <button type="button" onClick={() => setBlueprintOpen(true)} className={quiet}>
-                    View assessment blueprint
-                </button>
-            )}
-            {forge.auditDecision && (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                        <p className="text-sm font-bold text-white flex items-center gap-2">
-                            <span>Audit decision:</span>
-                            <span className={forge.auditDecision === 'APPROVED' ? 'text-lime-400 font-black' : 'text-amber-400 font-black'}>
-                                {forge.auditDecision}
-                            </span>
-                        </p>
-                        {forge.auditDecision === 'DO NOT APPROVE' && (
-                            <div className="flex flex-wrap items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={runCourseAudit}
-                                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800/80 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:border-lime-500/40 hover:text-white transition-all"
-                                >
-                                    <RotateCcw className="h-3.5 w-3.5" />
-                                    Re-run Audit
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        updateCourseData({
-                                            courseForge: {
-                                                ...(courseData.courseForge || {}),
-                                                auditDecision: 'APPROVED'
-                                            }
-                                        });
-                                    }}
-                                    className="inline-flex items-center gap-1.5 rounded-lg bg-lime-500 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider text-black hover:bg-lime-400 transition-all shadow-sm"
-                                >
-                                    <Check className="h-3.5 w-3.5" />
-                                    Approve & Unlock Launch
-                                </button>
+                        {findings.length > 0 && (
+                            <div className="space-y-1.5 pt-1 border-t border-white/5">
+                                <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Auditor Observations:</p>
+                                {findings.slice(0, 6).map((item: any, index: number) => (
+                                    <p key={index} className="text-xs text-gray-300 leading-relaxed">
+                                        <span className={item.severity === 'Critical' ? 'text-red-400 font-bold' : item.severity === 'Major' ? 'text-amber-400 font-bold' : 'text-yellow-300 font-medium'}>
+                                            {item.severity}.{' '}
+                                        </span>
+                                        <span className="text-gray-400">{item.location}: </span>
+                                        {item.problem}
+                                    </p>
+                                ))}
                             </div>
                         )}
                     </div>
-                    {findings.length > 0 && (
-                        <div className="space-y-1.5 pt-1 border-t border-white/5">
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Auditor Observations:</p>
-                            {findings.slice(0, 6).map((item: any, index: number) => (
-                                <p key={index} className="text-xs text-gray-300 leading-relaxed">
-                                    <span className={item.severity === 'Critical' ? 'text-red-400 font-bold' : item.severity === 'Major' ? 'text-amber-400 font-bold' : 'text-yellow-300 font-medium'}>
-                                        {item.severity}.{' '}
-                                    </span>
-                                    <span className="text-gray-400">{item.location}: </span>
-                                    {item.problem}
-                                </p>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
+                )}
             </div>}
             {blueprintOpen && assessmentReady && createPortal(
                 <div className="fixed inset-0 z-[230] flex items-center justify-center px-4 py-6">
