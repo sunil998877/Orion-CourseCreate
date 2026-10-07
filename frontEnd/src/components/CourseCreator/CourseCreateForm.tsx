@@ -30,8 +30,8 @@ const CourseCreatorContent: React.FC = () => {
       <main className="relative z-10 mx-auto max-w-[1600px] px-6 pb-8 pt-12 transition-all duration-700 max-md:px-4 max-md:pb-6 max-md:pt-8">
         <StepProgress />
 
-        <div className="mt-12 flex flex-col lg:flex-row gap-8 items-start">
-          <div className="flex-1 min-h-[620px] relative z-10 transition-all duration-300">
+        <div className="mt-12 flex flex-col lg:flex-row gap-8 max-md:items-stretch items-start w-full">
+          <div className="flex-1 w-full min-h-[620px] relative z-10 transition-all duration-300">
             <AnimatePresence mode="wait">
               {step === 1 && <CourseStepOne />}
               {step === 2 && <CourseStepTwo />}

@@ -226,12 +226,12 @@ const CourseStepFour: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             className="mb-5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent p-4 sm:p-4.5 backdrop-blur-xl relative overflow-hidden shadow-lg shadow-amber-500/5"
                         >
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="flex items-start gap-3.5">
+                            <div className="flex max-sm:flex-col items-start justify-between gap-4 min-w-0">
+                                <div className="flex items-start gap-3.5 min-w-0 w-full">
                                     <div className="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 shrink-0 mt-0.5">
                                         <AlertCircle className="w-5 h-5 animate-pulse" />
                                     </div>
-                                    <div>
+                                    <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2.5 flex-wrap">
                                             <h4 className="text-sm font-bold text-amber-300 uppercase tracking-wider">
                                                 Action Required · Complete Orion Production
@@ -243,17 +243,16 @@ const CourseStepFour: React.FC = () => {
                                         <p className="text-gray-300 text-xs mt-1.5 leading-relaxed max-w-2xl">
                                             You must create and approve <span className="text-white font-bold">{pendingSteps.join(', ')}</span> in the Orion Production section below. The <span className="text-lime-400 font-bold">'Looks Good, Continue'</span> button remains locked until all steps are approved.
                                         </p>
-                                        <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                        <div className="flex items-center gap-1.5 mt-3 flex-wrap">
                                             {['Trainer script', 'E-workbook', 'Assessment'].map((stepName) => {
                                                 const isDone = !pendingSteps.includes(stepName);
                                                 return (
                                                     <div
                                                         key={stepName}
-                                                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${
-                                                            isDone
+                                                        className={`flex shrink-0 items-center gap-1 max-sm:px-1.5 max-sm:py-0.5 max-sm:text-[9px] px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${isDone
                                                                 ? 'bg-lime-500/10 border-lime-500/30 text-lime-400'
                                                                 : 'bg-black/40 border-amber-500/30 text-amber-200'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {isDone ? (
                                                             <CheckCircle2 size={13} className="text-lime-400" />
@@ -273,7 +272,7 @@ const CourseStepFour: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={() => setProductionOpen((prev) => !prev)}
-                                    className="shrink-0 px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-xs font-bold transition-all whitespace-nowrap self-start"
+                                    className="shrink-0 max-sm:w-full px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-xs font-bold transition-all whitespace-nowrap self-start"
                                 >
                                     {productionOpen ? 'Hide Steps' : 'Open Steps'}
                                 </button>

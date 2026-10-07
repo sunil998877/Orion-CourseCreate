@@ -43,13 +43,11 @@ const PROVIDER_DEFAULTS = {
 };
 
 function getEffectiveKey(provider, doc = null) {
-    const envVar = PROVIDER_DEFAULTS[provider]?.envKey;
-    const envKey = (envVar && process.env[envVar]) ? process.env[envVar].trim() : '';
-    if (envKey) return envKey;
     if (doc?.apiKey && doc.apiKey.trim()) {
         return doc.apiKey.trim();
     }
-    return '';
+    const envVar = PROVIDER_DEFAULTS[provider]?.envKey;
+    return (envVar && process.env[envVar]) ? process.env[envVar].trim() : '';
 }
 
 async function checkElevenLabsLive(record) {
@@ -249,8 +247,8 @@ async function checkOpenAILive(record) {
                 const code = probeErr.error?.code || '';
                 const msg = probeErr.error?.message || '';
                 const isQuota = probeRes.status === 429 ||
-                                code === 'insufficient_quota' ||
-                                /credit|quota|billing/i.test(msg);
+                    code === 'insufficient_quota' ||
+                    /credit|quota|billing/i.test(msg);
                 if (isQuota) {
                     quotaExhausted = true;
                     quotaErrorMessage = msg || '429: You have no credits remaining. Please recharge on OpenAI billing.';
@@ -280,9 +278,9 @@ async function checkOpenAILive(record) {
         record.liveCheckSuccess = true;
         record.liveCheckMessage = `OpenAI API key active & authenticated (${latency}ms)`;
 
-        if (record.balance === null || record.balance === undefined || record.balance <= 0 || record.meta?.quotaExhausted) {
+        if (record.balance === null || record.balance === undefined) {
             record.balance = PROVIDER_DEFAULTS.openai.defaultBalance || 100000;
-            record.quotaLimit = record.quotaLimit || 1000000;
+            record.quotaLimit = 1000000;
         }
 
         record.status = record.balance < record.lowCreditThreshold
@@ -340,7 +338,7 @@ async function checkHeyGenLive(record) {
                     creditLimit = creds.premium_credits?.quota ?? creds.quota ?? creds.total;
                 }
             }
-        } catch (_) {}
+        } catch (_) { }
 
         if (remainingCredits === null) {
             try {
@@ -355,7 +353,7 @@ async function checkHeyGenLive(record) {
                         remainingCredits = val;
                     }
                 }
-            } catch (_) {}
+            } catch (_) { }
         }
 
         if (!authOk) {
@@ -366,7 +364,7 @@ async function checkHeyGenLive(record) {
                 if (avRes.ok) {
                     authOk = true;
                 }
-            } catch (_) {}
+            } catch (_) { }
         }
 
         const latency = Date.now() - start;
@@ -432,9 +430,7 @@ export async function ensureSystemApiBalances() {
         } else {
             let changed = false;
             if (existing.provider === 'openai') {
-                const effectiveKey = getEffectiveKey('openai', existing);
-                const keyChanged = maskApiKey(effectiveKey) !== (existing.keyMasked || '');
-                if (keyChanged || existing.balance === 500000 || existing.balance === null || existing.balance === undefined || existing.balance <= 0 || existing.status === 'exhausted' || existing.status === 'not_configured' || existing.meta?.quotaExhausted) {
+                if (existing.balance === 500000 || existing.balance === null || existing.balance === undefined || existing.meta?.quotaExhausted) {
                     await checkOpenAILive(existing);
                     changed = true;
                 }
@@ -562,7 +558,7 @@ export async function recordGammaCreditsRemaining(remainingCredits, deductedCred
             }
             await doc.save();
         }
-    } catch (_) {}
+    } catch (_) { }
 }
 
 export async function updateProviderBalanceByAdmin(provider, { balance, quotaLimit, lowCreditThreshold, notes }) {

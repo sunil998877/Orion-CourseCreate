@@ -128,7 +128,7 @@ export function ModuleAvatarVideoModal({
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [prevSlideIndex, setPrevSlideIndex] = useState<number | null>(null);
   const [slideAnimDirection, setSlideAnimDirection] = useState<'forward' | 'backward' | null>(null);
-  const advanceRef = useRef<() => void>(() => {});
+  const advanceRef = useRef<() => void>(() => { });
   const advancingRef = useRef(false);
   const [playing, setPlaying] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -260,7 +260,7 @@ export function ModuleAvatarVideoModal({
             slide?.Transcript ||
             slide?.transcript ||
             slide?.VoiceScript ||
-            
+
             slide?.voiceScript ||
             slide?.Narration ||
             slide?.narration ||
@@ -373,7 +373,7 @@ export function ModuleAvatarVideoModal({
         pollTimerRef.current = null;
       }
       if (tickRef.current) window.cancelAnimationFrame(tickRef.current);
-      try { window.speechSynthesis?.cancel(); } catch {}
+      try { window.speechSynthesis?.cancel(); } catch { }
       if (vocalAnimFrameRef.current) window.cancelAnimationFrame(vocalAnimFrameRef.current);
       if (audioRef.current) {
         audioRef.current.pause();
@@ -382,7 +382,7 @@ export function ModuleAvatarVideoModal({
       if (avatarVideoRef.current) {
         avatarVideoRef.current.pause();
         avatarVideoRef.current.removeAttribute('src');
-        try { avatarVideoRef.current.load(); } catch {}
+        try { avatarVideoRef.current.load(); } catch { }
       }
     };
   }, [courseId, moduleNumber, gammaUrlProp, fallbackSlides, moduleTitle]);
@@ -613,7 +613,7 @@ export function ModuleAvatarVideoModal({
           audioCacheRef.current[cacheKey] = fullUrl;
         }
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => {
         audioLoadingRef.current[cacheKey] = false;
       });
@@ -687,7 +687,7 @@ export function ModuleAvatarVideoModal({
           video.loop = false;
           const drift = video.currentTime - audio.currentTime;
           if (Number.isFinite(drift) && Math.abs(drift) > 0.12) {
-            try { video.currentTime = audio.currentTime; } catch {}
+            try { video.currentTime = audio.currentTime; } catch { }
             logSync('correct-drift', { drift: Number(drift.toFixed(3)) });
           }
           video.playbackRate = audio.playbackRate || speedRef.current;
@@ -697,12 +697,12 @@ export function ModuleAvatarVideoModal({
           video.playbackRate = Math.min(1.25, Math.max(0.85, rate || 1));
           const duration = video.duration;
           if (duration && Number.isFinite(duration) && (video.currentTime < 0.15 || video.currentTime > duration - 0.12)) {
-            try { video.currentTime = Math.min(0.35, duration / 3); } catch {}
+            try { video.currentTime = Math.min(0.35, duration / 3); } catch { }
           }
         }
         if (video.paused) {
           const attempt = video.play();
-          if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+          if (attempt && typeof attempt.catch === 'function') attempt.catch(() => { });
         }
       } else if (video && !video.paused) {
         video.pause();
@@ -759,11 +759,11 @@ export function ModuleAvatarVideoModal({
       return;
     }
     if (utteranceIdRef.current !== session) return;
-    try { video.currentTime = audio?.currentTime || 0; } catch {}
+    try { video.currentTime = audio?.currentTime || 0; } catch { }
     video.playbackRate = audio?.playbackRate || speedRef.current;
     if (playingRef.current && audio && !audio.paused) {
       const attempt = video.play();
-      if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+      if (attempt && typeof attempt.catch === 'function') attempt.catch(() => { });
     }
     logSync('avatar-attached');
     startAvatarLock();
@@ -816,7 +816,7 @@ export function ModuleAvatarVideoModal({
         speakTimeoutRef.current = null;
       }
       activeUtteranceRef.current = null;
-      try { window.speechSynthesis?.cancel(); } catch {}
+      try { window.speechSynthesis?.cancel(); } catch { }
       loadedSlideRef.current = null;
       narrationIdRef.current = null;
       detachAvatarVideo();
@@ -829,7 +829,7 @@ export function ModuleAvatarVideoModal({
         audioRef.current.onloadedmetadata = null;
         audioRef.current.onpause = null;
         audioRef.current.removeAttribute('src');
-        try { audioRef.current.load(); } catch {}
+        try { audioRef.current.load(); } catch { }
       }
       setSpeechError(null);
       setIsSpeaking(false);
@@ -912,7 +912,7 @@ export function ModuleAvatarVideoModal({
             video.volume = 0;
             video.loop = true;
             const attempt = video.play();
-            if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+            if (attempt && typeof attempt.catch === 'function') attempt.catch(() => { });
           }
           startAvatarLock();
           loadedSlideRef.current = null;
@@ -969,7 +969,7 @@ export function ModuleAvatarVideoModal({
           const offset = audio.duration && Number.isFinite(audio.duration)
             ? Math.min(startSeconds, Math.max(0, audio.duration - 0.05))
             : 0;
-          try { audio.currentTime = offset; } catch {}
+          try { audio.currentTime = offset; } catch { }
           setElapsedInSlide(offset);
           elapsedRef.current = offset;
 
@@ -998,7 +998,7 @@ export function ModuleAvatarVideoModal({
               video.muted = true;
               video.volume = 0;
               const attempt = video.play();
-              if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+              if (attempt && typeof attempt.catch === 'function') attempt.catch(() => { });
             }
             logSync('play');
           };
@@ -1055,14 +1055,14 @@ export function ModuleAvatarVideoModal({
             video.defaultMuted = true;
             video.volume = 0;
             if (lipSyncUrlRef.current) {
-              try { video.currentTime = audio.currentTime; } catch {}
+              try { video.currentTime = audio.currentTime; } catch { }
               video.loop = false;
               video.playbackRate = audio.playbackRate || speedRef.current;
             } else {
               video.loop = true;
             }
             const videoStart = video.play();
-            if (videoStart && typeof videoStart.catch === 'function') videoStart.catch(() => {});
+            if (videoStart && typeof videoStart.catch === 'function') videoStart.catch(() => { });
           }
           const started = audio.play();
           if (started && typeof started.catch === 'function') {
@@ -1354,7 +1354,7 @@ export function ModuleAvatarVideoModal({
       if (vid) {
         vid.muted = true;
         vid.loop = true;
-        try { await vid.play(); } catch {}
+        try { await vid.play(); } catch { }
       }
 
       const avatarImg = new Image();
@@ -1406,7 +1406,7 @@ export function ModuleAvatarVideoModal({
                   slideAvatarUrls[idx] = data.avatarVideoUrl;
                 }
               }
-            } catch {}
+            } catch { }
 
             if (audioUrl) {
               try {
@@ -1415,7 +1415,7 @@ export function ModuleAvatarVideoModal({
                   const arrBuf = await resp.arrayBuffer();
                   return await audioCtx.decodeAudioData(arrBuf);
                 }
-              } catch {}
+              } catch { }
             }
             return null;
           })
@@ -1477,7 +1477,7 @@ export function ModuleAvatarVideoModal({
           exportVid.currentTime = 0;
           try {
             await exportVid.play();
-          } catch {}
+          } catch { }
         }
 
         let sourceNode: AudioBufferSourceNode | null = null;
@@ -1553,14 +1553,14 @@ export function ModuleAvatarVideoModal({
               if (exportVid.paused) void exportVid.play();
               ctx.drawImage(exportVid, avX, avY, avSize, avSize);
               drawn = true;
-            } catch {}
+            } catch { }
           }
           if (!drawn && vid && vid.readyState >= 2) {
             try {
               if (vid.paused) void vid.play();
               ctx.drawImage(vid, avX, avY, avSize, avSize);
               drawn = true;
-            } catch {}
+            } catch { }
           }
           if (!drawn && avatarImg.complete && avatarImg.naturalWidth > 0) {
             ctx.drawImage(avatarImg, avX, avY, avSize, avSize);
@@ -1585,14 +1585,14 @@ export function ModuleAvatarVideoModal({
         }
 
         if (sourceNode) {
-          try { sourceNode.stop(); } catch {}
+          try { sourceNode.stop(); } catch { }
         }
       }
 
       try {
         exportVid.pause();
         exportVid.removeAttribute('src');
-      } catch {}
+      } catch { }
 
       if (!cancelExportRef.current) {
         setExportProgress({
@@ -1675,13 +1675,13 @@ export function ModuleAvatarVideoModal({
         const nextTime = audio.duration && Number.isFinite(audio.duration)
           ? Math.min(Math.max(0, audio.duration - 0.05), local)
           : local;
-        try { audio.currentTime = nextTime; } catch {}
+        try { audio.currentTime = nextTime; } catch { }
         const video = avatarVideoRef.current;
         if (video) {
           video.muted = true;
           video.volume = 0;
           if (lipSyncUrlRef.current) {
-            try { video.currentTime = audio.currentTime; } catch {}
+            try { video.currentTime = audio.currentTime; } catch { }
             video.loop = false;
             video.playbackRate = audio.playbackRate || speedRef.current;
           } else {
@@ -1689,8 +1689,8 @@ export function ModuleAvatarVideoModal({
           }
         }
         if (playingRef.current) {
-          audio.play().catch(() => {});
-          if (video) video.play().catch(() => {});
+          audio.play().catch(() => { });
+          if (video) video.play().catch(() => { });
           startAvatarLock();
         } else if (video && !video.paused) {
           video.pause();
@@ -1726,13 +1726,13 @@ export function ModuleAvatarVideoModal({
       audioRef.current.pause();
       try {
         audioRef.current.currentTime = 0;
-      } catch {}
+      } catch { }
       audioRef.current.onended = null;
       audioRef.current.ontimeupdate = null;
       audioRef.current.onerror = null;
     }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      try { window.speechSynthesis.cancel(); } catch {}
+      try { window.speechSynthesis.cancel(); } catch { }
     }
     setCaptionLine('');
 
@@ -1839,7 +1839,7 @@ export function ModuleAvatarVideoModal({
       stopAvatarLock();
       audioRef.current?.pause();
       if (avatarVideoRef.current && !avatarVideoRef.current.paused) avatarVideoRef.current.pause();
-      try { window.speechSynthesis?.pause(); } catch {}
+      try { window.speechSynthesis?.pause(); } catch { }
       logSync('pause');
       return;
     }
@@ -1867,7 +1867,7 @@ export function ModuleAvatarVideoModal({
         video.muted = true;
         video.volume = 0;
         if (lipSyncUrlRef.current) {
-          try { video.currentTime = audio.currentTime; } catch {}
+          try { video.currentTime = audio.currentTime; } catch { }
           video.loop = false;
           video.playbackRate = audio.playbackRate;
         } else {
@@ -1875,16 +1875,16 @@ export function ModuleAvatarVideoModal({
           video.playbackRate = audio.playbackRate;
         }
         const videoPlay = video.play();
-        if (videoPlay && typeof videoPlay.catch === 'function') videoPlay.catch(() => {});
+        if (videoPlay && typeof videoPlay.catch === 'function') videoPlay.catch(() => { });
       }
       const audioPlay = audio.play();
-      if (audioPlay && typeof audioPlay.catch === 'function') audioPlay.catch(() => {});
+      if (audioPlay && typeof audioPlay.catch === 'function') audioPlay.catch(() => { });
       startAvatarLock();
       logSync('resume');
       return;
     }
 
-    try { window.speechSynthesis?.resume(); } catch {}
+    try { window.speechSynthesis?.resume(); } catch { }
     speakSlide(slideIndex, { fromUserGesture: true, startSeconds: elapsedRef.current });
   };
 
@@ -1939,9 +1939,8 @@ export function ModuleAvatarVideoModal({
       >
 
         <div
-          className={`pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent px-4 py-3 transition-all duration-300 md:px-5 ${
-            showControls ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0'
-          }`}
+          className={`pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent px-4 py-3 transition-all duration-300 md:px-5 ${showControls ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0'
+            }`}
         >
           <div className="pointer-events-auto min-w-0">
             <div className="flex items-center gap-2 text-lime-400">
@@ -2026,9 +2025,9 @@ export function ModuleAvatarVideoModal({
                     style={
                       slideAnimDirection
                         ? {
-                            animation: `${slideAnimDirection === 'forward' ? 'slideInFromLeft' : 'slideInFromRight'} 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-                            willChange: 'transform, opacity',
-                          }
+                          animation: `${slideAnimDirection === 'forward' ? 'slideInFromLeft' : 'slideInFromRight'} 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+                          willChange: 'transform, opacity',
+                        }
                         : undefined
                     }
                   >
@@ -2053,9 +2052,9 @@ export function ModuleAvatarVideoModal({
                     style={
                       slideAnimDirection
                         ? {
-                            animation: `${slideAnimDirection === 'forward' ? 'slideInFromLeft' : 'slideInFromRight'} 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-                            willChange: 'transform, opacity',
-                          }
+                          animation: `${slideAnimDirection === 'forward' ? 'slideInFromLeft' : 'slideInFromRight'} 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+                          willChange: 'transform, opacity',
+                        }
                         : undefined
                     }
                   >
@@ -2088,11 +2087,11 @@ export function ModuleAvatarVideoModal({
                       src={
                         lipSyncVideoUrl
                           ? (lipSyncVideoUrl.startsWith('http') && !lipSyncVideoUrl.includes(window.location.host)
-                              ? `${API_BASE}/heygen/proxy-media?url=${encodeURIComponent(lipSyncVideoUrl)}`
-                              : lipSyncVideoUrl)
+                            ? `${API_BASE}/heygen/proxy-media?url=${encodeURIComponent(lipSyncVideoUrl)}`
+                            : lipSyncVideoUrl)
                           : (masterAvatar.previewVideoUrl && masterAvatar.previewVideoUrl.startsWith('http') && !masterAvatar.previewVideoUrl.includes(window.location.host)
-                              ? `${API_BASE}/heygen/proxy-media?url=${encodeURIComponent(masterAvatar.previewVideoUrl)}`
-                              : masterAvatar.previewVideoUrl)
+                            ? `${API_BASE}/heygen/proxy-media?url=${encodeURIComponent(masterAvatar.previewVideoUrl)}`
+                            : masterAvatar.previewVideoUrl)
                       }
                       crossOrigin="anonymous"
                       poster={masterAvatar.previewImageUrl}
@@ -2119,9 +2118,8 @@ export function ModuleAvatarVideoModal({
                     <img
                       src={masterAvatar.previewImageUrl || avatarPlaceholder}
                       alt=""
-                      className={`pointer-events-none absolute inset-0 h-full w-full scale-[1.15] object-cover object-[50%_12%] transition-opacity duration-100 ${
-                        playing && isSpeaking ? 'opacity-0' : 'opacity-100'
-                      }`}
+                      className={`pointer-events-none absolute inset-0 h-full w-full scale-[1.15] object-cover object-[50%_12%] transition-opacity duration-100 ${playing && isSpeaking ? 'opacity-0' : 'opacity-100'
+                        }`}
                     />
 
                     <div
@@ -2136,11 +2134,10 @@ export function ModuleAvatarVideoModal({
               </div>
 
               <div
-                className={`absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-black/70 via-black/40 to-transparent px-4 pb-5 pt-16 transition-all duration-300 md:px-6 ${
-                  showControls
+                className={`absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-black/70 via-black/40 to-transparent px-4 pb-5 pt-16 transition-all duration-300 md:px-6 ${showControls
                     ? 'translate-y-0 opacity-100'
                     : 'pointer-events-none translate-y-4 opacity-0'
-                }`}
+                  }`}
                 onClick={(e) => e.stopPropagation()}
               >
                 {captionsOn && captionLine && (
@@ -2177,159 +2174,149 @@ export function ModuleAvatarVideoModal({
                   </div>
                 )}
 
-                <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:gap-2.5">
-                  {/* Row 1: Play, Prev/Next slide, Seek & Time */}
-                  <div className="flex w-full items-center gap-1.5 sm:gap-2 md:w-auto md:gap-2.5">
+                <div className="flex w-full flex-wrap items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={togglePlay}
+                    disabled={!slides.length}
+                    className="flex h-11 w-[4.75rem] shrink-0 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90 disabled:opacity-40"
+                    aria-label={playing ? 'Pause' : 'Play'}
+                  >
+                    {playing ? (
+                      <Pause size={18} fill="currentColor" />
+                    ) : (
+                      <Play size={18} fill="currentColor" className="ml-0.5" />
+                    )}
+                  </button>
+
+                  <div className="flex h-11 items-center gap-0.5 rounded-2xl bg-[#2a2a2a]/95 px-1.5 text-white backdrop-blur">
                     <button
                       type="button"
-                      onClick={togglePlay}
-                      disabled={!slides.length}
-                      className="flex h-10 w-12 shrink-0 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90 disabled:opacity-40 sm:h-11 sm:w-[4.75rem]"
-                      aria-label={playing ? 'Pause' : 'Play'}
+                      onClick={goPrev}
+                      disabled={!slides.length || slideIndex === 0}
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-35"
+                      aria-label="Previous slide"
                     >
-                      {playing ? (
-                        <Pause size={18} fill="currentColor" />
-                      ) : (
-                        <Play size={18} fill="currentColor" className="ml-0.5" />
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={goNext}
+                      disabled={!slides.length || slideIndex >= slides.length - 1}
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-35"
+                      aria-label="Next slide"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+
+                  <div className="flex h-11 items-center gap-1 rounded-2xl bg-[#2a2a2a]/95 px-2.5 text-white backdrop-blur">
+                    <button
+                      type="button"
+                      onClick={() => skipBy(-10)}
+                      disabled={!slides.length}
+                      className="relative flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-40"
+                      aria-label="Back 10 seconds"
+                    >
+                      <RotateCcw size={18} strokeWidth={2} />
+                      <span className="pointer-events-none absolute text-[8px] font-bold leading-none">10</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => skipBy(10)}
+                      disabled={!slides.length}
+                      className="relative flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-40"
+                      aria-label="Forward 10 seconds"
+                    >
+                      <RotateCw size={18} strokeWidth={2} />
+                      <span className="pointer-events-none absolute text-[8px] font-bold leading-none">10</span>
+                    </button>
+                    <span className="min-w-[5.75rem] px-1.5 font-mono text-[13px] tabular-nums text-white/95">
+                      {formatTime(currentTime)} / {formatTime(totalDuration || slideDur)}
+                    </span>
+                  </div>
+
+                  <div className="relative">
+                    <button
+                      ref={chaptersBtnRef}
+                      type="button"
+                      onClick={openChapters}
+                      disabled={!slides.length}
+                      className="flex h-11 items-center rounded-2xl bg-[#2a2a2a]/95 px-3.5 text-[13px] font-medium text-white/90 backdrop-blur hover:bg-[#333] disabled:opacity-40"
+                    >
+                      Chapters
+                    </button>
+                  </div>
+
+                  <div className="ml-auto flex h-11 items-center gap-0.5 rounded-2xl bg-[#2a2a2a]/95 px-1.5 text-white backdrop-blur">
+                    <button
+                      type="button"
+                      onClick={toggleMute}
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
+                      aria-label={muted ? 'Unmute' : 'Mute'}
+                    >
+                      {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCaptionsOn((c) => !c)}
+                      className={`relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10 ${captionsOn ? 'text-lime-400' : 'text-white/90'
+                        }`}
+                      aria-label={captionsOn ? 'Captions on' : 'Captions off'}
+                      aria-pressed={captionsOn}
+                      title={captionsOn ? 'Captions: On' : 'Captions: Off'}
+                    >
+                      <Captions size={18} />
+                      {captionsOn && (
+                        <span className="absolute bottom-1 left-1/2 h-0.5 w-3.5 -translate-x-1/2 rounded-full bg-lime-400" />
                       )}
                     </button>
-
-                    <div className="flex h-10 shrink-0 items-center gap-0.5 rounded-2xl bg-[#2a2a2a]/95 px-1 text-white backdrop-blur sm:h-11 sm:px-1.5">
-                      <button
-                        type="button"
-                        onClick={goPrev}
-                        disabled={!slides.length || slideIndex === 0}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-35 sm:h-9 sm:w-9"
-                        aria-label="Previous slide"
-                      >
-                        <ChevronLeft size={20} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={goNext}
-                        disabled={!slides.length || slideIndex >= slides.length - 1}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-35 sm:h-9 sm:w-9"
-                        aria-label="Next slide"
-                      >
-                        <ChevronRight size={20} />
-                      </button>
-                    </div>
-
-                    <div className="flex h-10 min-w-0 flex-1 items-center justify-between gap-1 rounded-2xl bg-[#2a2a2a]/95 px-2 text-white backdrop-blur sm:h-11 sm:justify-center sm:px-2.5 md:flex-initial">
-                      <div className="flex shrink-0 items-center gap-0.5">
-                        <button
-                          type="button"
-                          onClick={() => skipBy(-10)}
-                          disabled={!slides.length}
-                          className="relative flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-40 sm:h-9 sm:w-9"
-                          aria-label="Back 10 seconds"
-                        >
-                          <RotateCcw size={18} strokeWidth={2} />
-                          <span className="pointer-events-none absolute text-[8px] font-bold leading-none">10</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => skipBy(10)}
-                          disabled={!slides.length}
-                          className="relative flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-40 sm:h-9 sm:w-9"
-                          aria-label="Forward 10 seconds"
-                        >
-                          <RotateCw size={18} strokeWidth={2} />
-                          <span className="pointer-events-none absolute text-[8px] font-bold leading-none">10</span>
-                        </button>
-                      </div>
-                      <span className="shrink-0 px-1 font-mono text-[11px] tabular-nums text-white/95 sm:text-[13px] md:min-w-[5.75rem] md:px-1.5">
-                        {formatTime(currentTime)} / {formatTime(totalDuration || slideDur)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Row 2: Chapters, Secondary Controls & Close */}
-                  <div className="flex w-full items-center gap-1.5 sm:gap-2 md:w-auto md:ml-auto md:gap-2.5">
-                    <div className="relative shrink-0">
-                      <button
-                        ref={chaptersBtnRef}
-                        type="button"
-                        onClick={openChapters}
-                        disabled={!slides.length}
-                        className="flex h-10 items-center rounded-2xl bg-[#2a2a2a]/95 px-3 text-[12px] font-medium text-white/90 backdrop-blur hover:bg-[#333] disabled:opacity-40 sm:h-11 sm:px-3.5 sm:text-[13px]"
-                      >
-                        Chapters
-                      </button>
-                    </div>
-
-                    <div className="flex h-10 min-w-0 flex-1 items-center justify-around rounded-2xl bg-[#2a2a2a]/95 px-1 text-white backdrop-blur sm:h-11 sm:justify-start sm:gap-0.5 sm:px-1.5 md:flex-initial">
-                      <button
-                        type="button"
-                        onClick={toggleMute}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 sm:h-9 sm:w-9"
-                        aria-label={muted ? 'Unmute' : 'Mute'}
-                      >
-                        {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCaptionsOn((c) => !c)}
-                        className={`relative flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 sm:h-9 sm:w-9 ${
-                          captionsOn ? 'text-lime-400' : 'text-white/90'
-                        }`}
-                        aria-label={captionsOn ? 'Captions on' : 'Captions off'}
-                        aria-pressed={captionsOn}
-                        title={captionsOn ? 'Captions: On' : 'Captions: Off'}
-                      >
-                        <Captions size={18} />
-                        {captionsOn && (
-                          <span className="absolute bottom-1 left-1/2 h-0.5 w-3.5 -translate-x-1/2 rounded-full bg-lime-400" />
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={cyclePlaybackSpeed}
-                        className="flex h-8 min-w-[2rem] items-center justify-center rounded-full px-1 text-[11px] font-semibold tabular-nums text-white/90 hover:bg-white/10 sm:h-9 sm:min-w-[2.5rem] sm:px-1.5 sm:text-[13px]"
-                        aria-label="Playback speed"
-                      >
-                        {`${playbackSpeed}x`}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={openAvatarPicker}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 sm:h-9 sm:w-9"
-                        aria-label="Avatar Studio Settings"
-                        title="Choose Master AI Avatar"
-                      >
-                        <Settings size={17} />
-                      </button>
-                      <button
-                        ref={downloadBtnRef}
-                        type="button"
-                        onClick={openDownloadMenu}
-                        className={`relative flex h-8 w-8 items-center justify-center rounded-full transition-colors sm:h-9 sm:w-9 ${
-                          showDownloadMenu ? 'bg-lime-400 text-black' : 'text-white/90 hover:bg-white/10 hover:text-lime-400'
-                        }`}
-                        aria-label="Download Video in MP4"
-                        title="Download Video (MP4)"
-                      >
-                        <Download size={17} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={toggleFullscreen}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 sm:h-9 sm:w-9"
-                        aria-label={isFullscreen ? 'Exit full screen' : 'Full screen'}
-                      >
-                        {isFullscreen ? <Minimize2 size={17} /> : <Maximize size={17} />}
-                      </button>
-                    </div>
-
                     <button
                       type="button"
-                      onClick={onClose}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#2a2a2a]/95 text-white/90 backdrop-blur hover:bg-[#333] sm:h-11 sm:w-11"
-                      aria-label="Close"
+                      onClick={cyclePlaybackSpeed}
+                      className="flex h-9 min-w-[2.5rem] items-center justify-center rounded-full px-1.5 text-[13px] font-semibold tabular-nums text-white/90 hover:bg-white/10"
+                      aria-label="Playback speed"
                     >
-                      <X size={18} />
+                      {`${playbackSpeed}x`}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={openAvatarPicker}
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
+                      aria-label="Avatar Studio Settings"
+                      title="Choose Master AI Avatar"
+                    >
+                      <Settings size={17} />
+                    </button>
+                    <button
+                      ref={downloadBtnRef}
+                      type="button"
+                      onClick={openDownloadMenu}
+                      className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showDownloadMenu ? 'bg-lime-400 text-black' : 'text-white/90 hover:bg-white/10 hover:text-lime-400'
+                        }`}
+                      aria-label="Download Video in MP4"
+                      title="Download Video (MP4)"
+                    >
+                      <Download size={17} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={toggleFullscreen}
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
+                      aria-label={isFullscreen ? 'Exit full screen' : 'Full screen'}
+                    >
+                      {isFullscreen ? <Minimize2 size={17} /> : <Maximize size={17} />}
                     </button>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#2a2a2a]/95 text-white/90 backdrop-blur hover:bg-[#333]"
+                    aria-label="Close"
+                  >
+                    <X size={18} />
+                  </button>
                 </div>
               </div>
             </>
@@ -2369,9 +2356,8 @@ export function ModuleAvatarVideoModal({
                   setShowChapters(false);
                   setChaptersPos(null);
                 }}
-                className={`flex w-full shrink-0 items-start gap-2.5 px-3.5 py-2.5 text-left text-sm hover:bg-white/10 ${
-                  i === slideIndex ? 'bg-white/10 text-white' : 'text-white/80'
-                }`}
+                className={`flex w-full shrink-0 items-start gap-2.5 px-3.5 py-2.5 text-left text-sm hover:bg-white/10 ${i === slideIndex ? 'bg-white/10 text-white' : 'text-white/80'
+                  }`}
               >
                 <span className="mt-0.5 w-4 shrink-0 font-mono text-xs text-white/45">{i + 1}</span>
                 <span className="min-w-0 flex-1 leading-snug">{s.title}</span>
@@ -2592,11 +2578,10 @@ export function ModuleAvatarVideoModal({
                     return (
                       <div
                         key={av.avatarId}
-                        className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all ${
-                          isSelected
+                        className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all ${isSelected
                             ? 'border-lime-400 bg-lime-500/10 shadow-[0_0_25px_rgba(163,230,53,0.15)] ring-1 ring-lime-400'
                             : 'border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/[0.08]'
-                        }`}
+                          }`}
                       >
 
                         <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
