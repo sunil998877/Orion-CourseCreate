@@ -43,11 +43,13 @@ const PROVIDER_DEFAULTS = {
 };
 
 function getEffectiveKey(provider, doc = null) {
+    const envVar = PROVIDER_DEFAULTS[provider]?.envKey;
+    const envKey = (envVar && process.env[envVar]) ? process.env[envVar].trim() : '';
+    if (envKey) return envKey;
     if (doc?.apiKey && doc.apiKey.trim()) {
         return doc.apiKey.trim();
     }
-    const envVar = PROVIDER_DEFAULTS[provider]?.envKey;
-    return (envVar && process.env[envVar]) ? process.env[envVar].trim() : '';
+    return '';
 }
 
 async function checkElevenLabsLive(record) {
@@ -278,9 +280,9 @@ async function checkOpenAILive(record) {
         record.liveCheckSuccess = true;
         record.liveCheckMessage = `OpenAI API key active & authenticated (${latency}ms)`;
 
-        if (record.balance === null || record.balance === undefined) {
+        if (record.balance === null || record.balance === undefined || record.balance <= 0 || record.meta?.quotaExhausted) {
             record.balance = PROVIDER_DEFAULTS.openai.defaultBalance || 100000;
-            record.quotaLimit = 1000000;
+            record.quotaLimit = record.quotaLimit || 1000000;
         }
 
         record.status = record.balance < record.lowCreditThreshold
@@ -430,7 +432,9 @@ export async function ensureSystemApiBalances() {
         } else {
             let changed = false;
             if (existing.provider === 'openai') {
-                if (existing.balance === 500000 || existing.balance === null || existing.balance === undefined || existing.meta?.quotaExhausted) {
+                const effectiveKey = getEffectiveKey('openai', existing);
+                const keyChanged = maskApiKey(effectiveKey) !== (existing.keyMasked || '');
+                if (keyChanged || existing.balance === 500000 || existing.balance === null || existing.balance === undefined || existing.balance <= 0 || existing.status === 'exhausted' || existing.status === 'not_configured' || existing.meta?.quotaExhausted) {
                     await checkOpenAILive(existing);
                     changed = true;
                 }

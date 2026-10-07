@@ -2177,151 +2177,159 @@ export function ModuleAvatarVideoModal({
                   </div>
                 )}
 
-                <div className="flex w-full flex-wrap items-center gap-2.5">
-                  <button
-                    type="button"
-                    onClick={togglePlay}
-                    disabled={!slides.length}
-                    className="flex h-11 w-[4.75rem] shrink-0 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90 disabled:opacity-40"
-                    aria-label={playing ? 'Pause' : 'Play'}
-                  >
-                    {playing ? (
-                      <Pause size={18} fill="currentColor" />
-                    ) : (
-                      <Play size={18} fill="currentColor" className="ml-0.5" />
-                    )}
-                  </button>
-
-                  <div className="flex h-11 items-center gap-0.5 rounded-2xl bg-[#2a2a2a]/95 px-1.5 text-white backdrop-blur">
+                <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:gap-2.5">
+                  {/* Row 1: Play, Prev/Next slide, Seek & Time */}
+                  <div className="flex w-full items-center gap-1.5 sm:gap-2 md:w-auto md:gap-2.5">
                     <button
                       type="button"
-                      onClick={goPrev}
-                      disabled={!slides.length || slideIndex === 0}
-                      className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-35"
-                      aria-label="Previous slide"
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={goNext}
-                      disabled={!slides.length || slideIndex >= slides.length - 1}
-                      className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-35"
-                      aria-label="Next slide"
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                  </div>
-
-                  <div className="flex h-11 items-center gap-1 rounded-2xl bg-[#2a2a2a]/95 px-2.5 text-white backdrop-blur">
-                    <button
-                      type="button"
-                      onClick={() => skipBy(-10)}
+                      onClick={togglePlay}
                       disabled={!slides.length}
-                      className="relative flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-40"
-                      aria-label="Back 10 seconds"
+                      className="flex h-10 w-12 shrink-0 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90 disabled:opacity-40 sm:h-11 sm:w-[4.75rem]"
+                      aria-label={playing ? 'Pause' : 'Play'}
                     >
-                      <RotateCcw size={18} strokeWidth={2} />
-                      <span className="pointer-events-none absolute text-[8px] font-bold leading-none">10</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => skipBy(10)}
-                      disabled={!slides.length}
-                      className="relative flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-40"
-                      aria-label="Forward 10 seconds"
-                    >
-                      <RotateCw size={18} strokeWidth={2} />
-                      <span className="pointer-events-none absolute text-[8px] font-bold leading-none">10</span>
-                    </button>
-                    <span className="min-w-[5.75rem] px-1.5 font-mono text-[13px] tabular-nums text-white/95">
-                      {formatTime(currentTime)} / {formatTime(totalDuration || slideDur)}
-                    </span>
-                  </div>
-
-                  <div className="relative">
-                    <button
-                      ref={chaptersBtnRef}
-                      type="button"
-                      onClick={openChapters}
-                      disabled={!slides.length}
-                      className="flex h-11 items-center rounded-2xl bg-[#2a2a2a]/95 px-3.5 text-[13px] font-medium text-white/90 backdrop-blur hover:bg-[#333] disabled:opacity-40"
-                    >
-                      Chapters
-                    </button>
-                  </div>
-
-                  <div className="ml-auto flex h-11 items-center gap-0.5 rounded-2xl bg-[#2a2a2a]/95 px-1.5 text-white backdrop-blur">
-                    <button
-                      type="button"
-                      onClick={toggleMute}
-                      className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
-                      aria-label={muted ? 'Unmute' : 'Mute'}
-                    >
-                      {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCaptionsOn((c) => !c)}
-                      className={`relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10 ${
-                        captionsOn ? 'text-lime-400' : 'text-white/90'
-                      }`}
-                      aria-label={captionsOn ? 'Captions on' : 'Captions off'}
-                      aria-pressed={captionsOn}
-                      title={captionsOn ? 'Captions: On' : 'Captions: Off'}
-                    >
-                      <Captions size={18} />
-                      {captionsOn && (
-                        <span className="absolute bottom-1 left-1/2 h-0.5 w-3.5 -translate-x-1/2 rounded-full bg-lime-400" />
+                      {playing ? (
+                        <Pause size={18} fill="currentColor" />
+                      ) : (
+                        <Play size={18} fill="currentColor" className="ml-0.5" />
                       )}
                     </button>
-                    <button
-                      type="button"
-                      onClick={cyclePlaybackSpeed}
-                      className="flex h-9 min-w-[2.5rem] items-center justify-center rounded-full px-1.5 text-[13px] font-semibold tabular-nums text-white/90 hover:bg-white/10"
-                      aria-label="Playback speed"
-                    >
-                      {`${playbackSpeed}x`}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={openAvatarPicker}
-                      className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
-                      aria-label="Avatar Studio Settings"
-                      title="Choose Master AI Avatar"
-                    >
-                      <Settings size={17} />
-                    </button>
-                    <button
-                      ref={downloadBtnRef}
-                      type="button"
-                      onClick={openDownloadMenu}
-                      className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
-                        showDownloadMenu ? 'bg-lime-400 text-black' : 'text-white/90 hover:bg-white/10 hover:text-lime-400'
-                      }`}
-                      aria-label="Download Video in MP4"
-                      title="Download Video (MP4)"
-                    >
-                      <Download size={17} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={toggleFullscreen}
-                      className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
-                      aria-label={isFullscreen ? 'Exit full screen' : 'Full screen'}
-                    >
-                      {isFullscreen ? <Minimize2 size={17} /> : <Maximize size={17} />}
-                    </button>
+
+                    <div className="flex h-10 shrink-0 items-center gap-0.5 rounded-2xl bg-[#2a2a2a]/95 px-1 text-white backdrop-blur sm:h-11 sm:px-1.5">
+                      <button
+                        type="button"
+                        onClick={goPrev}
+                        disabled={!slides.length || slideIndex === 0}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-35 sm:h-9 sm:w-9"
+                        aria-label="Previous slide"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={goNext}
+                        disabled={!slides.length || slideIndex >= slides.length - 1}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-35 sm:h-9 sm:w-9"
+                        aria-label="Next slide"
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    </div>
+
+                    <div className="flex h-10 min-w-0 flex-1 items-center justify-between gap-1 rounded-2xl bg-[#2a2a2a]/95 px-2 text-white backdrop-blur sm:h-11 sm:justify-center sm:px-2.5 md:flex-initial">
+                      <div className="flex shrink-0 items-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => skipBy(-10)}
+                          disabled={!slides.length}
+                          className="relative flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-40 sm:h-9 sm:w-9"
+                          aria-label="Back 10 seconds"
+                        >
+                          <RotateCcw size={18} strokeWidth={2} />
+                          <span className="pointer-events-none absolute text-[8px] font-bold leading-none">10</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => skipBy(10)}
+                          disabled={!slides.length}
+                          className="relative flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 disabled:opacity-40 sm:h-9 sm:w-9"
+                          aria-label="Forward 10 seconds"
+                        >
+                          <RotateCw size={18} strokeWidth={2} />
+                          <span className="pointer-events-none absolute text-[8px] font-bold leading-none">10</span>
+                        </button>
+                      </div>
+                      <span className="shrink-0 px-1 font-mono text-[11px] tabular-nums text-white/95 sm:text-[13px] md:min-w-[5.75rem] md:px-1.5">
+                        {formatTime(currentTime)} / {formatTime(totalDuration || slideDur)}
+                      </span>
+                    </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#2a2a2a]/95 text-white/90 backdrop-blur hover:bg-[#333]"
-                    aria-label="Close"
-                  >
-                    <X size={18} />
-                  </button>
+                  {/* Row 2: Chapters, Secondary Controls & Close */}
+                  <div className="flex w-full items-center gap-1.5 sm:gap-2 md:w-auto md:ml-auto md:gap-2.5">
+                    <div className="relative shrink-0">
+                      <button
+                        ref={chaptersBtnRef}
+                        type="button"
+                        onClick={openChapters}
+                        disabled={!slides.length}
+                        className="flex h-10 items-center rounded-2xl bg-[#2a2a2a]/95 px-3 text-[12px] font-medium text-white/90 backdrop-blur hover:bg-[#333] disabled:opacity-40 sm:h-11 sm:px-3.5 sm:text-[13px]"
+                      >
+                        Chapters
+                      </button>
+                    </div>
+
+                    <div className="flex h-10 min-w-0 flex-1 items-center justify-around rounded-2xl bg-[#2a2a2a]/95 px-1 text-white backdrop-blur sm:h-11 sm:justify-start sm:gap-0.5 sm:px-1.5 md:flex-initial">
+                      <button
+                        type="button"
+                        onClick={toggleMute}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 sm:h-9 sm:w-9"
+                        aria-label={muted ? 'Unmute' : 'Mute'}
+                      >
+                        {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCaptionsOn((c) => !c)}
+                        className={`relative flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 sm:h-9 sm:w-9 ${
+                          captionsOn ? 'text-lime-400' : 'text-white/90'
+                        }`}
+                        aria-label={captionsOn ? 'Captions on' : 'Captions off'}
+                        aria-pressed={captionsOn}
+                        title={captionsOn ? 'Captions: On' : 'Captions: Off'}
+                      >
+                        <Captions size={18} />
+                        {captionsOn && (
+                          <span className="absolute bottom-1 left-1/2 h-0.5 w-3.5 -translate-x-1/2 rounded-full bg-lime-400" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cyclePlaybackSpeed}
+                        className="flex h-8 min-w-[2rem] items-center justify-center rounded-full px-1 text-[11px] font-semibold tabular-nums text-white/90 hover:bg-white/10 sm:h-9 sm:min-w-[2.5rem] sm:px-1.5 sm:text-[13px]"
+                        aria-label="Playback speed"
+                      >
+                        {`${playbackSpeed}x`}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={openAvatarPicker}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 sm:h-9 sm:w-9"
+                        aria-label="Avatar Studio Settings"
+                        title="Choose Master AI Avatar"
+                      >
+                        <Settings size={17} />
+                      </button>
+                      <button
+                        ref={downloadBtnRef}
+                        type="button"
+                        onClick={openDownloadMenu}
+                        className={`relative flex h-8 w-8 items-center justify-center rounded-full transition-colors sm:h-9 sm:w-9 ${
+                          showDownloadMenu ? 'bg-lime-400 text-black' : 'text-white/90 hover:bg-white/10 hover:text-lime-400'
+                        }`}
+                        aria-label="Download Video in MP4"
+                        title="Download Video (MP4)"
+                      >
+                        <Download size={17} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={toggleFullscreen}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 sm:h-9 sm:w-9"
+                        aria-label={isFullscreen ? 'Exit full screen' : 'Full screen'}
+                      >
+                        {isFullscreen ? <Minimize2 size={17} /> : <Maximize size={17} />}
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#2a2a2a]/95 text-white/90 backdrop-blur hover:bg-[#333] sm:h-11 sm:w-11"
+                      aria-label="Close"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </>

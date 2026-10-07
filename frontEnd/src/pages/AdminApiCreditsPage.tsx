@@ -268,7 +268,7 @@ export default function AdminApiCreditsPage() {
                         <div
                             key={item.provider}
                             className={cn(
-                                "flex flex-col justify-between rounded-2xl border bg-white p-5 shadow-sm transition-all dark:bg-[#111827]/80 w-full",
+                                "flex flex-col justify-between rounded-2xl border bg-white p-5 shadow-sm transition-all dark:bg-[#111827]/80 w-full h-full",
                                 isExhausted
                                     ? "border-red-500/50 ring-1 ring-red-500/20 bg-red-500/[0.02]"
                                     : isLow
