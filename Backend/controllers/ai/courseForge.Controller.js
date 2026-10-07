@@ -41,6 +41,18 @@ const completeJson = async (prompt) => {
     return readJson(response.choices[0].message.content);
 };
 
+const completeJsonWithUsage = async (prompt) => {
+    const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' }
+    });
+    return {
+        data: readJson(response.choices[0].message.content),
+        usage: response.usage || null
+    };
+};
+
 const forgeOf = (courseData) => courseData?.courseForge && typeof courseData.courseForge === 'object'
     ? courseData.courseForge
     : null;
@@ -110,6 +122,14 @@ export const generateNarration = async (req, res) => {
 };
 
 export const generateAssessment = async (req, res) => {
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) {
+        return res.status(401).json({ success: false, message: 'User not authenticated' });
+    }
+
+    let reservation = null;
+    const referenceId = `assessment_${randomUUID()}`;
+
     try {
         const { courseData, modules } = req.body || {};
         const forge = forgeOf(courseData);
@@ -119,11 +139,88 @@ export const generateAssessment = async (req, res) => {
             return res.status(409).json({ message: 'Approve the blueprint before assessment' });
         if (usesCourseForge(courseData) && !forge.workbook && forge.workbookApproved !== true)
             return res.status(409).json({ message: 'Create the e-workbook before the assessment' });
-        let assessment = await completeJson(buildAssessmentPrompt(courseData, modules));
-        assessment = ensure20AssessmentQuestions(assessment, courseData, modules);
-        return res.json({ assessment });
-    }
-    catch (error) {
+
+        let actionKey = 'assessment_openai';
+        let rule = await PricingRule.findOne({ actionKey: 'assessment_openai', isActive: true });
+        if (!rule) {
+            rule = await PricingRule.findOne({ actionKey: 'quiz_openai', isActive: true });
+            if (rule) {
+                actionKey = 'quiz_openai';
+            } else {
+                await PricingRule.findOneAndUpdate(
+                    { actionKey: 'quiz_openai' },
+                    {
+                        $setOnInsert: {
+                            actionKey: 'quiz_openai',
+                            displayName: 'Generate Quiz',
+                            provider: 'openai',
+                            creditCost: 8,
+                            isActive: true,
+                        },
+                    },
+                    { upsert: true, new: true }
+                ).catch(() => {});
+                actionKey = 'quiz_openai';
+            }
+        }
+
+        try {
+            reservation = await reserve(userId, actionKey, referenceId);
+        } catch (reserveErr) {
+            if (reserveErr instanceof InsufficientCreditsError || reserveErr.name === 'InsufficientCreditsError') {
+                return res.status(402).json({
+                    success: false,
+                    message: reserveErr.message || 'Insufficient credits to generate assessment',
+                    code: 'insufficient_credits',
+                });
+            }
+            return res.status(400).json({
+                success: false,
+                message: reserveErr.message || 'Credit reservation failed',
+            });
+        }
+
+        const prompt = buildAssessmentPrompt(courseData, modules);
+        const { data: rawAssessment, usage } = await completeJsonWithUsage(prompt);
+
+        if (!rawAssessment) {
+            if (reservation) {
+                await release(userId, reservation).catch(() => {});
+            }
+            return res.status(502).json({ message: 'Could not generate assessment' });
+        }
+
+        const assessment = ensure20AssessmentQuestions(rawAssessment, courseData, modules);
+
+        const actualCost = Math.abs(Number(reservation?.amount || 8));
+        const usageMeta = {
+            provider: 'openai',
+            model: 'gpt-4o',
+            tokens: usage?.total_tokens || null,
+            promptTokens: usage?.prompt_tokens || null,
+            completionTokens: usage?.completion_tokens || null,
+            totalTokens: usage?.total_tokens || null,
+            taskType: 'assessment',
+            courseTitle: courseData?.title,
+            actionKey,
+            actualCost,
+        };
+
+        try {
+            await reconcile(userId, reservation, actualCost, usageMeta);
+        } catch (reconcileErr) {
+            console.error('Reconcile error:', reconcileErr?.message || reconcileErr);
+        }
+
+        return res.json({
+            assessment,
+            creditsDeducted: actualCost,
+            tokensUsed: usage?.total_tokens || null,
+        });
+    } catch (error) {
+        if (reservation) {
+            await release(userId, reservation).catch(() => {});
+        }
         return handleOpenAIError(error, res, 'generate-assessment');
     }
 };

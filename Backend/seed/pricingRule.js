@@ -28,6 +28,12 @@ const pricingRules = [
         creditCost: 8,
     },
     {
+        actionKey: "assessment_openai",
+        displayName: "Generate Assessment",
+        provider: "openai",
+        creditCost: 8,
+    },
+    {
         actionKey: "podcast_elevenlabs",
         displayName: "Generate Podcast",
         provider: "elevenlabs",

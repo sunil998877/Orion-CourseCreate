@@ -872,7 +872,9 @@ export const CourseCreatorProvider: React.FC<{
             if (data?.assessment) {
                 const completeAssessment = ensure20AssessmentQuestions(data.assessment, courseData, previewModules);
                 patchForge({ assessment: completeAssessment, assessmentApproved: false });
-                toast.success(`${completeAssessment.items.length} assessment questions ready for review (20 per module).`);
+                const creditsUsed = data.creditsDeducted ? ` (${data.creditsDeducted} credits deducted)` : '';
+                toast.success(`${completeAssessment.items.length} assessment questions ready for review (20 per module).${creditsUsed}`);
+                refreshWallet().catch(() => {});
             }
         }
         finally {

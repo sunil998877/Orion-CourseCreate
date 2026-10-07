@@ -18,7 +18,7 @@ export function resolveElevenVoice(requestedVoice, gender) {
     return defaultMale;
 }
 
-export async function ensureSlideNarrationAudio({ text, voiceId, gender }) {
+export async function ensureSlideNarrationAudio({ text, voiceId, gender, retry = false }) {
     const cleaned = String(text || '').replace(/\s+/g, ' ').trim();
     if (!cleaned) {
         const error = new Error('Narration text is required');
@@ -50,7 +50,7 @@ export async function ensureSlideNarrationAudio({ text, voiceId, gender }) {
     const filePath = path.join(audioDir, fileName);
     const audioUrl = `/audio/slides/${fileName}`;
 
-    if (fs.existsSync(filePath) && fs.statSync(filePath).size > 0) {
+    if (!retry && fs.existsSync(filePath) && fs.statSync(filePath).size > 100) {
         return { narrationId, audioUrl, filePath, voiceId: resolvedVoice, cached: true };
     }
 

@@ -38,6 +38,7 @@ function publicJob(audio, job) {
 }
 
 async function createHeyGenVideo(avatarId, audioAssetUrl) {
+    const isTestMode = process.env.HEYGEN_TEST_MODE === 'true';
     const bodyFor = (avatarStyle, dimension) => ({
         video_inputs: [
             {
@@ -54,6 +55,7 @@ async function createHeyGenVideo(avatarId, audioAssetUrl) {
             },
         ],
         dimension,
+        ...(isTestMode ? { test: true } : {}),
     });
 
     try {
@@ -70,12 +72,14 @@ async function createHeyGenVideo(avatarId, audioAssetUrl) {
     }
 }
 
-async function ensureAvatarJob(audio, avatarId) {
+async function ensureAvatarJob(audio, avatarId, forceRetry = false) {
     const file = jobPath(audio.narrationId, avatarId);
     const existing = readJob(file);
-    if (existing?.status === 'ready' && existing.avatarVideoUrl) return existing;
-    if (existing?.status === 'generating' && existing.avatarVideoId) return existing;
-    if (existing?.status === 'audio_only') return existing;
+    if (!forceRetry) {
+        if (existing?.status === 'ready' && existing.avatarVideoUrl) return existing;
+        if (existing?.status === 'generating' && existing.avatarVideoId) return existing;
+        if (existing?.status === 'audio_only' && !existing.error) return existing;
+    }
 
     const key = `${avatarId}::${audio.narrationId}`;
     if (inflight.has(key)) return inflight.get(key);
@@ -203,20 +207,33 @@ async function refreshJob(audio, avatarId) {
 export const syncSlideAvatar = async (req, res) => {
     try {
         const avatarId = String(req.body?.avatarId || getHeyGenConfig().avatarId || '').trim();
+        const forceRetry = Boolean(req.body?.retry || req.query?.retry);
         const audio = await ensureSlideNarrationAudio({
             text: req.body?.text,
             voiceId: req.body?.voiceId,
             gender: req.body?.gender,
         });
         const file = jobPath(audio.narrationId, avatarId);
-        const existing = readJob(file);
+        let existing = readJob(file);
+
+        if (forceRetry && existing?.status !== 'ready') {
+            existing = null;
+        }
+
         if (existing?.status === 'ready' && existing.avatarVideoUrl) {
             return res.json(publicJob(audio, existing));
         }
-        if (existing?.status === 'audio_only' || (existing?.status === 'generating' && existing.avatarVideoId)) {
+
+        if (existing?.status === 'generating' && existing.avatarVideoId) {
+            const refreshed = await refreshJob(audio, avatarId);
+            return res.json(publicJob(audio, refreshed));
+        }
+
+        if (existing?.status === 'audio_only' && !existing.error && !forceRetry) {
             return res.json(publicJob(audio, existing));
         }
-        void ensureAvatarJob(audio, avatarId).catch((error) => {
+
+        void ensureAvatarJob(audio, avatarId, forceRetry).catch((error) => {
             console.error('[slide-sync] background start failed', error);
         });
         return res.json(publicJob(audio, { status: 'generating' }));

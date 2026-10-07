@@ -453,7 +453,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
 
             {isOpen &&
                 createPortal(
-                    <div className={`fixed inset-0 z-[9999] flex items-center justify-center ${isFullscreen ? 'p-0' : 'p-4 sm:p-6'}`}>
+                    <div className={`fixed inset-0 z-[9999] flex items-center justify-center ${isFullscreen ? 'p-0' : 'p-2 sm:p-6'}`}>
                         <div
                             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                             onClick={() => {
@@ -465,29 +465,29 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
 
                         <div className={`relative z-10 flex flex-col overflow-hidden bg-[#0d121d] shadow-2xl transition-all duration-200 animate-in fade-in zoom-in-95 ${isFullscreen
                             ? 'w-full h-full max-w-none max-h-none rounded-none border-none'
-                            : 'w-full max-w-3xl max-h-[90vh] rounded-3xl border border-white/10'
+                            : 'w-full max-w-3xl max-h-[94vh] sm:max-h-[90vh] rounded-2xl sm:rounded-3xl border border-white/10'
                             }`}>
 
-                            <div className="flex items-center justify-between border-b border-white/10 px-6 py-4 bg-white/[0.02]">
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <CheckSquare className="h-5 w-5 text-lime-400" />
-                                        <h3 className="text-lg font-black text-white">
+                            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-6 sm:py-4 bg-white/[0.02] gap-3">
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                        <CheckSquare className="h-4 w-4 sm:h-5 sm:w-5 text-lime-400 shrink-0" />
+                                        <h3 className="text-sm sm:text-lg font-black text-white leading-tight">
                                             Module {moduleIndex + 1} Assessment MCQs
                                         </h3>
-                                        <span className="rounded-full bg-lime-500/10 border border-lime-500/30 px-2.5 py-0.5 text-[11px] font-bold text-lime-300">
+                                        <span className="rounded-full bg-lime-500/10 border border-lime-500/30 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold text-lime-300 shrink-0 whitespace-nowrap">
                                             {moduleItemsWithIndices.length} Questions
                                         </span>
                                     </div>
-                                    <p className="mt-0.5 text-xs text-gray-400">
+                                    <p className="mt-1 text-[11px] sm:text-xs text-gray-400 line-clamp-1 sm:line-clamp-none">
                                         {moduleTitle || `Module ${moduleIndex + 1}`} · {moduleItemsWithIndices.length} MCQs in this module ({allItems.length} total across course).
                                     </p>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                                     <button
                                         type="button"
                                         onClick={() => setIsFullscreen((prev) => !prev)}
-                                        className="rounded-xl border border-white/10 p-2 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                                        className="rounded-xl border border-white/10 p-1.5 sm:p-2 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
                                         title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
                                         aria-label={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
                                     >
@@ -504,7 +504,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                             setIsFullscreen(false);
                                             resetForms();
                                         }}
-                                        className="rounded-xl border border-white/10 p-2 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                                        className="rounded-xl border border-white/10 p-1.5 sm:p-2 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
                                         aria-label="Close"
                                     >
                                         <X className="h-4 w-4" />
@@ -512,11 +512,11 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 px-6 pt-3 pb-2 border-b border-white/5 bg-black/20 shrink-0">
+                            <div className="flex items-center gap-2 px-3 sm:px-6 pt-2.5 sm:pt-3 pb-2 border-b border-white/5 bg-black/20 shrink-0 overflow-x-auto">
                                 <button
                                     type="button"
                                     onClick={() => setViewScope('module')}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
                                         viewScope === 'module'
                                             ? 'bg-lime-500/20 text-lime-300 border border-lime-500/30 shadow-sm'
                                             : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -527,7 +527,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                 <button
                                     type="button"
                                     onClick={() => setViewScope('all')}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
                                         viewScope === 'all'
                                             ? 'bg-lime-500/20 text-lime-300 border border-lime-500/30 shadow-sm'
                                             : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -537,15 +537,15 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                 </button>
                             </div>
 
-                            <div className="overflow-y-auto px-6 py-5 space-y-6 custom-scrollbar">
+                            <div className="overflow-y-auto px-3.5 sm:px-6 py-4 sm:py-5 space-y-4 sm:space-y-6 custom-scrollbar">
 
                                 {blueprintRow && (
-                                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                                    <div className="rounded-xl sm:rounded-2xl border border-white/10 bg-black/30 p-3.5 sm:p-4">
                                         <p className="text-[10px] font-black uppercase tracking-wider text-lime-400">
                                             Learning Competency Blueprint
                                         </p>
-                                        <p className="mt-1 text-sm font-bold text-white">{blueprintRow.item}</p>
-                                        <p className="mt-1 text-xs text-gray-400">
+                                        <p className="mt-1 text-xs sm:text-sm font-bold text-white">{blueprintRow.item}</p>
+                                        <p className="mt-1 text-[11px] sm:text-xs text-gray-400">
                                             {[
                                                 blueprintRow.outcome,
                                                 blueprintRow.cognitiveDemand,
@@ -557,7 +557,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                                 .join(' · ')}
                                         </p>
                                         {blueprintRow.evidence && (
-                                            <p className="mt-2 text-xs text-gray-300 leading-relaxed">
+                                            <p className="mt-2 text-[11px] sm:text-xs text-gray-300 leading-relaxed">
                                                 <span className="font-semibold text-gray-400">Required Evidence: </span>
                                                 {blueprintRow.evidence}
                                             </p>
@@ -565,7 +565,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                     </div>
                                 )}
 
-                                <div className="space-y-4">
+                                <div className="space-y-3 sm:space-y-4">
                                     <div className="flex items-center justify-between">
                                         <h4 className="text-xs font-black uppercase tracking-widest text-lime-400 flex items-center gap-1.5">
                                             <FileText className="h-3.5 w-3.5" />
@@ -576,7 +576,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                     </div>
 
                                     {displayedItems.length === 0 && !addingType && (
-                                        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.01] p-8 text-center">
+                                        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.01] p-6 sm:p-8 text-center">
                                             <HelpCircle className="mx-auto h-8 w-8 text-gray-500 mb-2" />
                                             <p className="text-sm font-semibold text-gray-300">No assessment MCQs in this module yet.</p>
                                             <p className="mt-1 text-xs text-gray-500">
@@ -588,65 +588,27 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                     {displayedItems.map(({ item, globalIdx }, localIdx) => (
                                         <div
                                             key={globalIdx}
-                                            className="group rounded-2xl border border-white/10 bg-white/[0.02] hover:border-lime-500/30 p-4 transition-all"
+                                            className="group rounded-xl sm:rounded-2xl border border-white/10 bg-white/[0.02] hover:border-lime-500/30 p-3.5 sm:p-4 transition-all w-full"
                                         >
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div className="space-y-2 flex-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="rounded-md bg-lime-500/10 border border-lime-500/20 px-2 py-0.5 text-[10px] font-black text-lime-400 uppercase tracking-wider">
-                                                            {viewScope === 'all'
-                                                                ? `Q${globalIdx + 1} · Mod ${item.moduleNumber || ((globalIdx % Math.max(1, moduleCount)) + 1)}`
-                                                                : `Quiz Q${localIdx + 1}`}
+                                            <div className="flex items-center justify-between gap-2 w-full">
+                                                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+                                                    <span className="rounded-md bg-lime-500/10 border border-lime-500/20 px-2 py-0.5 text-[10px] font-black text-lime-400 uppercase tracking-wider shrink-0">
+                                                        {viewScope === 'all'
+                                                            ? `Q${globalIdx + 1} · Mod ${item.moduleNumber || ((globalIdx % Math.max(1, moduleCount)) + 1)}`
+                                                            : `Quiz Q${localIdx + 1}`}
+                                                    </span>
+                                                    {item.difficulty && (
+                                                        <span className="text-[10px] text-gray-400 font-semibold uppercase shrink-0">
+                                                            {item.difficulty}
                                                         </span>
-                                                        {item.difficulty && (
-                                                            <span className="text-[10px] text-gray-400 font-semibold uppercase">
-                                                                {item.difficulty}
-                                                            </span>
-                                                        )}
-                                                        {item.topic && (
-                                                            <span className="text-[10px] text-gray-500">
-                                                                · {item.topic}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className="text-sm font-bold text-white leading-relaxed">
-                                                        {item.stem}
-                                                    </p>
-                                                    {lines(item.options).length > 0 && (
-                                                        <ul className="mt-2 space-y-1.5 pl-1">
-                                                            {lines(item.options).map((opt: unknown, oIdx: number) => {
-                                                                const text = String(opt || '');
-                                                                const isCorrect =
-                                                                    text.trim() === String(item.answer || '').trim();
-                                                                return (
-                                                                    <li
-                                                                        key={oIdx}
-                                                                        className={`flex items-center gap-2 text-xs rounded-lg px-2.5 py-1.5 ${isCorrect
-                                                                            ? 'bg-lime-500/10 border border-lime-500/30 font-bold text-lime-300'
-                                                                            : 'bg-white/[0.02] text-gray-300'
-                                                                            }`}
-                                                                    >
-                                                                        <span
-                                                                            className={`h-4 w-4 rounded-full flex items-center justify-center text-[10px] font-bold ${isCorrect
-                                                                                ? 'bg-lime-500 text-black'
-                                                                                : 'bg-white/10 text-gray-400'
-                                                                                }`}
-                                                                        >
-                                                                            {String.fromCharCode(65 + oIdx)}
-                                                                        </span>
-                                                                        <span>{text}</span>
-                                                                        {isCorrect && (
-                                                                            <span className="ml-auto text-[10px] font-black uppercase text-lime-400">
-                                                                                Correct Answer
-                                                                            </span>
-                                                                        )}
-                                                                    </li>
-                                                                );
-                                                            })}
-                                                        </ul>
+                                                    )}
+                                                    {item.topic && (
+                                                        <span className="text-[10px] text-gray-500 truncate max-w-[140px] sm:max-w-none">
+                                                            · {item.topic}
+                                                        </span>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                                                <div className="flex items-center gap-0.5 sm:gap-1 opacity-70 group-hover:opacity-100 transition-opacity shrink-0">
                                                     <button
                                                         type="button"
                                                         onClick={() => {
@@ -663,7 +625,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                                             setQuizTopic(item.topic || '');
                                                             setQuizDifficulty(item.difficulty || 'Medium');
                                                         }}
-                                                        className="p-1.5 text-gray-400 hover:text-lime-300 rounded-lg hover:bg-white/5 transition-colors"
+                                                        className="p-1 sm:p-1.5 text-gray-400 hover:text-lime-300 rounded-lg hover:bg-white/5 transition-colors"
                                                         title="Edit this task"
                                                     >
                                                         <Edit3 className="h-3.5 w-3.5" />
@@ -671,76 +633,112 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                                     <button
                                                         type="button"
                                                         onClick={() => handleDeleteQuizTask(globalIdx)}
-                                                        className="p-1.5 text-gray-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors"
+                                                        className="p-1 sm:p-1.5 text-gray-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors"
                                                         title="Delete this task"
                                                     >
                                                         <Trash2 className="h-3.5 w-3.5" />
                                                     </button>
                                                 </div>
                                             </div>
+
+                                            <p className="mt-2 text-xs sm:text-sm font-bold text-white leading-relaxed break-words w-full">
+                                                {item.stem}
+                                            </p>
+
+                                            {lines(item.options).length > 0 && (
+                                                <ul className="mt-2.5 space-y-1.5 pl-0 w-full">
+                                                    {lines(item.options).map((opt: unknown, oIdx: number) => {
+                                                        const text = String(opt || '');
+                                                        const isCorrect =
+                                                            text.trim() === String(item.answer || '').trim();
+                                                        return (
+                                                            <li
+                                                                key={oIdx}
+                                                                className={`w-full flex items-start sm:items-center justify-between gap-2 text-xs rounded-lg px-2.5 py-1.5 transition-colors ${isCorrect
+                                                                    ? 'bg-lime-500/10 border border-lime-500/30 font-bold text-lime-300'
+                                                                    : 'bg-white/[0.02] text-gray-300'
+                                                                    }`}
+                                                            >
+                                                                <div className="flex items-start sm:items-center gap-2 min-w-0 flex-1">
+                                                                    <span
+                                                                        className={`h-4 w-4 mt-0.5 sm:mt-0 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold ${isCorrect
+                                                                            ? 'bg-lime-500 text-black'
+                                                                            : 'bg-white/10 text-gray-400'
+                                                                            }`}
+                                                                    >
+                                                                        {String.fromCharCode(65 + oIdx)}
+                                                                    </span>
+                                                                    <span className="break-words leading-snug sm:leading-normal">{text}</span>
+                                                                </div>
+                                                                {isCorrect && (
+                                                                    <span className="shrink-0 whitespace-nowrap text-[9px] sm:text-[10px] font-black uppercase text-lime-400 mt-0.5 sm:mt-0 ml-1.5 sm:ml-auto">
+                                                                        Correct Answer
+                                                                    </span>
+                                                                )}
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            )}
                                         </div>
                                     ))}
 
                                     {modulePracticalTasks.map(({ task, idx }) => (
                                         <div
                                             key={idx}
-                                            className="group rounded-2xl border border-white/10 bg-white/[0.02] hover:border-lime-500/30 p-4 transition-all"
+                                            className="group rounded-xl sm:rounded-2xl border border-white/10 bg-white/[0.02] hover:border-lime-500/30 p-3.5 sm:p-4 transition-all w-full"
                                         >
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div className="space-y-1.5 flex-1">
-                                                    <span className="rounded-md bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-black text-emerald-400 uppercase tracking-wider">
-                                                        Practical Assignment
-                                                    </span>
-                                                    {task.item && (
-                                                        <p className="text-sm font-bold text-white mt-1">{task.item}</p>
-                                                    )}
-                                                    <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-line">
-                                                        {task.prompt}
-                                                    </p>
-                                                    {task.evidence && (
-                                                        <p className="text-xs text-gray-400">
-                                                            <span className="font-semibold text-gray-300">Deliverable: </span>
-                                                            {task.evidence}
-                                                        </p>
-                                                    )}
-                                                    {task.threshold && (
-                                                        <p className="text-xs text-lime-400 font-medium">
-                                                            Pass standard: {task.threshold}
-                                                        </p>
-                                                    )}
-                                                </div>
+                                            <div className="flex items-center justify-between gap-2 w-full">
+                                                <span className="rounded-md bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-black text-emerald-400 uppercase tracking-wider shrink-0">
+                                                    Practical Assignment
+                                                </span>
                                                 <button
                                                     type="button"
                                                     onClick={() => handleDeletePracticalTask(idx)}
-                                                    className="p-1.5 text-gray-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors"
+                                                    className="p-1 sm:p-1.5 text-gray-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors shrink-0"
                                                     title="Delete this practical task"
                                                 >
                                                     <Trash2 className="h-3.5 w-3.5" />
                                                 </button>
                                             </div>
+                                            {task.item && (
+                                                <p className="text-sm font-bold text-white mt-1.5 w-full">{task.item}</p>
+                                            )}
+                                            <p className="mt-1 text-xs text-gray-300 leading-relaxed whitespace-pre-line w-full">
+                                                {task.prompt}
+                                            </p>
+                                            {task.evidence && (
+                                                <p className="mt-1.5 text-xs text-gray-400 w-full">
+                                                    <span className="font-semibold text-gray-300">Deliverable: </span>
+                                                    {task.evidence}
+                                                </p>
+                                            )}
+                                            {task.threshold && (
+                                                <p className="mt-1 text-xs text-lime-400 font-medium w-full">
+                                                    Pass standard: {task.threshold}
+                                                </p>
+                                            )}
                                         </div>
                                     ))}
 
                                     {modulePracticalTasks.length === 0 && defaultModulePracticalTask && (
-                                        <div className="group rounded-2xl border border-white/10 bg-white/[0.02] hover:border-lime-500/30 p-4 transition-all">
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div className="space-y-1.5 flex-1">
-                                                    <span className="rounded-md bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-black text-emerald-400 uppercase tracking-wider">
-                                                        Practical Assignment
-                                                    </span>
-                                                    <p className="text-sm font-bold text-white mt-1">{defaultModulePracticalTask.item}</p>
-                                                    <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-line">
-                                                        {defaultModulePracticalTask.prompt}
-                                                    </p>
-                                                    <p className="text-xs text-gray-400">
-                                                        <span className="font-semibold text-gray-300">Deliverable: </span>
-                                                        {defaultModulePracticalTask.evidence}
-                                                    </p>
-                                                    <p className="text-xs text-lime-400 font-medium">
-                                                        Pass standard: {defaultModulePracticalTask.threshold}
-                                                    </p>
-                                                </div>
+                                        <div className="group rounded-xl sm:rounded-2xl border border-white/10 bg-white/[0.02] hover:border-lime-500/30 p-3.5 sm:p-4 transition-all w-full">
+                                            <div className="flex items-center justify-between gap-2 w-full">
+                                                <span className="rounded-md bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-black text-emerald-400 uppercase tracking-wider shrink-0">
+                                                    Practical Assignment
+                                                </span>
                                             </div>
+                                            <p className="text-sm font-bold text-white mt-1.5 w-full">{defaultModulePracticalTask.item}</p>
+                                            <p className="mt-1 text-xs text-gray-300 leading-relaxed whitespace-pre-line w-full">
+                                                {defaultModulePracticalTask.prompt}
+                                            </p>
+                                            <p className="mt-1.5 text-xs text-gray-400 w-full">
+                                                <span className="font-semibold text-gray-300">Deliverable: </span>
+                                                {defaultModulePracticalTask.evidence}
+                                            </p>
+                                            <p className="mt-1 text-xs text-lime-400 font-medium w-full">
+                                                Pass standard: {defaultModulePracticalTask.threshold}
+                                            </p>
                                         </div>
                                     )}
                                 </div>
@@ -811,7 +809,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                                             <div>
                                                 <label className="block text-[11px] font-semibold text-gray-400 mb-1">
                                                     Topic / Category:
@@ -901,7 +899,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                             />
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                                             <div>
                                                 <label className="block text-[11px] font-semibold text-gray-400 mb-1">
                                                     Required Deliverable / Evidence:
@@ -953,14 +951,14 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                         <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
                                             Add More Tasks to this Module:
                                         </p>
-                                        <div className="flex flex-wrap items-center gap-3">
+                                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                                             <button
                                                 type="button"
                                                 onClick={() => {
                                                     resetForms();
                                                     setAddingType('quiz');
                                                 }}
-                                                className="inline-flex items-center gap-2 rounded-xl border border-lime-500/30 bg-lime-500/10 px-4 py-2.5 text-xs font-bold text-lime-300 hover:bg-lime-500/20 hover:text-white transition-all shadow-sm"
+                                                className="inline-flex items-center gap-2 rounded-xl border border-lime-500/30 bg-lime-500/10 px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-lime-300 hover:bg-lime-500/20 hover:text-white transition-all shadow-sm"
                                             >
                                                 <Plus className="h-4 w-4" />
                                                 Add Quiz Task
@@ -970,7 +968,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                                 type="button"
                                                 disabled={isGeneratingAI}
                                                 onClick={() => handleGenerateAITask('quiz')}
-                                                className="inline-flex items-center gap-2 rounded-xl border border-lime-400/40 bg-gradient-to-r from-lime-500/20 to-emerald-500/20 px-4 py-2.5 text-xs font-bold text-lime-300 hover:from-lime-500/30 hover:to-emerald-500/30 hover:text-white transition-all shadow-sm disabled:opacity-50"
+                                                className="inline-flex items-center gap-2 rounded-xl border border-lime-400/40 bg-gradient-to-r from-lime-500/20 to-emerald-500/20 px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-lime-300 hover:from-lime-500/30 hover:to-emerald-500/30 hover:text-white transition-all shadow-sm disabled:opacity-50"
                                             >
                                                 {isGeneratingAI ? (
                                                     <>
@@ -990,16 +988,17 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                 )}
                             </div>
 
-                            <div className="flex items-center justify-between border-t border-white/10 px-6 py-4 bg-white/[0.02]">
+                            <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 sm:px-6 sm:py-4 bg-white/[0.02] gap-2">
                                 <button
                                     type="button"
                                     onClick={handleDownloadAssessment}
                                     disabled={totalTasksCount === 0}
-                                    className="group/btn inline-flex items-center gap-2 rounded-xl border border-lime-500/30 bg-lime-500/10 px-4 py-2.5 text-xs font-bold text-lime-400 hover:bg-lime-500/20 hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    className="group/btn inline-flex items-center gap-1.5 sm:gap-2 rounded-xl border border-lime-500/30 bg-lime-500/10 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-lime-400 hover:bg-lime-500/20 hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                                     title="Download assessment MCQs as a PDF file"
                                 >
-                                    <Download className="h-4 w-4 text-lime-400 group-hover/btn:translate-y-0.5 transition-transform" />
-                                    Download Assessment PDF
+                                    <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-lime-400 group-hover/btn:translate-y-0.5 transition-transform shrink-0" />
+                                    <span className="hidden sm:inline">Download Assessment PDF</span>
+                                    <span className="inline sm:hidden">Download PDF</span>
                                 </button>
 
                                 <button
@@ -1009,7 +1008,7 @@ export const ModuleAssessmentTask: React.FC<Props> = ({
                                         setIsFullscreen(false);
                                         resetForms();
                                     }}
-                                    className="rounded-xl bg-lime-500 px-6 py-2.5 text-xs font-black uppercase tracking-wider text-black hover:bg-lime-400 transition-all shadow-md active:scale-95"
+                                    className="rounded-xl bg-lime-500 px-5 sm:px-6 py-2 sm:py-2.5 text-xs font-black uppercase tracking-wider text-black hover:bg-lime-400 transition-all shadow-md active:scale-95 shrink-0"
                                 >
                                     Done
                                 </button>

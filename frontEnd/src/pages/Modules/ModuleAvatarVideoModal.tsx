@@ -5,6 +5,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Download,
   Loader2,
   Maximize,
   Minimize2,
@@ -21,6 +22,7 @@ import {
   VolumeX,
   X,
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { API_BASE, ORIGIN } from '../../utils/api';
 import avatarPlaceholder from '../../assests/avatar.png';
 
@@ -137,6 +139,15 @@ export function ModuleAvatarVideoModal({
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [showChapters, setShowChapters] = useState(false);
   const [chaptersPos, setChaptersPos] = useState<{ left: number; bottom: number; maxH: number } | null>(null);
+
+  const downloadBtnRef = useRef<HTMLButtonElement | null>(null);
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const [downloadPos, setDownloadPos] = useState<{ left: number; bottom: number } | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportProgress, setExportProgress] = useState<{ slide: number; total: number; percent: number; statusText?: string } | null>(null);
+  const [isDownloadingDirect, setIsDownloadingDirect] = useState(false);
+  const [moduleVideoUrl, setModuleVideoUrl] = useState<string | null>(null);
+  const cancelExportRef = useRef(false);
 
   const [masterAvatar, setMasterAvatar] = useState<AvatarInfo>({
     avatarId: 'Abigail_expressive_2024112501',
@@ -1148,6 +1159,474 @@ export function ModuleAvatarVideoModal({
     };
   }, [showChapters]);
 
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(
+          `${API_BASE}/heygen/courses/${encodeURIComponent(courseId)}/modules/${moduleNumber}/status`,
+          { headers: { Authorization: `Bearer ${token || ''}` } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.videoUrl) {
+            setModuleVideoUrl(data.videoUrl);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch module video status:', err);
+      }
+    };
+    fetchStatus();
+  }, [courseId, moduleNumber]);
+
+  const openDownloadMenu = () => {
+    const btn = downloadBtnRef.current;
+    if (!btn) {
+      setShowDownloadMenu((v) => !v);
+      return;
+    }
+    if (showDownloadMenu) {
+      setShowDownloadMenu(false);
+      setDownloadPos(null);
+      return;
+    }
+    const rect = btn.getBoundingClientRect();
+    const gap = 12;
+    const menuWidth = 340;
+    const left = Math.max(16, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 16));
+    setDownloadPos({
+      left,
+      bottom: window.innerHeight - rect.top + gap,
+    });
+    setShowDownloadMenu(true);
+  };
+
+  useEffect(() => {
+    if (!showDownloadMenu) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowDownloadMenu(false);
+        setDownloadPos(null);
+      }
+    };
+    const onResize = () => {
+      setShowDownloadMenu(false);
+      setDownloadPos(null);
+    };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [showDownloadMenu]);
+
+  const downloadDirectMp4 = async (videoUrl: string, suffix: string) => {
+    if (!videoUrl) {
+      toast.error('No video URL available for download.');
+      return;
+    }
+    setIsDownloadingDirect(true);
+    const toastId = toast.loading('Preparing MP4 video download...');
+    try {
+      const cleanTitle = (moduleTitle || `Module_${moduleNumber}`).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filename = `${cleanTitle}_${suffix}.mp4`;
+      const proxyUrl = `${API_BASE}/heygen/proxy-media?url=${encodeURIComponent(videoUrl)}`;
+
+      const resp = await fetch(proxyUrl);
+      if (!resp.ok) throw new Error(`Proxy error: ${resp.status}`);
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+
+      toast.update(toastId, {
+        render: 'Video downloaded successfully in MP4 format!',
+        type: 'success',
+        isLoading: false,
+        autoClose: 3500,
+      });
+      setShowDownloadMenu(false);
+    } catch (err: any) {
+      console.warn('Proxy download failed, falling back to direct:', err);
+      try {
+        const a = document.createElement('a');
+        a.href = videoUrl;
+        a.target = '_blank';
+        a.download = `${moduleTitle || `Module_${moduleNumber}`}_${suffix}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        toast.update(toastId, {
+          render: 'Download started in browser!',
+          type: 'success',
+          isLoading: false,
+          autoClose: 3500,
+        });
+      } catch (fallbackErr: any) {
+        toast.update(toastId, {
+          render: 'Failed to download video: ' + (fallbackErr?.message || 'Error'),
+          type: 'error',
+          isLoading: false,
+          autoClose: 4000,
+        });
+      }
+      setShowDownloadMenu(false);
+    } finally {
+      setIsDownloadingDirect(false);
+    }
+  };
+
+  const exportFullPresentationVideo = async () => {
+    if (!slides.length) {
+      toast.warn('No slides available to export.');
+      return;
+    }
+
+    setShowDownloadMenu(false);
+    setIsExporting(true);
+    cancelExportRef.current = false;
+    setExportProgress({
+      slide: 0,
+      total: slides.length,
+      percent: 5,
+      statusText: 'Preparing voiceover narration & slide assets...',
+    });
+
+    if (playingRef.current) {
+      togglePlay();
+    }
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1280;
+      canvas.height = 720;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('HTML Canvas 2D context is not available.');
+
+      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      const audioCtx = new AudioCtxClass();
+      if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+      }
+      const dest = audioCtx.createMediaStreamDestination();
+
+      let chosenMime = 'video/mp4';
+      if (typeof MediaRecorder !== 'undefined') {
+        if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1,mp4a.40.2')) {
+          chosenMime = 'video/mp4;codecs=avc1,mp4a.40.2';
+        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+          chosenMime = 'video/mp4';
+        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+          chosenMime = 'video/webm;codecs=vp9,opus';
+        } else if (MediaRecorder.isTypeSupported('video/webm')) {
+          chosenMime = 'video/webm';
+        }
+      }
+
+      const canvasStream = canvas.captureStream(25);
+      const audioTracks = dest.stream.getAudioTracks();
+      const combinedStream = new MediaStream([
+        ...canvasStream.getVideoTracks(),
+        ...audioTracks,
+      ]);
+
+      const recorder = new MediaRecorder(combinedStream, {
+        mimeType: chosenMime,
+        videoBitsPerSecond: 2500000,
+      });
+
+      const chunks: Blob[] = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      const token = localStorage.getItem('token');
+      const gender = masterAvatar.gender || (/albert|adrian|male/i.test(masterAvatar.avatarName) ? 'male' : 'female');
+
+      const vid = avatarVideoRef.current;
+      if (vid) {
+        vid.muted = true;
+        vid.loop = true;
+        try { await vid.play(); } catch {}
+      }
+
+      const avatarImg = new Image();
+      avatarImg.crossOrigin = 'anonymous';
+      if (masterAvatar.previewImageUrl) {
+        avatarImg.src = masterAvatar.previewImageUrl.startsWith('http') && !masterAvatar.previewImageUrl.includes(window.location.host)
+          ? `${API_BASE}/heygen/proxy-media?url=${encodeURIComponent(masterAvatar.previewImageUrl)}`
+          : masterAvatar.previewImageUrl;
+      }
+
+      const exportVid = document.createElement('video');
+      exportVid.crossOrigin = 'anonymous';
+      exportVid.muted = true;
+      exportVid.playsInline = true;
+      exportVid.loop = true;
+      exportVid.autoplay = true;
+
+      const slideAvatarUrls: (string | null)[] = new Array(slides.length).fill(null);
+
+      const [preloadedAudios, preloadedImages] = await Promise.all([
+        Promise.all(
+          slides.map(async (slide, idx) => {
+            const fullText = (slide.script || slide.content || slide.title || '').replace(/\s+/g, ' ').trim();
+            if (!fullText) return null;
+            const cacheKey = `${idx}::${fullText}`;
+            let audioUrl = audioCacheRef.current[cacheKey];
+
+            try {
+              const res = await fetch(`${API_BASE}/heygen/slide-sync`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token || ''}`,
+                },
+                body: JSON.stringify({
+                  text: fullText,
+                  voiceId: masterAvatar.voiceId || undefined,
+                  gender,
+                  avatarId: masterAvatar.avatarId,
+                }),
+              });
+              if (res.ok) {
+                const data = await res.json();
+                if (data?.audioUrl) {
+                  audioUrl = absoluteMediaUrl(data.audioUrl);
+                  audioCacheRef.current[cacheKey] = audioUrl;
+                }
+                if (data?.avatarVideoUrl) {
+                  slideAvatarUrls[idx] = data.avatarVideoUrl;
+                }
+              }
+            } catch {}
+
+            if (audioUrl) {
+              try {
+                const resp = await fetch(audioUrl);
+                if (resp.ok) {
+                  const arrBuf = await resp.arrayBuffer();
+                  return await audioCtx.decodeAudioData(arrBuf);
+                }
+              } catch {}
+            }
+            return null;
+          })
+        ),
+        Promise.all(
+          slides.map(async (_, idx) => {
+            const srcUrl = gammaImages[idx];
+            if (!srcUrl) return null;
+            try {
+              const img = new Image();
+              img.crossOrigin = 'anonymous';
+              img.src = srcUrl.startsWith('http') && !srcUrl.includes(window.location.host)
+                ? `${API_BASE}/heygen/proxy-media?url=${encodeURIComponent(srcUrl)}`
+                : srcUrl;
+              await new Promise((res) => {
+                if (img.complete) return res(null);
+                img.onload = () => res(null);
+                img.onerror = () => res(null);
+                setTimeout(() => res(null), 2500);
+              });
+              return img.naturalWidth > 0 ? img : null;
+            } catch {
+              return null;
+            }
+          })
+        ),
+      ]);
+
+      if (cancelExportRef.current) {
+        setIsExporting(false);
+        setExportProgress(null);
+        return;
+      }
+
+      recorder.start(100);
+
+      for (let i = 0; i < slides.length; i++) {
+        if (cancelExportRef.current) break;
+
+        const currentPct = 10 + Math.round((i / slides.length) * 85);
+        setExportProgress({
+          slide: i + 1,
+          total: slides.length,
+          percent: currentPct,
+          statusText: `Recording slide ${i + 1} of ${slides.length} with talking avatar & voice narration...`,
+        });
+
+        const slide = slides[i];
+        const audioBuf = preloadedAudios[i];
+        const slideImg = preloadedImages[i];
+        const avatarVidSrc = slideAvatarUrls[i] || masterAvatar.previewVideoUrl;
+
+        if (avatarVidSrc) {
+          const proxiedVid = avatarVidSrc.startsWith('http') && !avatarVidSrc.includes(window.location.host)
+            ? `${API_BASE}/heygen/proxy-media?url=${encodeURIComponent(avatarVidSrc)}`
+            : avatarVidSrc;
+          exportVid.src = proxiedVid;
+          exportVid.loop = !slideAvatarUrls[i];
+          exportVid.currentTime = 0;
+          try {
+            await exportVid.play();
+          } catch {}
+        }
+
+        let sourceNode: AudioBufferSourceNode | null = null;
+        if (audioBuf) {
+          sourceNode = audioCtx.createBufferSource();
+          sourceNode.buffer = audioBuf;
+          sourceNode.connect(dest);
+          sourceNode.start();
+        }
+
+        const effectiveDur = audioBuf ? Math.max(2.5, audioBuf.duration + 0.2) : 3.5;
+        const startT = performance.now();
+        const endT = startT + effectiveDur * 1000;
+
+        while (performance.now() < endT) {
+          if (cancelExportRef.current) break;
+
+          ctx.fillStyle = '#0a0a0c';
+          ctx.fillRect(0, 0, 1280, 720);
+
+          if (slideImg && slideImg.complete && slideImg.naturalWidth > 0) {
+            const scale = Math.min(1280 / slideImg.naturalWidth, 720 / slideImg.naturalHeight);
+            const dw = slideImg.naturalWidth * scale;
+            const dh = slideImg.naturalHeight * scale;
+            const dx = (1280 - dw) / 2;
+            const dy = (720 - dh) / 2;
+            ctx.drawImage(slideImg, dx, dy, dw, dh);
+          } else {
+            const grad = ctx.createLinearGradient(0, 0, 1280, 720);
+            grad.addColorStop(0, '#0d1527');
+            grad.addColorStop(1, '#020617');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 1280, 720);
+
+            ctx.fillStyle = '#a3e635';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillText(`COURSE MODULE ${moduleNumber}`, 80, 110);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 38px sans-serif';
+            ctx.fillText(slide.title, 80, 170, 950);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '22px sans-serif';
+            const contentText = slide.content || slide.script || '';
+            const words = contentText.split(' ');
+            let line = '';
+            let y = 240;
+            for (let w = 0; w < words.length; w++) {
+              const testLine = line + words[w] + ' ';
+              if (ctx.measureText(testLine).width > 880) {
+                ctx.fillText(line, 80, y);
+                line = words[w] + ' ';
+                y += 34;
+                if (y > 580) break;
+              } else {
+                line = testLine;
+              }
+            }
+            if (line && y <= 580) ctx.fillText(line, 80, y);
+          }
+
+          const avSize = 135;
+          const avX = 1280 - avSize - 35;
+          const avY = 35;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(avX + avSize / 2, avY + avSize / 2, avSize / 2, 0, Math.PI * 2);
+          ctx.clip();
+          let drawn = false;
+          if (exportVid.readyState >= 2) {
+            try {
+              if (exportVid.paused) void exportVid.play();
+              ctx.drawImage(exportVid, avX, avY, avSize, avSize);
+              drawn = true;
+            } catch {}
+          }
+          if (!drawn && vid && vid.readyState >= 2) {
+            try {
+              if (vid.paused) void vid.play();
+              ctx.drawImage(vid, avX, avY, avSize, avSize);
+              drawn = true;
+            } catch {}
+          }
+          if (!drawn && avatarImg.complete && avatarImg.naturalWidth > 0) {
+            ctx.drawImage(avatarImg, avX, avY, avSize, avSize);
+          }
+          ctx.restore();
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(avX + avSize / 2, avY + avSize / 2, avSize / 2, 0, Math.PI * 2);
+          ctx.lineWidth = 3.5;
+          ctx.strokeStyle = '#a3e635';
+          ctx.stroke();
+          ctx.restore();
+
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+          ctx.fillRect(35, 720 - 50, 160, 28);
+          ctx.fillStyle = '#a3e635';
+          ctx.font = 'bold 13px sans-serif';
+          ctx.fillText(`SLIDE ${i + 1} OF ${slides.length}`, 48, 720 - 31);
+
+          await new Promise((r) => setTimeout(r, 40));
+        }
+
+        if (sourceNode) {
+          try { sourceNode.stop(); } catch {}
+        }
+      }
+
+      try {
+        exportVid.pause();
+        exportVid.removeAttribute('src');
+      } catch {}
+
+      if (!cancelExportRef.current) {
+        setExportProgress({
+          slide: slides.length,
+          total: slides.length,
+          percent: 100,
+          statusText: 'Finalizing MP4 video download...',
+        });
+
+        recorder.stop();
+        await new Promise((res) => { recorder.onstop = res; });
+
+        const finalBlob = new Blob(chunks, { type: chosenMime.includes('mp4') ? 'video/mp4' : chosenMime });
+        const dlUrl = URL.createObjectURL(finalBlob);
+        const a = document.createElement('a');
+        a.href = dlUrl;
+        const cleanName = (moduleTitle || `Module_${moduleNumber}`).replace(/[^a-zA-Z0-9_-]/g, '_');
+        a.download = `${cleanName}_Module_${moduleNumber}_Course_Video.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(dlUrl), 10000);
+
+        toast.success('Course video downloaded with voiceover & talking avatar in MP4!');
+      }
+    } catch (err: any) {
+      console.error('Export presentation video error:', err);
+      toast.error('Export failed: ' + (err?.message || 'Unknown error'));
+    } finally {
+      setIsExporting(false);
+      setExportProgress(null);
+    }
+  };
+
   const goToSlide = useCallback(
     (index: number, opts?: { playSpeech?: boolean; keepPlaying?: boolean; fromUserGesture?: boolean }) => {
       const next = Math.max(0, Math.min(slides.length - 1, index));
@@ -1606,7 +2085,16 @@ export function ModuleAvatarVideoModal({
                   <div className="relative h-[132px] w-[132px] md:h-[162px] md:w-[162px] overflow-hidden rounded-full border-2 border-black bg-black">
                     <video
                       ref={avatarVideoRef}
-                      src={lipSyncVideoUrl || masterAvatar.previewVideoUrl}
+                      src={
+                        lipSyncVideoUrl
+                          ? (lipSyncVideoUrl.startsWith('http') && !lipSyncVideoUrl.includes(window.location.host)
+                              ? `${API_BASE}/heygen/proxy-media?url=${encodeURIComponent(lipSyncVideoUrl)}`
+                              : lipSyncVideoUrl)
+                          : (masterAvatar.previewVideoUrl && masterAvatar.previewVideoUrl.startsWith('http') && !masterAvatar.previewVideoUrl.includes(window.location.host)
+                              ? `${API_BASE}/heygen/proxy-media?url=${encodeURIComponent(masterAvatar.previewVideoUrl)}`
+                              : masterAvatar.previewVideoUrl)
+                      }
+                      crossOrigin="anonymous"
                       poster={masterAvatar.previewImageUrl}
                       playsInline
                       muted
@@ -1805,6 +2293,18 @@ export function ModuleAvatarVideoModal({
                       <Settings size={17} />
                     </button>
                     <button
+                      ref={downloadBtnRef}
+                      type="button"
+                      onClick={openDownloadMenu}
+                      className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+                        showDownloadMenu ? 'bg-lime-400 text-black' : 'text-white/90 hover:bg-white/10 hover:text-lime-400'
+                      }`}
+                      aria-label="Download Video in MP4"
+                      title="Download Video (MP4)"
+                    >
+                      <Download size={17} />
+                    </button>
+                    <button
                       type="button"
                       onClick={toggleFullscreen}
                       className="flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
@@ -1871,6 +2371,146 @@ export function ModuleAvatarVideoModal({
             ))}
           </div>
         </>
+      )}
+
+      {showDownloadMenu && (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-[10000] cursor-default bg-transparent"
+            aria-label="Close download menu"
+            onClick={() => {
+              setShowDownloadMenu(false);
+              setDownloadPos(null);
+            }}
+          />
+          <div
+            className="fixed z-[10001] w-[340px] max-w-[calc(100vw-32px)] overflow-hidden rounded-3xl border border-white/20 bg-[#18181c]/95 p-4 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
+            style={{
+              left: downloadPos ? downloadPos.left : '50%',
+              bottom: downloadPos ? downloadPos.bottom : 80,
+              transform: downloadPos ? undefined : 'translateX(-50%)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2 text-lime-400">
+                <Download size={18} />
+                <span className="text-xs font-black uppercase tracking-wider">
+                  Download Video
+                </span>
+              </div>
+              <span className="rounded-full bg-lime-400/10 px-2 py-0.5 text-[10px] font-bold text-lime-400">
+                MP4 Format
+              </span>
+            </div>
+
+            <div className="mt-3 space-y-2.5">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition hover:border-lime-500/40">
+                <div className="flex items-start justify-between gap-2.5">
+                  <div className="min-w-0">
+                    <h5 className="flex items-center gap-1.5 text-xs font-bold text-white">
+                      <Video size={13} className="text-lime-400" />
+                      Full Course Video
+                    </h5>
+                    <p className="mt-1 text-[11px] leading-snug text-white/60">
+                      Complete slide deck with voiceover narration and avatar presenter in MP4.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isExporting || !slides.length}
+                    onClick={exportFullPresentationVideo}
+                    className="flex shrink-0 items-center gap-1.5 rounded-xl border border-lime-400/40 bg-lime-400/10 px-3 py-1.5 text-xs font-bold text-lime-400 transition hover:bg-lime-400 hover:text-black active:scale-95 disabled:opacity-50"
+                  >
+                    <Download size={13} />
+                    <span>Export MP4</span>
+                  </button>
+                </div>
+              </div>
+
+              {moduleVideoUrl && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition hover:border-lime-500/40">
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="min-w-0">
+                      <h5 className="flex items-center gap-1.5 text-xs font-bold text-white">
+                        <UserCheck size={13} className="text-lime-400" />
+                        HeyGen Studio Video
+                      </h5>
+                      <p className="mt-1 text-[11px] leading-snug text-white/60">
+                        Full studio module video rendered by HeyGen.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={isDownloadingDirect}
+                      onClick={() =>
+                        downloadDirectMp4(moduleVideoUrl, 'Studio_Module')
+                      }
+                      className="flex shrink-0 items-center gap-1.5 rounded-xl bg-lime-400 px-3 py-1.5 text-xs font-bold text-black transition hover:bg-lime-300 active:scale-95 disabled:opacity-50"
+                    >
+                      <Download size={13} />
+                      <span>Download</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {isExporting && exportProgress && (
+        <div className="fixed inset-0 z-[10003] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-in fade-in duration-200">
+          <div
+            className="w-full max-w-md rounded-3xl border border-lime-500/30 bg-[#141416] p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-500/15 text-lime-400">
+                <Loader2 size={24} className="animate-spin" />
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-white">Generating Course MP4 Video</h4>
+                <p className="text-xs font-medium text-lime-400">
+                  {exportProgress.statusText || `Recording slide ${exportProgress.slide} of ${exportProgress.total}`}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <div className="mb-1.5 flex justify-between text-xs font-semibold text-white/80">
+                <span>Rendering Progress</span>
+                <span className="font-mono text-lime-400">{exportProgress.percent}%</span>
+              </div>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-lime-500 to-lime-300 transition-all duration-300"
+                  style={{ width: `${exportProgress.percent}%` }}
+                />
+              </div>
+            </div>
+
+            <p className="mt-4 text-center text-[11px] text-white/50">
+              Please keep this window open while the video and voiceover are encoded.
+            </p>
+
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  cancelExportRef.current = true;
+                  setIsExporting(false);
+                  setExportProgress(null);
+                  toast.info('Export cancelled');
+                }}
+                className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white/80 transition hover:bg-white/10 hover:text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showAvatarPicker && (
