@@ -236,8 +236,23 @@ const CourseForgeGates: React.FC<{ stage: 'build' | 'review'; open?: boolean; on
                     {steps.map((step) => {
                         const isApproved = step.state === 'Approved';
                         const isCurrent = step.state === 'Create' || step.state === 'Ready to approve';
+                        const actionButton = buttons.find((button) => button.open && !busy && (button.label === step.label || (step.state === 'Ready to approve' && button.kind === 'approve' && button.label.toLowerCase().includes(step.label === 'Research dossier' ? 'dossier' : step.label.toLowerCase()))));
+                        const runStep = () => {
+                            if (isApproved || busy) return;
+                            if (actionButton) {
+                                actionButton.onClick();
+                                return;
+                            }
+                            toast.info(`Please complete previous steps in order before ${step.label}.`);
+                        };
                         return (
-                            <div key={step.label} className="flex items-center justify-between px-4 py-3 rounded-xl border border-white/5 bg-[#12131a]">
+                            <button
+                                key={step.label}
+                                type="button"
+                                onClick={runStep}
+                                disabled={isApproved || busy}
+                                className="flex w-full items-center justify-between px-4 py-3 rounded-xl border border-white/5 bg-[#12131a] text-left disabled:opacity-70"
+                            >
                                 <div className="flex items-center gap-3">
                                     <div className="text-gray-400">
                                         {step.label.toLowerCase().includes('assessment') ? <ListChecks size={18} /> : step.label.toLowerCase().includes('blueprint') ? <Layers size={18} /> : <FileText size={18} />}
@@ -247,11 +262,11 @@ const CourseForgeGates: React.FC<{ stage: 'build' | 'review'; open?: boolean; on
                                 <div className="flex items-center gap-2">
                                     <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${isApproved ? 'bg-[#152010] border border-lime-500/20 text-lime-400' : isCurrent ? 'bg-[#1a1710] border border-amber-500/20 text-amber-400' : 'bg-transparent text-gray-500'}`}>
                                         {isApproved && <CheckCircle2 size={14} className="text-lime-400" />}
-                                        {step.state}
+                                        {busy && actionButton ? 'Working' : step.state}
                                     </span>
                                     <ChevronRight size={16} className="text-gray-600" />
                                 </div>
-                            </div>
+                            </button>
                         );
                     })}
                 </div>
